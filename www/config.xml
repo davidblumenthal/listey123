@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<widget xmlns = "http://www.w3.org/ns/widgets"
+    xmlns:gap = "http://phonegap.com/ns/1.0"
+    id        = "com.blumenthal.mobile_class_example"
+    versionCode="5"
+    version   = "0.0.1">
+  <name>David's Mobile Class Test</name>
+  <description>
+    Mobile class test with PhoneGap
+  </description>
+
+  <author href="http://blumenthal.com" email="phonegap@blumenthal.com">
+    David Blumenthal
+  </author>
+
+  <preference name="phonegap-version" value="2.7.0" />
+  <preference name="android-minSdkVersion" value="7" />
+  <!-- If you do not want any permissions to be added to your app, add the
+    following tag to your config.xml; you will still have the INTERNET
+    permission on your app, which PhoneGap requires. -->
+  <preference name="permissions" value="none"/>
+
+
+  <!-- See http://build.phonegap.com/docs/config-xml for more details -->
+</widget>
