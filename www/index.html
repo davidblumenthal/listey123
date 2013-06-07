@@ -40,16 +40,19 @@
      	console.log(text);
     }
 
+	// Cordova is ready
+        //
+        var deviceReady = true;//default to true until I figure this out.
+        function onDeviceReady() {
+		debugOut("Device Is Ready!");
+            deviceReady = true;
+        }
+        
     // Set deviceReady when device is actually ready
     //
     document.addEventListener("deviceready", onDeviceReady, false);
 
-	// Cordova is ready
-        //
-        var deviceReady = false;
-        function onDeviceReady() {
-            deviceReady = true;
-        }
+
 
         // Audio player
         //
