@@ -30,5 +30,6 @@
   <!-- gap:splash src="images/splash.png" / -->
   <preference name="exit-on-suspend" value="true" />
   <feature name="http://api.phonegap.com/1.0/media"/>
+  <plugin name="Media" value="org.apache.cordova.AudioHandler" />
   <!-- See http://build.phonegap.com/docs/config-xml for more details -->
 </widget>
