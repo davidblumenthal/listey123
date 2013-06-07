@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mobile Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="js/jq/jquery.mobile-1.3.1.min.css" />
+  <script type="text/javascript" src="js/jq/jquery-1.9.1.min.js"></script>
+  <script type="text/javascript" src="js/jq/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body>
+<div data-role="page" id="choose-list-page">
+  <div data-role="header">
+    <h1>Choose a list</h1>
+  </div><!-- header -->
+    <div data-role="content">
+        <ul data-role="listview" data-count-theme="c" data-inset="true">
+                <li><a href="#shopping-page">Shopping<span class="ui-li-count">12</span></a></li>
+        </ul>
+  </div><!-- content -->
+</div><!-- choose-list -->
+
+<div data-role="page" id="shopping-page">
+  <div data-role="header">
+    <h1>Shopping List</h1>
+    <a href="#choose-list-page" data-role="button" data-icon="home">Home</a>
+  </div><!-- header -->
+    <div data-role="content">
+        <ul data-role="listview" data-autodividers="true"  data-filter="true" data-inset="true">
+                <li><a href="#config-item-dialog" data-rel="dialog">Milk</a></li>
+                <li><a href="#config-item-dialog" data-rel="dialog">Pepper</a></li>
+        </ul>
+  </div><!-- content -->
+</div><!-- choose-list -->
+
+
+<div data-role="page" id="config-item-dialog">
+    <div data-role="header">
+      <h1>Item Details</h1>
+      <a href="#shopping-page" data-role="button" data-icon="back">Save</a>
+    </div><!-- header -->
+    <div data-role="content">
+        <input type="text" name="item_name"  placeholder="Item name"><br>
+        <input type="button" name="more" value="More" data-inline="true">
+        <input type="button" name="less" value="Less" data-inline="true"><br>
+        <div  data-role="fieldcontain">
+            <fieldset data-role="controlgroup">
+                <legend>Choose which categories this applies to:</legend>
+                <input type="checkbox" name="checkbox-1a" id="checkbox-1a" class="custom" />
+                <label for="checkbox-1a">Central Market</label>
+          </fieldset>
+      </div>
+      <input type="button" name="add-category" value="Add Category"><br>
+    </div><!-- content -->
+</div><!-- choose-list -->
+
+<script>
+function save(keyID, valID) {
+	var keyId="lang1", valId = "lang2";
+	console.log("save clicked");
+	var k = document.getElementById(keyId).value;
+	var v = document.getElementById(valId).value;
+	var data = get_data('store');
+	data[k] = v;
+	localStorage.setItem('store', JSON.stringify(data));
+	display('Saved ' + k +  ' ' + v);
+	
+	document.getElementById(keyId).value = '';
+	document.getElementById(valId).value = '';
+	
+	list();
+	
+	return false;
+}
+
+function display(html,divId) {
+	if (!divId) {
+		divId = 'response';
+	}
+	document.getElementById(divId).innerHTML = html;
+}
+
+function list() {
+	var data = get_data('store');
+	var has_keys=0;
+	for (var k in data) {has_keys++; break}
+	
+	if (has_keys) {
+		var html = '<b>Listing:</b><br>';
+		for (k in data){
+			html += k + ' = ' + data[k] + '<br>';
+		}
+		display(html, 'list');
+		return false;
+	}
+	display ('Empty', 'list');
+	return false;
+}
+function get_data(field) {
+	var data_str = localStorage.getItem(field);
+	if (data_str == null) {
+		return {};
+	}
+	return JSON.parse(data_str);
+}
+//document.getElementById('save').addEventListener('click', save);
+
+//list();
+</script>
+</body>
+</html>
