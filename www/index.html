@@ -35,9 +35,12 @@
 <script type="text/javascript">
      var output = "";
      function debugOut (text) {
-     	var output = document.getElementById('output').innerHTML;
-     	output = output + "<br>" + text;
-     	document.getElementById('output').innerHTML = output;
+     	var elem = document.getElementById('output');
+     	if (elem !== null) {
+     	  var output = elem.innerHTML;
+     	  output = output + "<br>" + text;
+     	  elem.innerHTML = output;
+     	}
      	console.log(text);
     }
 
@@ -64,19 +67,24 @@
 	}
  
 	function error_error(e) {
-		alert('Error playing: ' + e.message);
+		debugOut('Error playing: ' + e.message);
 	}
 
     function playAudio(src) {
-    	    debugOut('playing audio');
+    	 if (device.platform == 'Android') {
+           src = '/android_asset/www/' + src;
+         }
+    	    debugOut('playing ' + src);
             if (!deviceReady){
             	debugOut('not ready');
                 return;
             }
             try {
+              debugOut("Creating Media");
               var my_media = new Media(src, success, error_error);
             
               // Play audio
+              debugOut("about to play");
               my_media.play();
             } catch (e) {
             	debugOut(e.Message);
