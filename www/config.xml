@@ -27,7 +27,7 @@
   <!-- preference name="permissions" value="none"/ -->
 
   <icon src="images/icon.png" />
-  <gap:splash src="images/splash.png" />
+  <!-- gap:splash src="images/splash.png" / -->
   <preference name="exit-on-suspend" value="true" />
   <feature name="http://api.phonegap.com/1.0/media"/>
   <!-- See http://build.phonegap.com/docs/config-xml for more details -->
