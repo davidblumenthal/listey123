@@ -48,13 +48,22 @@
         //
         var my_media = null;
         
+         function success() {
+		// ignore
+	}
+ 
+	function error_error(e) {
+		alert('great error');
+		alert(e.message);
+	}
+
     function playAudio(src) {
     	    console.log('playing audio');
             if (!deviceReady){
             	console.log('not ready');
                 return;
             }
-            var my_media = new Media(src, onSuccess, onError);
+            var my_media = new Media(src, success, error_error);
             
             // Play audio
             my_media.play();
