@@ -1,94 +1,77 @@
-<!DOCTYPE html>
 <html>
 <head>
-  <title>Mobile Test</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="js/jq/jquery.mobile-1.3.1.min.css" />
   <script type="text/javascript" src="js/jq/jquery-1.9.1.min.js"></script>
-  <script type="text/javascript" src="js/jq/jquery.mobile-1.3.1.min.js"></script>
+  <script type="text/javascript" >
+
+(function ($) {
+	$.fn.photoResize = function (options) {
+
+		var element	= $(this), 
+			defaults = {
+	            bottomSpacing: 10
+			};
+		
+		$(element).load(function () {
+			updatePhotoHeight();
+
+			$(window).bind('resize', function () {
+				updatePhotoHeight();
+			});
+		});
+
+		options = $.extend(defaults, options);
+
+		function updatePhotoHeight() {
+			var o = options, 
+				photoHeight = $(window).height();
+
+			$(element).attr('height', photoHeight - o.bottomSpacing);
+		}
+	};
+
+}(jQuery));
+</script>
+<script type="text/javascript">
+
+    // Set deviceReady when device is actually ready
+    //
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+	// Cordova is ready
+        //
+        var deviceReady = false;
+        function onDeviceReady() {
+            deviceReady = true;
+        }
+
+        // Audio player
+        //
+        var my_media = null;
+        
+    function playAudio(src) {
+    	    console.log('playing audio');
+            if (!deviceReady){
+            	console.log('not ready');
+                return;
+            }
+            var my_media = new Media(src, onSuccess, onError);
+            
+            // Play audio
+            my_media.play();
+        }
+
+	$(document).ready(function() {
+	        console.log("Resizing\n");
+		$("img").photoResize({
+			bottomSpacing: 15
+		});
+	});
+console.log("here2");
+</script>
 </head>
 <body>
-<div data-role="page" id="main-page">
-  <div data-role="header">
-    <h1>My app</h1>
-  </div>
-  <div data-role="content">
-    Word in language 1: <input type='text' name='lang1' id='lang1'><br>
-    Word in language 2: <input type='text' name='lang2' id='lang2'><br>
-    <input type="submit" name="save" id="save" value="Save">
-    <br><br><br>
-    <div id="response"></div>
-  </div>
-  <div data-role="footer" data-position="fixed" >
-    <p><a href="#list-page" data-role="button">See list</a></p>
-  </div>
-</div>
-
-<div data-role="page" id="list-page">
-  <div data-role="header">
-    <h1>Current List</h1>
-  </div>
-  <div data-role="content">
-    <div id="list"></div>
-  </div>
-  <div data-role="footer" data-position="fixed" >
-    <a href="#main-page" data-role="button" data-icon="home">Home</a>
-  </div>
-</div>
-
-
-<script>
-function save(keyID, valID) {
-	var keyId="lang1", valId = "lang2";
-	console.log("save clicked");
-	var k = document.getElementById(keyId).value;
-	var v = document.getElementById(valId).value;
-	var data = get_data('store');
-	data[k] = v;
-	localStorage.setItem('store', JSON.stringify(data));
-	display('Saved ' + k +  ' ' + v);
-	
-	document.getElementById(keyId).value = '';
-	document.getElementById(valId).value = '';
-	
-	list();
-	
-	return false;
-}
-
-function display(html,divId) {
-	if (!divId) {
-		divId = 'response';
-	}
-	document.getElementById(divId).innerHTML = html;
-}
-
-function list() {
-	var data = get_data('store');
-	var has_keys=0;
-	for (var k in data) {has_keys++; break}
-	
-	if (has_keys) {
-		var html = '<b>Listing:</b><br>';
-		for (k in data){
-			html += k + ' = ' + data[k] + '<br>';
-		}
-		display(html, 'list');
-		return false;
-	}
-	display ('Empty', 'list');
-	return false;
-}
-function get_data(field) {
-	var data_str = localStorage.getItem(field);
-	if (data_str == null) {
-		return {};
-	}
-	return JSON.parse(data_str);
-}
-document.getElementById('save').addEventListener('click', save);
-
-list();
-</script>
+<center>
+<img src="images/david.png" onClick="playAudio('sounds/Kid_Laugh.mp3')">
+</center>
 </body>
 </html>
