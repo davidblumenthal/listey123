@@ -63,11 +63,11 @@
         var my_media = null;
         
          function success() {
-		// ignore
+		debugOut("Successful play!");
 	}
  
 	function error_error(e) {
-		debugOut('Error playing: ' + e.message);
+		debugOut('Error playing: Code=' + e.code + ", message = " + e.message);
 	}
 
     function playAudio(src) {
