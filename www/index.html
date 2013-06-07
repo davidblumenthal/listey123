@@ -32,6 +32,13 @@
 }(jQuery));
 </script>
 <script type="text/javascript">
+     var output = "";
+     function debugOut (text) {
+     	var output = document.getElementById('output').innerHTML;
+     	output = output + "<br>" + text;
+     	document.getElementById('output').innerHTML = output;
+     	console.log(text);
+    }
 
     // Set deviceReady when device is actually ready
     //
@@ -53,34 +60,38 @@
 	}
  
 	function error_error(e) {
-		alert('great error');
-		alert(e.message);
+		alert('Error playing: ' + e.message);
 	}
 
     function playAudio(src) {
-    	    console.log('playing audio');
+    	    debugOut('playing audio');
             if (!deviceReady){
-            	console.log('not ready');
+            	debugOut('not ready');
                 return;
             }
-            var my_media = new Media(src, success, error_error);
+            try {
+              var my_media = new Media(src, success, error_error);
             
-            // Play audio
-            my_media.play();
+              // Play audio
+              my_media.play();
+            } catch (e) {
+            	debugOut(e.Message);
+            }
         }
 
 	$(document).ready(function() {
-	        console.log("Resizing\n");
+	        debugOut("Resizing\n");
 		$("img").photoResize({
 			bottomSpacing: 15
 		});
 	});
-console.log("here2");
+debugOut("here2");
 </script>
 </head>
 <body>
 <center>
 <img src="images/david.png" onClick="playAudio('sounds/Kid_Laugh.mp3')">
 </center>
+<div id="output"></div>
 </body>
 </html>
