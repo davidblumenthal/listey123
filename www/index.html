@@ -7,11 +7,11 @@
 (function ($) {
 	$.fn.photoResize = function (options) {
 
-		var element	= $(this), 
+		var element	= $(this),
 			defaults = {
 	            bottomSpacing: 10
 			};
-		
+
 		$(element).load(function () {
 			updatePhotoHeight();
 
@@ -23,7 +23,7 @@
 		options = $.extend(defaults, options);
 
 		function updatePhotoHeight() {
-			var o = options, 
+			var o = options,
 				photoHeight = $(window).height();
 
 			$(element).attr('height', photoHeight - o.bottomSpacing);
@@ -51,7 +51,7 @@
 		debugOut("Device Is Ready!");
             deviceReady = true;
         }
-        
+
     // Set deviceReady when device is actually ready
     //
     document.addEventListener("deviceready", onDeviceReady, false);
@@ -61,11 +61,11 @@
         // Audio player
         //
         var my_media = null;
-        
+
          function success() {
 		debugOut("Successful play!");
 	}
- 
+
 	function error_error(e) {
 		debugOut('Error playing: Code=' + e.code + ", message = " + e.message);
 	}
@@ -82,7 +82,7 @@
             try {
               debugOut("Creating Media");
               var my_media = new Media(src, success, error_error);
-            
+
               // Play audio
               debugOut("about to play");
               my_media.play();
@@ -102,7 +102,7 @@ debugOut("here2");
 </head>
 <body>
 <center>
-<img src="images/david.png" onClick="playAudio('sounds/Kid_Laugh.mp3')">
+<img src="images/david.png" onClick="playAudio('sounds/laugh.mp3')">
 </center>
 <div id="output"></div>
 </body>
