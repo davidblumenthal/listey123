@@ -71,9 +71,7 @@
 	}
 
     function playAudio(src) {
-    	 if (device.platform == 'Android') {
-           //src = '/android_asset/www/' + src;
-         }
+            src = getPhoneGapPath() + src;
     	    debugOut('playing ' + src);
             if (!deviceReady){
             	debugOut('not ready');
@@ -97,12 +95,19 @@
 			bottomSpacing: 15
 		});
 	});
+
+	function getPhoneGapPath() {
+	    var path = window.location.pathname;
+	    path = path.substr( path, path.length - 10 );
+	    return 'file://' + path;
+	};
+
 debugOut("here2");
 </script>
 </head>
 <body>
 <center>
-<img src="images/StarWarsQuotes.jpg" onClick="playAudio('www/sounds/StarWars.mp3')">
+<img src="images/StarWarsQuotes.jpg" onClick="playAudio('sounds/StarWars.mp3')">
 </center>
 <div id="output"></div>
 </body>
