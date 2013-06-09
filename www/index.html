@@ -71,6 +71,10 @@
 	}
 
     function playAudio(src) {
+      debugOut("UserAgent = " + navigator.userAgent);
+	  if((navigator.userAgent.match(/android/i))) {
+	      //CODE_FOR_ANDROID
+
             src = getPhoneGapPath() + src;
     	    debugOut('playing ' + src);
             if (!deviceReady){
@@ -82,13 +86,25 @@
               var my_media = new Media(src, success, error_error);
 
               // Play audio
-              debugOut("about to play");
+              debugOut("about to play with media");
               my_media.play();
             } catch (e) {
             	debugOut(e.Message);
             }
         }
+        else {
+	      //CODE_FOR_IPHONE_||_IPAD
+  	      var source= document.createElement('source');
+	      audio= document.createElement('audio');
+	      source.type='audio/mp3';
+	      source.src= src;
 
+	      audio.setAttribute('src', source.src);
+          // Play audio
+          debugOut("about to play using audio tag");
+          audio.play();
+        }
+    }
 	$(document).ready(function() {
 	        debugOut("Resizing\n");
 		$("img").photoResize({
