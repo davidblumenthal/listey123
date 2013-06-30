@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="js/jq/jquery.mobile-1.3.1.min.css" />
   <script type="text/javascript" src="js/jq/jquery-1.9.1.min.js"></script>
   <script type="text/javascript" src="js/jq/jquery.mobile-1.3.1.min.js"></script>
+  <script type="text/javascript" src="js/shopping.js"></script>
 </head>
 <body>
 
@@ -17,9 +18,7 @@
 
     <div data-role="content">
     	<a href="#add-list-dialog" data-role="button" data-rel="dialog">Add A List</a>
-        <ul data-role="listview" data-count-theme="c" data-inset="true">
-                <li><a href="#list-page">Shopping<span class="ui-li-count">12</span></a></li>
-        </ul>
+    	<div id="lists"></div>
   </div><!-- content -->
 </div><!-- choose-list -->
 
@@ -99,93 +98,21 @@
 <div data-role="page" id="add-list-dialog">
     <div data-role="header">
       <h1>Add List</h1>
-      <a href="#list-page" data-role="button" data-icon="back">Save</a>
+      <a href="#" id="saveAddList" data-role="button" data-icon="back">Save Me</a>
     </div><!-- header -->
     <div data-role="content">
-        <input type="text" name="listName"  placeholder="List name">
+        <input type="text" name="listName" id="listName" placeholder="List name">
     </div><!-- content -->
 </div><!-- add-list-dialog -->
 
-
 <!-- ************************************************************************ -->
 
-<script>
-<!--
-  Data format:
-    listName => {items : [{name : "Butter",
-  	                       count: 2,
-  	                       state: "crossedOff",
-  	                       lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                      },
-  	                      {name : "Milk",
-  	                       lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                      },
-  	                      {name : "Eggs",
-  	                       state: "deleted",
-  	                       lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                      },
-  	                      {name : "Doritos",
-  	                       state: "purged",
-  	                       lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                      },
-  	                      ],
-  	              }
-
--->
-
-
-
-function save() {
-	var keyId="lang1", valId = "lang2";
-	console.log("save clicked");
-	var k = document.getElementById(keyId).value;
-	var v = document.getElementById(valId).value;
-	var data = get_data('lists');
-	data[k] = v;
-	localStorage.setItem('store', JSON.stringify(data));
-	display('Saved ' + k +  ' ' + v);
-
-	document.getElementById(keyId).value = '';
-	document.getElementById(valId).value = '';
-
-	list();
-
-	return false;
-}
-
-function display(html,divId) {
-	if (!divId) {
-		divId = 'response';
-	}
-	document.getElementById(divId).innerHTML = html;
-}
-
-function list() {
-	var data = get_data('lists');
-	var has_keys=0;
-	for (var k in data) {has_keys++; break}
-
-	if (has_keys) {
-		var html = '<b>Listing:</b><br>';
-		for (k in data){
-			html += k + ' = ' + data[k] + '<br>';
-		}
-		display(html, 'list');
-		return false;
-	}
-	display ('Empty', 'list');
-	return false;
-}
-function get_data(field) {
-	var data_str = localStorage.getItem(field);
-	if (data_str == null) {
-		return {};
-	}
-	return JSON.parse(data_str);
-}
-//document.getElementById('save').addEventListener('click', save);
-
-//list();
-</script>
+  <script>
+  $( document ).ready(function() {
+  	displayLists();
+  	console.log("addListDialog: document ready");
+  	$("#saveAddList").click(configureList);
+  });
+  </script>
 </body>
 </html>
