@@ -3,26 +3,18 @@
     listName => {items : [{name : "Milk",
   	                       lastUpdate: "06/28/2013 13:25:29 CDT",
   	                      },
-  	                      {name : "Eggs",
-  	                       state: "deleted",
-  	                       lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                      },
-  	                      {name : "Doritos",
-  	                       state: "purged",
-  	                       lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                      },
   	                      ],
   	             crossedOffItems : [{name : "Butter",
   	                                 count: 2,
   	                       	         lastUpdate: "06/28/2013 13:25:29 CDT",
   	                                },
   	                               ],
-  	             deletedItems : [{name : "Butter",
+  	             deletedItems : [{name : "Eggs",
   	                              count: 2,
   	                              lastUpdate: "06/28/2013 13:25:29 CDT",
   	                             },
   	                            ],
-  	             purgedItems : [{name : "Butter",
+  	             purgedItems : [{name : "Doritos",
   	                             count: 2,
   	                             lastUpdate: "06/28/2013 13:25:29 CDT",
   	                            },
@@ -32,6 +24,15 @@
   	            }
 
 */
+
+var gSelectedList;
+
+function sortItemsByName (a, b) {
+	a = a["name"].toUpperCase();
+	b = b["name"].toUpperCase();
+	return ((a < b) ? -1 : (a > b) ? +1 : 0);
+}//sortItemsByName
+
 
 function trim (str) {
     return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
@@ -68,12 +69,13 @@ function escapeHTML( string )
 
 
 function configureList() {
+	console.log("configureList - top\n");
 	var elem = $("#listName");
 	if (elem === undefined) {
 		alert("Can't find listName element");
 		return;
 	}
-	var newName = trim($("#listName").val());
+	var newName = trim(elem.val());
 
 	if (newName.length == 0) {
 		alert("You didn't enter a list name");
@@ -84,8 +86,7 @@ function configureList() {
 	var data = get_data();
 	if (!(newName in data)) {
 		console.log("configureList: Saving new list " + newName);
-		data[newName] = {items:{},
-	        	         lastUpdate: now()
+		data[newName] = {lastUpdate: now()
 	        	        };
 		save_data(data);
 		displayLists();
@@ -100,71 +101,64 @@ function configureList() {
 	$('.ui-dialog').dialog('close');
 }
 
-function displayLists() {
-	var data = get_data(),
-		listNames = keys(data).sort(),
-		ul;
 
-	if (listNames.length == 0) {
-		$("#lists").html("Click 'Add A List' to create a list");
+
+
+
+function configureItem() {
+	console.log("configureItem - top\n");
+	var elem = $("#itemName");
+	if (elem.length == 0) {
+		alert("Can't find itemName element");
+		return;
 	}
-	else {
-		ul = $("<ul>", {"data-role":"listview", "data-count-theme":"c", "data-inset":"true"});
+	var newName = trim(elem.val());
 
-		$.each(listNames, function (index, value) {
-			ul.append("<li><a href='#list-page'>" + escapeHTML(value) + "<span class='ui-li-count'>" + keys(data[value]["items"]).length + "</span></a></li>");
-		});
-
-		//replace the current lists div contents with the new unordered list
-		$("#lists").html(ul);
-
-		//have to explicitly transform to listview after initial page load
-		ul.listview();
-	}
-}//displayLists
-
-
-function save() {
-	var keyId="lang1", valId = "lang2";
-	console.log("save clicked");
-	var k = document.getElementById(keyId).value;
-	var v = document.getElementById(valId).value;
-	var data = get_data();
-	data[k] = v;
-	save_data(JSON.stringify(data));
-	display('Saved ' + k +  ' ' + v);
-
-	document.getElementById(keyId).value = '';
-	document.getElementById(valId).value = '';
-
-	list();
-
-	return false;
-}
-
-function display(html,divId) {
-	if (!divId) {
-		divId = 'response';
-	}
-	document.getElementById(divId).innerHTML = html;
-}
-
-function list() {
-	var data = get_data();
-	var has_keys=0;
-	for (var k in data) {has_keys++; break}
-
-	if (has_keys) {
-		var html = '<b>Listing:</b><br>';
-		for (k in data){
-			html += k + ' = ' + data[k] + '<br>';
-		}
-		display(html, 'list');
+	if (newName.length == 0) {
+		alert("You didn't enter an item name");
 		return false;
 	}
-	display ('Empty', 'list');
-	return false;
+
+	console.log("configureItem: newName = " + newName);
+	var data = get_data();
+	var list = data[gSelectedList];
+	if (list !== undefined)  {
+		if (!("items" in list)) {
+			console.log("adding items list to " + listName);
+			list["items"] = [];
+		}
+		var items = list["items"];
+		
+		var index;
+		for (var i = 0; i < items.length; i++) {
+		   if (items[i].name === newName) {
+		      index = i;
+		      break;
+		   } 
+		}
+		
+		if (index === undefined) {
+			console.log("configureItem: Saving new item " + newName);
+			items.push({lastUpdate: now(),
+				    name: newName});
+			items.sort(sortItemsByName);
+	        }//item doesn't exist
+	        else {
+	        	console.log("configureItem: " + newName + " already exists, not adding again");
+	        }//item already exists
+		save_data(data);
+		displayItems();
+	}
+	else {
+		console.log("Current list " + gSelectedList + " is somehow not defined!");
+	}
+	//blank out value so it will be blank on next load
+//	$("#itemName").val("");
+
+	//close the dialog
+	$('.ui-dialog').dialog('close');
 }
+
 
 function save_data(data, field) {
 	if (field === undefined) {
@@ -185,7 +179,19 @@ console.log("get_data: field = " + field + ", data_str = " + data_str);
 	return JSON.parse(data_str);
 }
 
+function getUrlVars() {
+    var vars = {}, keyval;
+    var keyvals = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < keyvals.length; i++)
+    {
+        keyval = keyvals[i].split('=');
+        vars[decodeURIComponent(keyval[0])] = decodeURIComponent(keyval[1]);
+    }
+    return vars;
+}
+
+
 $( document ).ready(function() {
-	displayLists();
 	$("#saveAddList").click(configureList);
+	$("#saveAddItem").click(configureItem);
 });

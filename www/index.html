@@ -1,130 +1,81 @@
+<!DOCTYPE html>
 <html>
 <head>
-  <script type="text/javascript" src="js/jq/jquery-1.9.1.min.js"></script>
- <script src="phonegap.js"></script>
-  <script type="text/javascript" >
-
-(function ($) {
-	$.fn.photoResize = function (options) {
-
-		var element	= $(this),
-			defaults = {
-	            bottomSpacing: 10
-			};
-
-		$(element).load(function () {
-			updatePhotoHeight();
-
-			$(window).bind('resize', function () {
-				updatePhotoHeight();
-			});
-		});
-
-		options = $.extend(defaults, options);
-
-		function updatePhotoHeight() {
-			var o = options,
-				photoHeight = $(window).height();
-
-			$(element).attr('height', photoHeight - o.bottomSpacing);
-		}
-	};
-
-}(jQuery));
-</script>
-<script type="text/javascript">
-     var output = "";
-     function debugOut (text) {
-     	var elem = document.getElementById('output');
-     	if (elem !== null) {
-     	  var output = elem.innerHTML;
-     	  output = output + "<br>" + text;
-     	  elem.innerHTML = output;
-     	}
-     	console.log(text);
-    }
-
-	// Cordova is ready
-        //
-        var deviceReady = true;//default to true until I figure this out.
-        function onDeviceReady() {
-		debugOut("Device Is Ready!");
-            deviceReady = true;
-        }
-
-    // Set deviceReady when device is actually ready
-    //
-    document.addEventListener("deviceready", onDeviceReady, false);
-
-
-
-        // Audio player
-        //
-        var my_media = null;
-
-         function success() {
-		debugOut("Successful play!");
-	}
-
-	function error_error(e) {
-		debugOut('Error playing: Code=' + e.code + ", message = " + e.message);
-	}
-
-    function playAudio(src) {
-      debugOut("UserAgent = " + navigator.userAgent);
-	  if((navigator.userAgent.match(/android/i))) {
-	      //CODE_FOR_ANDROID
-
-            src = getPhoneGapPath() + src;
-    	    debugOut('playing ' + src);
-            if (!deviceReady){
-            	debugOut('not ready');
-                return;
-            }
-            try {
-              debugOut("Creating Media");
-              var my_media = new Media(src, success, error_error);
-
-              // Play audio
-              debugOut("about to play with media");
-              my_media.play();
-            } catch (e) {
-            	debugOut(e.Message);
-            }
-        }
-        else {
-	      //CODE_FOR_IPHONE_||_IPAD
-  	      var source= document.createElement('source');
-	      audio= document.createElement('audio');
-	      source.type='audio/mp3';
-	      source.src= src;
-
-	      audio.setAttribute('src', source.src);
-          // Play audio
-          debugOut("about to play using audio tag");
-          audio.play();
-        }
-    }
-	$(document).ready(function() {
-	        debugOut("Resizing\n");
-		$("img").photoResize({
-			bottomSpacing: 15
-		});
-	});
-
-	function getPhoneGapPath() {
-	    var path = window.location.pathname;
-	    path = path.substr( path, path.length - 10 );
-	    return 'file://' + path;
-	};
-
-debugOut("here2");
-</script>
+  <title>Listey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="js/jq/jquery.mobile-1.3.1.min.css" />
+  <script type="text/javascript" src="js/jq/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" src="js/jq/jquery.mobile-1.3.1.js"></script>
 </head>
 <body>
-<center>
-<img src="images/StarWarsQuotes.jpg" onClick="playAudio('sounds/StarWars.mp3')">
-</center>
-<div id="output"></div>
+
+<!-- ************************************************************************ -->
+<div data-role="page" id="choose-list-page">
+  <div data-role="header">
+    <h1>Choose a list</h1>
+  </div><!-- header -->
+
+    <div data-role="content">
+    	<a href="#add-list-dialog" data-role="button" data-rel="dialog">Add A List</a>
+    	<div id="lists"></div>
+  </div><!-- content -->
+</div><!-- choose-list -->
+
+
+<!-- ************************************************************************ -->
+
+
+<div data-role="page" id="config-item-dialog">
+    <div data-role="header">
+      <h1>Item Details</h1>
+      <a href="#" id="saveAddItem" data-role="button" data-icon="back">Save Me</a>
+    </div><!-- header -->
+    <div data-role="content">
+        <input type="text" name="itemName" id="itemName" data-inline="true" placeholder="Item name">Count: 1
+        <a href="#" data-role="button" data-inline="true">More</A>
+        <a href="#" data-role="button" data-inline="true">Less</A>&nbsp;&nbsp;&nbsp;
+        <a href="#" data-role="button" data-inline="true">Delete</A><br>
+        <div  data-role="fieldcontain">
+            <fieldset data-role="controlgroup">
+                <legend>Choose which categories this applies to:</legend>
+                <input type="checkbox" name="checkbox-1a" id="checkbox-1a" class="custom" />
+                <label for="checkbox-1a">Central Market</label>
+                <input type="checkbox" name="checkbox-1b" id="checkbox-1b" class="custom" />
+                <label for="checkbox-1b">Breed & Co</label>
+          </fieldset>
+      </div>
+      <a href="#config-cat-dialog" data-role="button" data-rel="dialog">Configure Categories</a>
+    </div><!-- content -->
+</div><!-- config-item-dialog -->
+
+<!-- ************************************************************************ -->
+
+<div data-role="page" id="config-cat-dialog">
+    <div data-role="header">
+      <h1>Configure Category</h1>
+      <a href="#items-page" data-role="button" data-icon="back">Save</a>
+    </div><!-- header -->
+    <div data-role="content">
+        <input type="text" name="catName"  placeholder="Category name">
+    </div><!-- content -->
+</div><!-- config-cat-dialog -->
+
+<!-- ************************************************************************ -->
+
+<div data-role="page" id="add-list-dialog">
+    <div data-role="header">
+      <h1>Add List</h1>
+      <a href="#" id="saveAddList" data-role="button" data-icon="back">Save Me</a>
+    </div><!-- header -->
+    <div data-role="content">
+        <input type="text" name="listName" id="listName" placeholder="List name">
+    </div><!-- content -->
+</div><!-- add-list-dialog -->
+
+<!-- ************************************************************************ -->
+
+  <script type="text/javascript" src="js/shopping.js"></script>
+  <script type="text/javascript" src="js/listpage.js"></script>
+  <script type="text/javascript" src="js/itemspage.js"></script>
 </body>
 </html>
