@@ -27,7 +27,7 @@
 
 var gSelectedList;
 
-function sortItemsByName (a, b) {
+function sortHashesByName (a, b) {
 	a = a["name"].toUpperCase();
 	b = b["name"].toUpperCase();
 	return ((a < b) ? -1 : (a > b) ? +1 : 0);
@@ -89,7 +89,7 @@ console.log("get_data: field = " + field + ", data_str = " + data_str);
 
 function getUrlVars() {
     var vars = {}, keyval;
-    var keyvals = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    var keyvals = window.location.href.slice(window.location.href.indexOf('?') + 1).split(/[&#]/);
     for(var i = 0; i < keyvals.length; i++)
     {
         keyval = keyvals[i].split('=');

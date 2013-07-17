@@ -66,7 +66,7 @@ function displayItems (listName) {
 		    var itemsSpliced = items.splice(index, 1);
 		    itemsSpliced[0]["lastUpdate"] = now();
 		    crossedOffItems.push(itemsSpliced[0]);
-		    crossedOffItems.sort(sortItemsByName);
+		    crossedOffItems.sort(sortHashesByName);
 		    save_data(data);
 		    displayItems();
 		    return true;
@@ -135,5 +135,8 @@ $(document).on('pageshow', '#items-page', function() {
 	
 	//Add list parameter to addItemLink url
 	$('#addItemLink').attr("href", 'configureItem?list=' + encodeURIComponent(listName));
+		
+	//Add list parameter to configCatLink url
+	$('#configCatLink').attr("href", 'configureCategory?list=' + encodeURIComponent(listName));
 });
 
