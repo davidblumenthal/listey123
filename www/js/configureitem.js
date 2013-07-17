@@ -17,7 +17,7 @@ function configureItem() {
 
 	console.log("configureItem: newName = " + newName);
 	var data = get_data();
-	var list = data[gSelectedList];
+	var list = data[listName];
 
 	if (list !== undefined)  {
 		if (!("items" in list)) {
@@ -45,7 +45,6 @@ function configureItem() {
 	        }//item already exists
 
 		save_data(data);
-		//displayItems();
 	}
 	else {
 		console.log("Current list " + gSelectedList + " is somehow not defined!");
