@@ -111,7 +111,7 @@ function displayItems (listName) {
 					return true;
 				});//aElem.click
 					
-				aElem = $("<a href='#config-item-dialog' data-rel='dialog'>Configure</a>");
+				aElem = $("<a href='configureItem' data-rel='dialog'>Configure</a>");
 				liElem.append(aElem);
 				aElem.click(function () {
 				    alert("Clicked " + value["name"] + " configuration");
@@ -132,4 +132,8 @@ function displayItems (listName) {
 $(document).on('pageshow', '#items-page', function() {
 	var listName = getUrlVars()["list"];
 	displayItems(listName);
+	
+	//Add list parameter to addItemLink url
+	$('#addItemLink').attr("href", 'configureItem?list=' + encodeURIComponent(listName));
 });
+
