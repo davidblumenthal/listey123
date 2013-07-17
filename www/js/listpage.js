@@ -1,6 +1,3 @@
-$('#choose-list-page').bind('pageinit', function(event) {
-	displayLists();
-});
 
 function displayLists() {
 	var data = get_data(),
@@ -38,3 +35,7 @@ function displayLists() {
 		ulElem.listview();
 	}
 }//displayLists
+
+$('#choose-list-page').bind('pageinit', function(event) {
+	displayLists();
+});
