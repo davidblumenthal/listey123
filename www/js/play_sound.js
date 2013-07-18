@@ -6,41 +6,54 @@
 
         // Cordova is ready
         //
+        var deviceReady = false;
         function onDeviceReady() {
-            playAudio("/android_asset/www/audio/audio.mp3");
+	    debugOut("Device Is Ready!");
+            deviceReady = true;
         }
 
         // Audio player
         //
-        var my_media = null;
-        var mediaTimer = null;
     function playAudio(src) {
-            if (my_media == null) {
-                // Create Media object from src
-                my_media = new Media(src, onSuccess, onError);
-            } // else play current audio
-            // Play audio
-            my_media.play();
+      debugOut("UserAgent = " + navigator.userAgent);
+	  if((navigator.userAgent.match(/android/i))) {
+	      //CODE_FOR_ANDROID
 
-            // Update my_media position every second
-            if (mediaTimer == null) {
-                mediaTimer = setInterval(function() {
-                    // get my_media position
-                    my_media.getCurrentPosition(
-                        // success callback
-                        function(position) {
-                            if (position > -1) {
-                                setAudioPosition((position) + " sec");
-                            }
-                        },
-                        // error callback
-                        function(e) {
-                            console.log("Error getting pos=" + e);
-                            setAudioPosition("Error: " + e);
-                        }
-                    );
-                }, 1000);
+            src = getPhoneGapPath() + src;
+    	    debugOut('playing ' + src);
+            if (!deviceReady){
+            	debugOut('not ready');
+                return;
+            }
+            try {
+              debugOut("Creating Media");
+              var my_media = new Media(src, success, error_error);
+
+              // Play audio
+              debugOut("about to play with media");
+              my_media.play();
+            } catch (e) {
+            	debugOut(e.Message);
             }
         }
+        else {
+	      //CODE_FOR_IPHONE_||_IPAD
+  	      var source= document.createElement('source');
+	      audio= document.createElement('audio');
+	      source.type='audio/mp3';
+	      source.src= src;
+
+	      audio.setAttribute('src', source.src);
+          // Play audio
+          debugOut("about to play using audio tag");
+          audio.play();
+        }
+    }
+
+	function getPhoneGapPath() {
+	    var path = window.location.pathname;
+	    path = path.substr( path, path.length - 10 );
+	    return 'file://' + path;
+	};
 
 </script>

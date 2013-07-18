@@ -1,0 +1,84 @@
+<html>
+<head>
+  <script type="text/javascript" src="js/jq/jquery-1.9.1.min.js"></script>
+ <script src="phonegap.js"></script>
+  <script type="text/javascript" >
+
+(function ($) {
+	$.fn.photoResize = function (options) {
+
+		var element	= $(this),
+			defaults = {
+	            bottomSpacing: 10
+			};
+
+		$(element).load(function () {
+			updatePhotoHeight();
+
+			$(window).bind('resize', function () {
+				updatePhotoHeight();
+			});
+		});
+
+		options = $.extend(defaults, options);
+
+		function updatePhotoHeight() {
+			var o = options,
+				photoHeight = $(window).height();
+
+			$(element).attr('height', photoHeight - o.bottomSpacing);
+		}
+	};
+
+}(jQuery));
+</script>
+<script type="text/javascript">
+     var output = "";
+     function debugOut (text) {
+     	var elem = document.getElementById('output');
+     	if (elem !== null) {
+     	  var output = elem.innerHTML;
+     	  output = output + "<br>" + text;
+     	  elem.innerHTML = output;
+     	}
+     	console.log(text);
+    }
+
+	// Cordova is ready
+        //
+        var deviceReady = true;//default to true until I figure this out.
+        function onDeviceReady() {
+		debugOut("Device Is Ready!");
+            deviceReady = true;
+        }
+
+    // Set deviceReady when device is actually ready
+    //
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+
+
+        // Audio player
+        //
+        var my_media = null;
+
+         function success() {
+		debugOut("Successful play!");
+	}
+
+	function error_error(e) {
+		debugOut('Error playing: Code=' + e.code + ", message = " + e.message);
+	}
+
+
+
+debugOut("here2");
+</script>
+</head>
+<body>
+<center>
+<img src="images/StarWarsQuotes.jpg" onClick="playAudio('sounds/StarWars.mp3')">
+</center>
+<div id="output"></div>
+</body>
+</html>
