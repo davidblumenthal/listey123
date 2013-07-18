@@ -19,7 +19,7 @@ function displayLists() {
 			ulElem.append(liElem);
 			itemsList = data[value]["items"];
 			numItems = (itemsList === undefined) ? 0 : keys(itemsList).length;
-			aElem = $("<a href='items?list="+encodeURIComponent(value)+"'>" + escapeHTML(value) + "<span class='ui-li-count'>" + numItems + "</span></a>");
+			aElem = $("<a href='items.html?list="+encodeURIComponent(value)+"'>" + escapeHTML(value) + "<span class='ui-li-count'>" + numItems + "</span></a>");
 			liElem.append(aElem);
 			aElem.click(function () {
 			    console.log("displayLists: clicked on " + value);

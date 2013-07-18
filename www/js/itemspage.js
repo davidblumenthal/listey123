@@ -134,9 +134,9 @@ $(document).on('pageshow', '#items-page', function() {
 	displayItems(listName);
 	
 	//Add list parameter to addItemLink url
-	$('#addItemLink').attr("href", 'configureItem?list=' + encodeURIComponent(listName));
+	$('#addItemLink').attr("href", 'configureItem.html?list=' + encodeURIComponent(listName));
 		
 	//Add list parameter to configCatLink url
-	$('#configCatLink').attr("href", 'configureCategory?list=' + encodeURIComponent(listName));
+	$('#configCatLink').attr("href", 'configureCategory.html?list=' + encodeURIComponent(listName));
 });
 
