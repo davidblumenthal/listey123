@@ -105,7 +105,7 @@ function displayItems (listName) {
 					var itemsSpliced = crossedOffItems.splice(index, 1);
 					itemsSpliced[0]["lastUpdate"] = now();
 					items.push(itemsSpliced[0]);
-					items.sort(sortItemsByName);
+					items.sort(sortHashesByName);
 					save_data(data);
 					displayItems();
 					return true;
