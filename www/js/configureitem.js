@@ -38,7 +38,7 @@ function configureItem() {
 			console.log("configureItem: Saving new item " + newName);
 			items.push({lastUpdate: now(),
 				    name: newName});
-			items.sort(sortItemsByName);
+			items.sort(sortHashesByName);
 	        }//item doesn't exist
 	        else {
 	        	console.log("configureItem: " + newName + " already exists, not adding again");
