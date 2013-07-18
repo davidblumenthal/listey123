@@ -43,7 +43,7 @@ function displayItems (listName) {
 	                </li>
 */
 	    console.log("Some items or crossedOffItems found: items=" + items.length + ", crossedOffItems=" + crossedOffItems.length);
-	    ulElem = $("<ul>", {"data-role":"listview", "data-filter":"true", "data-split-icon":"gear", "data-count-theme":"c", "data-inset":"true"});
+	    ulElem = $("<ul>", {"data-role":"listview", "data-split-icon":"gear", "data-count-theme":"c", "data-inset":"true"});
 
 	    $.each(items, function (index, value) {
 	        console.log("   Adding " + value["name"]);;
