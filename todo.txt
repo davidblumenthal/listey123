@@ -1,0 +1,42 @@
+##################################################################
+####PhoneGap Client Side####
+* Add delete options
+* Add uncheck-all option (ask if should uncheck for just the selected stores or all stores)
+* Implement item configuration update
+* Finish category maintenance
+* Finish item category save
+* Add auto-suggest of items from standard list + deleted items
+* Add rename of categories
+* Add category items page where you can select a category then check off all items that belong in that store
+* Add location (subcategory) options inside stores
+* In location config, add page where you can check off all items from that store that belong in that location
+* Support multiple locations, or just single?
+* Replace error alerts with dialogs
+* Add SyncML layer
+* Add ability to send list as email
+* Add manual ordering/reordering
+
+* Adjust to add features for larger screens (option to display categories inline?)
+
+
+################################################################
+#### Implement server side ####
+  * Implement OpenID
+  * Add ability to upload list
+  * Add ability to export list
+  * Add ability to share/revoke share of list
+    * As view-only
+    * With full edit privs
+  * Add ability to share an link to a list that doesn't require login
+    * As view-only
+  * Google ads
+
+################################################################
+#### Implement Android-Native ####
+  * Reuse as much of the PhoneGap code as possible, but also implement background Sync
+
+
+
+################################################################
+#### Implement IOS-Native ####
+  * Reuse as much of the PhoneGap code as possible, but also implement background Sync
