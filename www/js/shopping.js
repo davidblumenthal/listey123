@@ -1,36 +1,39 @@
 /*
   Data format:
     listName => {items : [{name : "Milk",
-  	                       lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                      },
-  	                      ],
-  	             crossedOffItems : [{name : "Butter",
-  	                                 count: 2,
-  	                       	         lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                                },
-  	                               ],
-  	             deletedItems : [{name : "Eggs",
-  	                              count: 2,
-  	                              lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                             },
-  	                            ],
-  	             purgedItems : [{name : "Doritos",
-  	                             count: 2,
-  	                             lastUpdate: "06/28/2013 13:25:29 CDT",
-  	                            },
-  	                           ],
+                           lastUpdate: "06/28/2013 13:25:29 CDT",
+                          },
+                          ],
+                 crossedOffItems : [{name : "Butter",
+                                     count: 2,
+                                     lastUpdate: "06/28/2013 13:25:29 CDT",
+                                    },
+                                   ],
+                 deletedItems : [{name : "Eggs",
+                                  count: 2,
+                                  lastUpdate: "06/28/2013 13:25:29 CDT",
+                                 },
+                                ],
+                 purgedItems : [{name : "Doritos",
+                                 count: 2,
+                                 lastUpdate: "06/28/2013 13:25:29 CDT",
+                                },
+                               ],
 
-  	             lastUpdate: "06/28/2013 13:25:29 CDT"
-  	            }
+                 lastUpdate: "06/28/2013 13:25:29 CDT"
+                }
 
 */
+
+var ITEMS = 'items';
+var CROSSED_OFF_ITEMS = 'crossedOffItems';
 
 var gSelectedList;
 
 function sortHashesByName (a, b) {
-	a = a["name"].toUpperCase();
-	b = b["name"].toUpperCase();
-	return ((a < b) ? -1 : (a > b) ? +1 : 0);
+    a = a["name"].toUpperCase();
+    b = b["name"].toUpperCase();
+    return ((a < b) ? -1 : (a > b) ? +1 : 0);
 }//sortItemsByName
 
 
@@ -69,23 +72,54 @@ function escapeHTML( string )
 
 
 function save_data(data, field) {
-	if (field === undefined) {
-		field = 'lists';
-	}
-	localStorage.setItem(field, JSON.stringify(data));
+    if (field === undefined) {
+        field = 'lists';
+    }
+    localStorage.setItem(field, JSON.stringify(data));
 }
 
 function get_data(field) {
-	if (field === undefined) {
-		field = 'lists';
-	}
-	var data_str = localStorage.getItem(field);
+    if (field === undefined) {
+        field = 'lists';
+    }
+    var data_str = localStorage.getItem(field);
 console.log("get_data: field = " + field + ", data_str = " + data_str);
-	if (data_str == undefined) {
-		return {};
-	}
-	return JSON.parse(data_str);
+    if (data_str == undefined) {
+        return {};
+    }
+    return JSON.parse(data_str);
 }
+
+function getList(listName) {
+    var data = get_data(), list;
+    if (!(listName in data)) {
+        data[listName] = [];
+    }
+
+    return (data[listName]);
+}//getList
+
+
+function getListNames() {
+    var data = get_data();
+    var listNames = keys(data).sort();
+
+    return listNames;
+}//getListNames
+
+
+function getItems(listName, itemsType) {
+    var list = getList(listName);
+    if (itemsType === undefined) {
+        itemsType = ITEMS;
+    }
+    var items = list[itemsType];
+    if (items === undefined) {
+        items = [];
+    }
+    return items;
+}//getItems
+
 
 function getUrlVars() {
     var vars = {}, keyval;
