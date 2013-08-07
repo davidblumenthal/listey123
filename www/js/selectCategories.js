@@ -102,7 +102,6 @@ function displayCategories() {
 	    	fieldContainElem.append(fieldSetElem);
 		//replace the current lists div contents with the new unordered list
 	    	$("#categories").html(fieldContainElem);
-console.log("New html = "+ $("#categories").html());
 	    
 	    	//have to explicitly transform to pretty view after initial page load
 	    	$("#categories").trigger('create');
