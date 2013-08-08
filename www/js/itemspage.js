@@ -8,7 +8,7 @@ function displayItems (listName) {
     //Note, this assumes listName is a valid list
     var data = get_data(),
         items = getItems(listName),
-        crossedOffItems = data[listName]["crossedOffItems"],
+        crossedOffItems = getItems(listName, CROSSED_OFF_ITEMS),
         ulElem,
         liElem,
         aElem,
@@ -21,7 +21,7 @@ function displayItems (listName) {
         crossedOffItems = [];
     }
 
-    if ((items === undefined || items.length == 0) && (crossedOffItems === undefined || crossedOffItems.length == 0)) {
+    if ((items.length == 0) && (crossedOffItems.length == 0)) {
         console.log("No items found for " + listName);
         $("#items").html("Click 'Add An Item' to add an item");
     }
@@ -59,16 +59,11 @@ function displayItems (listName) {
         liElem.append(aElem);
         aElem.click(function () {
             console.log("Clicked " + value["name"]);
-            if (crossedOffItems.length == 0) {
-                console.log("initializing crossedOffItems");
-                data[listName]["crossedOffItems"] = crossedOffItems;
+            var item = removeItem(listName, value["name"]);
+            if (item !== undefined) {//check just to be safe
+                addOrUpdateItem(listName, item, CROSSED_OFF_ITEMS);
+                displayItems();
             }
-            var itemsSpliced = items.splice(index, 1);
-            itemsSpliced[0]["lastUpdate"] = now();
-            crossedOffItems.push(itemsSpliced[0]);
-            crossedOffItems.sort(sortHashesByName);
-            save_data(data);
-            displayItems();
             return true;
         });//aElem.click
 
@@ -97,17 +92,13 @@ function displayItems (listName) {
                 aElem = $("<a href='#'><strike>" + escapeHTML(value["name"]) + itemCountSpan + "<strike></a>");
                 liElem.append(aElem);
                 aElem.click(function () {
-                        console.log("Clicked crossed off " + value["name"]);
-                    if (items.length == 0) {
-                        console.log("initializing items");
-                            data[listName]["items"] = items;
+                    console.log("Clicked crossed off " + value["name"]);
+                    var item = removeItem(listName, value["name"], CROSSED_OFF_ITEMS);
+                    if (item !== undefined) {//check just to be safe
+                        addOrUpdateItem(listName, item);
+                        displayItems();
                     }
-                    var itemsSpliced = crossedOffItems.splice(index, 1);
-                    itemsSpliced[0]["lastUpdate"] = now();
-                    items.push(itemsSpliced[0]);
-                    items.sort(sortHashesByName);
-                    save_data(data);
-                    displayItems();
+
                     return true;
                 });//aElem.click
 
@@ -129,8 +120,9 @@ function displayItems (listName) {
 }//displayItems
 
 
-$(document).on('pageshow', '#items-page', function() {
+$(document).on('pagebeforeshow', '#items-page', function() {
     var listName = getUrlVars()["list"];
+    $('#itemsPageTitle').text(listName);
     displayItems(listName);
 
     //Add list parameter to addItemLink url
@@ -141,5 +133,8 @@ $(document).on('pageshow', '#items-page', function() {
 
     //Add list parameter to configCatLink url
     $('#configCatLink').attr("href", 'configureCategory.html?list=' + encodeURIComponent(listName));
+
+    //Add list parameter to configureList link
+    $('#configureList').attr("href", 'configureList.html?list=' + encodeURIComponent(listName));
 });
 

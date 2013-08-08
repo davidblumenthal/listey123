@@ -1,6 +1,7 @@
 ##################################################################
 ####PhoneGap Client Side####
 * Add delete options
+* Add rename/delete dialog.
 * Add uncheck-all option (ask if should uncheck for just the selected stores or all stores)
 * Implement item configuration update
 * Finish category maintenance

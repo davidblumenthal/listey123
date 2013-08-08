@@ -1,38 +1,73 @@
 
 function configureList() {
-	console.log("configureList - top\n");
-	var elem = $("#listName");
-	if (elem === undefined) {
-		alert("Can't find listName element");
-		return;
-	}
-	var newName = trim(elem.val());
+    console.log("configureList - top\n");
 
-	if (newName.length == 0) {
-		alert("You didn't enter a list name");
-		return false;
-	}
+    var origListName = $("#origListName").val();
 
-	console.log("configureList: newName = " + newName);
-	var data = get_data();
-	if (!(newName in data)) {
-		console.log("configureList: Saving new list " + newName);
-		data[newName] = {lastUpdate: now()
-	        	        };
-		save_data(data);
-		displayLists();
-	}
-	else {
-		console.log("configureList: " + newName + " already exists, not adding again");
-	}
-	//blank out value so it will be blank on next load
-//	$("#listName").val("");
+    var elem = $("#listName");
+    if (elem === undefined) {
+        alert("Can't find listName element");
+        return;
+    }
+    var newName = trim(elem.val());
 
-	//close the dialog
-	$('.ui-dialog').dialog('close');
+    if (newName.length == 0) {
+        alert("You didn't enter a list name");
+        return false;
+    }
+
+    if (origListName.length>0) {
+        if (origListName === newName) {
+            console.log("configureListName: name didn't change");
+        }
+        else {//name changed
+            //XXX
+            alert("Renaming lists (from " + origListName + " to " + newName + ") is not currently implemented");
+            return;
+        }
+    }//if renaming
+
+    else {//if adding new
+        if (addList(newName)) {
+            //refresh the list of lists
+            displayLists();
+        }
+    }//adding new
+
+    //close the dialog
+    $('.ui-dialog').dialog('close');
 }
 
-$(document).on('click', '#saveAddList', function() {
-	console.log("Clicked on saveAddList");
-	configureList();
+
+$(document).on('click', '#saveConfigureList', function() {
+    console.log("Clicked on saveConfigureList");
+    configureList();
 });
+
+
+$(document).on('submit', '#config-list-dialog-form', function(eventObject) {
+    console.log("config-list-dialog-form submitted");
+    configureList();
+    eventObject.preventDefault();
+    return false;
+});
+
+$(document).on('pagebeforeshow', '#configure-list-dialog', function() {
+    var listName = getUrlVars()["list"];
+
+    console.log("configure-list-dialog pagebeforeshow: listName=" + listName);
+
+    if (listName === undefined) {
+        $("#deleteListButton").hide();
+        $("#origListName").val("");
+    }
+    else {
+        $("#configureListHeader").text("Rename List");
+        $("#origListName").val(listName);
+        $("#listName").val(listName);
+        $("#deleteListButton").show();
+        //Add list parameter to configureList link
+        $('#deleteListButton').attr("href", 'deleteListConfirm.html?list=' + encodeURIComponent(listName));
+    }
+});
+

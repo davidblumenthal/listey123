@@ -21,7 +21,7 @@ function displayLists() {
             aElem = $("<a href='items.html?list="+encodeURIComponent(listName)+"'>" + escapeHTML(listName) + "<span class='ui-li-count'>" + numItems + "</span></a>");
             liElem.append(aElem);
             aElem.click(function () {
-                console.log("displayLists: clicked on " + value);
+                console.log("displayLists: clicked on " + listName);
                 //displayItems(value);
                 return true;
             });//aElem.click

@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html><body>
 
-<div data-role="page" id="add-list-dialog">
+<div data-role="page" id="configure-list-dialog">
+    <form id="config-list-dialog-form" data-ajax="false">
     <div data-role="header">
-      <h1>Add List</h1>
-      <a href="#" id="saveAddList" data-role="button" data-icon="back">Save Me</a>
+      <h1 id="configureListHeader">Add List</h1>
+      <a href="#" id="saveConfigureList" data-role="button" data-icon="back">Save Me</a>
     </div><!-- header -->
     <div data-role="content">
         <input type="text" name="listName" id="listName" placeholder="List name">
+        <input type="hidden" name="origListName" id="origListName">
+        <a href="#" id="deleteListButton" data-role="button">Delete List</A><br>
     </div><!-- content -->
-</div><!-- add-list-dialog -->
+    </form>
+</div><!-- configure-list-dialog -->
 
 </body>
 </html>
