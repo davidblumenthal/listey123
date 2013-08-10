@@ -1,4 +1,5 @@
 function displayItems (listName) {
+    console.log("displayItems for list " + listName);
     if (listName === undefined) {
         listName = gSelectedList;
     } else {
@@ -47,32 +48,33 @@ function displayItems (listName) {
 
         $.each(items, function (index, value) {
             console.log("   Adding " + value["name"]);;
-        liElem = $("<li>");
-        ulElem.append(liElem);
-        if ("count" in value) {
-            itemCountSpan = "<span class='ui-li-count'>" + value["count"] + "</span>";
-        }
-        else {
-            itemCountSpan = "";
-        }
-        aElem = $("<a href='#'>" + escapeHTML(value["name"]) + itemCountSpan + "</a>");
-        liElem.append(aElem);
-        aElem.click(function () {
-            console.log("Clicked " + value["name"]);
-            var item = removeItem(listName, value["name"]);
-            if (item !== undefined) {//check just to be safe
-                addOrUpdateItem(listName, item, CROSSED_OFF_ITEMS);
-                displayItems();
+            liElem = $("<li>");
+            ulElem.append(liElem);
+            if ("count" in value) {
+                itemCountSpan = "<span class='ui-li-count'>" + value["count"] + "</span>";
             }
-            return true;
-        });//aElem.click
+            else {
+                itemCountSpan = "";
+            }
+            aElem = $("<a href='#'>" + escapeHTML(value["name"]) + itemCountSpan + "</a>");
+            liElem.append(aElem);
+            aElem.click(function () {
+                console.log("Clicked " + value["name"]);
+                var item = removeItem(listName, value["name"]);
+                if (item !== undefined) {//check just to be safe
+                    addOrUpdateItem(listName, item, undefined, CROSSED_OFF_ITEMS);
+                    displayItems();
+                }
+                return true;
+            });//aElem.click
 
-        aElem = $("<a href='#config-item-dialog' data-rel='dialog'>Configure</a>");
-        liElem.append(aElem);
-        aElem.click(function () {
-            alert("Clicked " + value["name"] + " configuration");
-            return true;
-        });//aElem.click
+            aElem = $("<a href='configureItem.html' data-rel='dialog'>Configure</a>");
+            liElem.append(aElem);
+            aElem.click(function () {
+                gConfigureItemName = value["name"];
+                console.log("Clicked " + value["name"] + " configuration");
+                return true;
+            });//aElem.click
         });//each item
 
         if (crossedOffItems.length > 0) {
@@ -102,10 +104,11 @@ function displayItems (listName) {
                     return true;
                 });//aElem.click
 
-                aElem = $("<a href='configureItem' data-rel='dialog'>Configure</a>");
+                aElem = $("<a href='configureItem.html' data-rel='dialog'>Configure</a>");
                 liElem.append(aElem);
                 aElem.click(function () {
-                    alert("Clicked " + value["name"] + " configuration");
+                    gConfigureItemName = value["name"];
+                    console.log("Clicked " + value["name"] + " configuration");
                     return true;
                 });//aElem.click
             });//each item
@@ -126,7 +129,12 @@ $(document).on('pagebeforeshow', '#items-page', function() {
     displayItems(listName);
 
     //Add list parameter to addItemLink url
-    $('#addItemLink').attr("href", 'configureItem.html?list=' + encodeURIComponent(listName));
+    $('#addItemLink').attr("href", 'configureItem.html?list=' + encodeURIComponent(listName))
+                     .click(function() {
+                         gConfigureItemName = undefined;
+                         console.log("Clicked add new item");
+                         return true;
+                     });
 
     //Add list parameter to selectCategoriesLink url
     $('#selectCategoriesLink').attr("href", 'selectCategories.html?list=' + encodeURIComponent(listName));

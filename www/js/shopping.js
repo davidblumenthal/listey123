@@ -162,25 +162,56 @@ function getItemIndex(items, itemName) {
 }//getItemIndex
 
 
+/*
+  (itemObj) getItem(listName, itemName, [itemsType])
+
+  itemsType is optional.  If not passed, will look in main
+  list and crossed off list.
+*/
 function getItem(listName, itemName, itemsType) {
     var items = getItems(listName, itemsType);
 
-    var itemIndex = getItemIndex(items, item["name"]);
+    var itemIndex = getItemIndex(items, itemName);
+
+    if (itemIndex === -1 && itemsType === undefined) {
+        return(getItem(listName, itemName, CROSSED_OFF_ITEMS));
+    }
     return (itemIndex === -1 ? undefined : items[itemIndex]);
 }//getItem
 
 
 
-//(didAddItem) addOrUpdateItem(listName, item, itemsType)
-function addOrUpdateItem(listName, item, itemsType) {
+/*
+  (boolean didAddItem) addOrUpdateItem(listName, item, [origItemName], [listType])
+
+  If origItemName is undef, assumes item["name"]
+
+  If listType is defined, only works with that list.
+  Otherwise, looks up the item by origItemName in main and crossed off lists.
+
+  If found, updates with info in item.  Otherwise adds to listType or main list.
+*/
+function addOrUpdateItem(listName, item, origItemName, listType) {
     if (!("name" in item)) {
         console.log("addItem: item parameter doesn't have a name field, skipping");
         return false;
     }
+    if (origItemName === undefined) {
+        origItemName = item["name"];
+    }
     item["lastUpdate"] = now();
 
-    var items = getItems(listName, itemsType);
-    var itemIndex = getItemIndex(items, item["name"]);
+    //get it in main list or crossed off list.  If not found in either
+    //then add to main list
+    var items = getItems(listName, listType);
+    var itemIndex = getItemIndex(items, origItemName);
+    if (itemIndex === -1 && listType === undefined) {
+        var crossedOffItems = getItems(listName, CROSSED_OFF_ITEMS);
+        itemIndex = getItemIndex(crossedOffItems, origItemName);
+        if (itemIndex !== -1) {
+            items = crossedOffItems;
+        }
+    }
 
     var didAddItem;
 

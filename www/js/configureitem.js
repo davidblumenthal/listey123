@@ -1,3 +1,5 @@
+var gConfigureItemName;//Can't pass parameters to dialog boxes, have to pass in global vars
+
 function configureItem() {
     console.log("configureItem - top\n");
 
@@ -14,10 +16,21 @@ function configureItem() {
         alert("You didn't enter an item name");
         return false;
     }
+    var categories = [];
+    $("#categories :checked").each(function() {
+        categories.push($(this).val());
+    });
+    console.log("configureItem: newName = " + newName + (categories.length > 0 ? ". Categories = " + categories.join() : ""));
 
-    console.log("configureItem: newName = " + newName);
+    var item = {name: newName};
+    if (categories.length > 0) {
+        item["categories"] = categories;
+    }
+    addOrUpdateItem(listName, item, gConfigureItemName);
 
-    addOrUpdateItem(listName, {name: newName});
+    //Sigh, can't pass cgi/location bar params to dialogs, so have to use global
+    //So need to wipe the global when the dialog closes.
+    gConfigureItemName = undefined;
 
     //close the dialog
     $('.ui-dialog').dialog('close');
@@ -26,17 +39,7 @@ function configureItem() {
 
 
 function displayCategories(categoriesDivId, itemName) {
-    /*         <div  data-role="fieldcontain">
-            <fieldset data-role="controlgroup">
-                <legend>Choose which categories this applies to:</legend>
-                <input type="checkbox" name="checkbox-1a" id="checkbox-1a" class="custom" />
-                <label for="checkbox-1a">Central Market</label>
-                <input type="checkbox" name="checkbox-1b" id="checkbox-1b" class="custom" />
-                <label for="checkbox-1b">Breed & Co</label>
-            </fieldset>
-        </div>
-        */
-        console.log("displayCategories - top\n");
+    console.log("displayCategories - top\n");
 
     var listName = getUrlVars()["list"];
 
@@ -51,13 +54,32 @@ function displayCategories(categoriesDivId, itemName) {
     }
     else {
         console.log(categories.length + " categories found");
+
+        var item = getItem(listName, gConfigureItemName);
+        var itemCategoriesHash = {};
+        if (item !== undefined) {
+            var itemCategoriesArray = item["categories"];
+            if (itemCategoriesArray !== undefined) {
+                $.each(itemCategoriesArray, function(index, value) {
+                    itemCategoriesHash[value] = true;
+                });
+            }
+            console.log("Configuring " + gConfigureItemName + (itemCategoriesArray !== undefined ? ". Categories = " + itemCategoriesArray.join() : ""));
+        }
+        else {
+            console.log("Adding new item");
+        }
         fieldContainElem = $("<div>", {"data-role":"fieldcontain"});
         fieldSetElem = $("<fieldset>", {"data-role":"controlgroup"});
-        fieldSetElem.append("<legend>Choose which categories this applies to:</legend>");
+        fieldSetElem.append("<legend>Choose which stores this applies to:</legend>");
 
         $.each(categories, function (index, value) {
-            console.log("   Adding " + value["name"]);;
-            inputElem = $("<input>", {"type":"checkbox", class:"custom", "id":"checkbox-"+index});
+            console.log("   Adding " + value["name"]);
+            var attributes = {"type":"checkbox", class:"custom", "id":"checkbox-"+index, "value":value["name"]};
+            if (itemCategoriesHash[value["name"]]) {
+                attributes["checked"] = "true";
+            }
+            inputElem = $("<input>", attributes);
             fieldSetElem.append(inputElem);
             labelElem = $("<label>", {"for":"checkbox-"+index});
             labelElem.text(value["name"]);
@@ -82,11 +104,16 @@ $(document).on('click', '#saveAddItem', function() {
 $(document).on('pagebeforeshow', '#config-item-dialog', function() {
     var listName = getUrlVars()["list"];
     displayCategories("categories");
+
+    if (gConfigureItemName !== undefined) {
+        $("#itemName").val(gConfigureItemName);
+    }
 });
 
 $(document).on('submit', '#config-item-dialog-form', function(eventObject) {
     console.log("Form submitted");
     configureItem();
     eventObject.preventDefault();
+
     return false;
 });
