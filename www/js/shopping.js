@@ -251,6 +251,65 @@ function removeItem(listName, itemName, itemsType) {
 }//removeItem
 
 
+function getSelectedCategories(listName) {
+    var list = getList(listName);
+    var currentFilterCategories = list["selectedCategories"];
+    return (currentFilterCategories === undefined ? {} : currentFilterCategories);
+}
+
+
+
+function saveSelectedCategories(listName, categories) {
+    var list = getList(listName);
+    list["selectedCategories"] = categories;
+    save_data();
+}
+
+
+function displayCategories(categoriesDivId, selectedCategoriesHash) {
+    console.log("displayCategories - top\n");
+
+    var listName = getUrlVars()["list"];
+
+    //Note, this assumes listName is a valid list
+    var categories = getItems(listName, CATEGORIES),
+        crossedOffItems = getItems(listName, CROSSED_OFF_ITEMS),
+        fieldContainElem, fieldSetElem, inputElem, labelElem;
+
+    if (categories.length == 0) {
+        console.log("No stores found for " + listName);
+        $("#" + categoriesDivId).html("Click 'Configure Stores' to add a store");
+    }
+    else {
+        console.log(categories.length + " categories found");
+
+        fieldContainElem = $("<div>", {"data-role":"fieldcontain"});
+        fieldSetElem = $("<fieldset>", {"data-role":"controlgroup"});
+        fieldSetElem.append("<legend>Choose which stores this applies to:</legend>");
+
+        $.each(categories, function (index, value) {
+            console.log("   Adding " + value["name"]);
+            var attributes = {"type":"checkbox", class:"custom", "id":"checkbox-"+index, "value":value["name"]};
+            if (selectedCategoriesHash[value["name"]]) {
+                attributes["checked"] = "true";
+            }
+            inputElem = $("<input>", attributes);
+            fieldSetElem.append(inputElem);
+            labelElem = $("<label>", {"for":"checkbox-"+index});
+            labelElem.text(value["name"]);
+            fieldSetElem.append(labelElem);
+        });//each item
+        fieldContainElem.append(fieldSetElem);
+        //replace the current lists div contents with the new unordered list
+        $("#" + categoriesDivId).html(fieldContainElem);
+
+        //have to explicitly transform to pretty view after initial page load
+        $("#" + categoriesDivId).trigger('create');
+    }//else not empty
+}//displayCategories
+
+
+
 function getUrlVars() {
     var vars = {}, keyval;
     var keyvals = window.location.href.slice(window.location.href.indexOf('?') + 1).split(/[&#]/);

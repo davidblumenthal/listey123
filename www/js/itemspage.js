@@ -1,3 +1,29 @@
+/*
+(string list filteredCategories) filterSelectgedCategories(items, string list selectedCategoriesList)
+
+Return items that have a category that is in the selectedCategories list
+
+If selectedCategoriesList is empty, return everything.
+
+*/
+function filterSelectedCategories(items, selectedCategories) {
+console.log("filterSelectedCategories: selectedCategories = " + JSON.stringify(selectedCategories));
+    if ($.isEmptyObject(selectedCategories)) {
+        return items;
+    }
+
+    return ($.grep(items, function(item){
+        itemCategories = item["categories"];
+        for (var i=0; i < selectedCategories.length; i++) {
+            if (itemCategories[selectedCategories[i]]){
+                return true;
+            }
+        }//for
+        return false;
+    }));
+}//filterSelectedCategories
+
+
 function displayItems (listName) {
     console.log("displayItems for list " + listName);
     if (listName === undefined) {
@@ -8,8 +34,9 @@ function displayItems (listName) {
 
     //Note, this assumes listName is a valid list
     var data = get_data(),
-        items = getItems(listName),
-        crossedOffItems = getItems(listName, CROSSED_OFF_ITEMS),
+        selectedCategories = getSelectedCategories(listName),
+        items = filterSelectedCategories(getItems(listName), selectedCategories),
+        crossedOffItems = filterSelectedCategories(getItems(listName, CROSSED_OFF_ITEMS), selectedCategories),
         ulElem,
         liElem,
         aElem,
