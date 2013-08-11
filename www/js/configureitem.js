@@ -16,16 +16,14 @@ function configureItem() {
         alert("You didn't enter an item name");
         return false;
     }
-    var categories = [];
+    var categories = {};
     $("#categories :checked").each(function() {
-        categories.push($(this).val());
+        categories[$(this).val()] = true;
     });
-    console.log("configureItem: newName = " + newName + (categories.length > 0 ? ". Categories = " + categories.join() : ""));
 
     var item = {name: newName};
-    if (categories.length > 0) {
-        item["categories"] = categories;
-    }
+    item["categories"] = categories;
+
     addOrUpdateItem(listName, item, gConfigureItemName);
 
     //Sigh, can't pass cgi/location bar params to dialogs, so have to use global
@@ -38,7 +36,7 @@ function configureItem() {
 
 
 
-function displayCategories(categoriesDivId, itemName) {
+function displayCategories(categoriesDivId) {
     console.log("displayCategories - top\n");
 
     var listName = getUrlVars()["list"];
@@ -49,8 +47,8 @@ function displayCategories(categoriesDivId, itemName) {
         fieldContainElem, fieldSetElem, inputElem, labelElem;
 
     if (categories.length == 0) {
-        console.log("No categories found for " + listName);
-        $("#categories").html("Click 'Configure Categories' to add a category");
+        console.log("No stores found for " + listName);
+        $("#categories").html("Click 'Configure Stores' to add a store");
     }
     else {
         console.log(categories.length + " categories found");
@@ -58,13 +56,8 @@ function displayCategories(categoriesDivId, itemName) {
         var item = getItem(listName, gConfigureItemName);
         var itemCategoriesHash = {};
         if (item !== undefined) {
-            var itemCategoriesArray = item["categories"];
-            if (itemCategoriesArray !== undefined) {
-                $.each(itemCategoriesArray, function(index, value) {
-                    itemCategoriesHash[value] = true;
-                });
-            }
-            console.log("Configuring " + gConfigureItemName + (itemCategoriesArray !== undefined ? ". Categories = " + itemCategoriesArray.join() : ""));
+            itemCategoriesHash = item["categories"];
+            console.log("Configuring " + gConfigureItemName);
         }
         else {
             console.log("Adding new item");
