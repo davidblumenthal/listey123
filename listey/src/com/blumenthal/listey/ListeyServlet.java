@@ -1,6 +1,5 @@
 package com.blumenthal.listey;
 import java.io.IOException;
-import java.util.Date;
 import java.util.logging.Logger;
 import javax.servlet.http.*;
 import com.google.appengine.api.users.User;
