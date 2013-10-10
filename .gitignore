@@ -20,6 +20,7 @@ local.properties
 *.class
 .settings/
 .loadpath
+*/war/WEB-INF/appengine-generated/
 
 # External tool builders
 .externalToolBuilders/
