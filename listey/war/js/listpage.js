@@ -43,5 +43,10 @@ $('#choose-list-page').bind('pageinit', function(event) {
 	else {
 		console.log("User is logged in as " + getUserEmail());
 	}
-    displayLists();
+});
+
+
+$('#choose-list-page').bind('pagebeforeshow', function() {
+	console.log("Showing list page");
+	displayLists();
 });
