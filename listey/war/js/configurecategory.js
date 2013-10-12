@@ -1,5 +1,6 @@
 
 function configureCategory() {
+
     console.log("configureCategory - top\n");
 
     var listName = getUrlVars()["list"];
@@ -28,7 +29,7 @@ $(document).on('click', '#saveCategory', function() {
     configureCategory();
 });
 
-$(document).on('submit', '#config-cat-dialog-form', function(eventObject) {
+$(document).on('submit', '#configure-cat-dialog-form', function(eventObject) {
     console.log("Form submitted");
     configureCategory();
     eventObject.preventDefault();
