@@ -304,6 +304,42 @@ function removeItem(listName, itemName, itemsType) {
 }//removeItem
 
 
+function addCategory(listName, newName) {
+	var list = getList(listName);
+
+	if (list !== undefined)  {
+		if (!(CATEGORIES in list)) {
+			console.log("adding " + CATEGORIES + " list to " + listName);
+			list[CATEGORIES] = [];
+		}
+		var categories = list[CATEGORIES];
+
+		var index;
+		for (var i = 0; i < categories.length; i++) {
+			if (categories[i].name === newName) {
+				index = i;
+				break;
+			}
+		}
+
+		if (index === undefined) {
+			console.log("addCategory: Saving new category " + newName);
+			categories.push({lastUpdate: now(),
+				name: newName});
+			categories.sort(sortHashesByName);
+		}//category doesn't exist
+		else {
+			console.log("configureCategory: " + newName + " already exists, not adding again");
+		}//item already exists
+
+		save_data();
+	}
+	else {
+		console.log("Current list " + listName + " is somehow not defined!");
+	}
+}//addCategory
+
+
 function getSelectedCategories(listName) {
     var list = getList(listName);
     var currentFilterCategories = list["selectedCategories"];
