@@ -22,7 +22,7 @@ function configureItem() {
     });
 
     var item = {name: newName};
-    item["categories"] = categories;
+    item[CATEGORIES] = categories;
 
     addOrUpdateItem(listName, item, gConfigureItemName);
 
