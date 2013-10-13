@@ -144,6 +144,9 @@ console.log("saving data");
     		//just refresh everything.  Note, this could be nicer!
     		window.location = "index.html";
     	}
+    	else {
+    		console.log("Client version is newer than server, not updating");
+    	}
     });
 }//syncData
 
