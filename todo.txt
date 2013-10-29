@@ -17,6 +17,8 @@
 * Add ability to send list as email
 * Add manual ordering/reordering
 
+* Option to use location services to figure out what store you're at?
+
 * Adjust to add features for larger screens (option to display categories inline?)
 
 
