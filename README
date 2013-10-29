@@ -1,1 +1,8 @@
 Listey is a general-purpose list tracking application.
+
+Currently, it is using jQuery Mobile to render web pages
+entirely from static HTML and javascript, and AJAX calls
+to a Google App Engine page to allow synchronization.
+
+This frontend is designed to drop into a PhoneGap install
+for installing as a mobile app.
