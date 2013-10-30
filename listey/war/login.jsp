@@ -3,7 +3,6 @@
 <%@ page import="com.google.appengine.api.users.User" %>
 <%@ page import="com.google.appengine.api.users.UserService" %>
 <%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
-<-- %@ page import="org.apache.commons.lang.StringEscapeUtils" %  ->
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %> 
 <html>
 <head>
@@ -21,15 +20,12 @@
     String jsSnippet="";
     String site;
     if (user != null) {
-      //XXX need to escape email address!
-%>
-  <script>
-    //saveUserEmail("<-- %= escapeJavaScript(user.getEmail()) % -->");
-    saveUserEmail("<%= user.getEmail() %>");
-    window.location = LISTEY_HOME + "index.html";
-  </script>
-<%
+      Cookie cookie = new Cookie("isLoggedIn","1");
+      cookie.setMaxAge(60*60*4);//4 hours
+      response.addCookie(cookie);
+      response.sendRedirect("index.html");//XXX need fully scoped somehow for phonegap?
    }//if user defined 
+   else {
 %>
 <!-- ************************************************************************ -->
 <div data-role="page" id="login-page">
@@ -45,5 +41,6 @@
     <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" rel="external" data-role="button">Log In</a>
   </div><!-- content -->
 </div><!-- choose-list -->
+<% } %>
 </body>
 </html>
