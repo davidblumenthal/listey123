@@ -36,12 +36,12 @@ function displayLists() {
 }//displayLists
 
 $('#choose-list-page').bind('pageinit', function(event) {
-	if (!getUserEmail()) {
+	if (!isLoggedIn()) {
 		console.log("The user is not logged in, redirect to the login page");
 		window.location = LISTEY_HOME + "login.jsp";
 	}
 	else {
-		console.log("User is logged in as " + getUserEmail());
+		console.log("User is logged in.");
 	}
 });
 

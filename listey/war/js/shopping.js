@@ -31,10 +31,21 @@ var LISTS = 'lists';
 var ITEMS = 'items';
 var CROSSED_OFF_ITEMS = 'crossedOffItems';
 var CATEGORIES = 'categories';
-var LISTEY_HOME = "http://localhost:8888/";
+//var LISTEY_HOME = "http://1.blumenthal-listey.appspot.com/";
+//var LISTEY_HOME = "http://localhost:8888/";
+var LISTEY_HOME = "";//use a relative link for now, until I'm ready to deploy on phonegap
+
 var LOCALSTORAGE_LISTS_KEY = 'lists';
 
 var gSelectedList, gData={};
+
+
+//http://stackoverflow.com/questions/5639346/shortest-function-for-reading-a-cookie-in-javascript
+function read_cookie(key)
+{
+    var result;
+    return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? (result[1]) : null;
+}
 
 function sortHashesByName (a, b) {
     a = a["name"].toUpperCase();
@@ -93,14 +104,10 @@ function save_data(data, field) {
 }//save_data
 
 
-
-function getUserEmail() {
-	return(localStorage.getItem("userEmail"));
+function isLoggedIn() {
+	return read_cookie("isLoggedIn");
 }
 
-function saveUserEmail(userEmail) {
-	return(localStorage.setItem("userEmail", userEmail));
-}
 
 function get_data(field) {
     if (field === undefined) {
@@ -137,10 +144,11 @@ console.log("syncData - top");
     $.post(LISTEY_HOME + "ajax", params, function(returnedData){
 console.log("syncData call returned: " + returnedData);
     	var returnedDataHash = JSON.parse(returnedData);
-    	if (!sentLastUpdateDate || returnedDataHash["lastUpdate"] > sentLastUpdateDate) {
+    	if ((!sentLastUpdateDate && returnedDataHash["lastUpdate"]) 
+    		|| returnedDataHash["lastUpdate"] > sentLastUpdateDate) {
 console.log("saving data");
     		save_data(returnedDataHash);
-    		alert("Pulled an update from the server");
+    		window.alert("Pulled an update from the server");
     		//just refresh everything.  Note, this could be nicer!
     		window.location = "index.html";
     	}
