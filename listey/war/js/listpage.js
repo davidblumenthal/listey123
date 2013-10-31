@@ -37,8 +37,7 @@ function displayLists() {
 
 $('#choose-list-page').bind('pageinit', function(event) {
 	if (!isLoggedIn()) {
-		console.log("The user is not logged in, redirect to the login page");
-		window.location = LISTEY_HOME + "login.jsp";
+		handleNotLoggedIn();
 	}
 	else {
 		console.log("User is logged in.");
