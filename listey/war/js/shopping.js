@@ -126,6 +126,13 @@ function get_data(field) {
     return gData[field];
 }
 
+
+function handleNotLoggedIn(){
+	console.log("The user is not logged in, redirect to the login page");
+	window.location = LISTEY_HOME + "login.jsp";
+}
+
+
 /** Post any local changes to the server and
  * get back the latest data stored on the server.
  * XXX - NOTE! This is currently pretty brute-force.  It sends
@@ -141,21 +148,31 @@ console.log("syncData - top");
 	var sentLastUpdateDate = sentData["lastUpdate"];
 	var params = {"content" : JSON.stringify(sentData),
 			      "lastUpdate" : sentLastUpdateDate};
-    $.post(LISTEY_HOME + "ajax", params, function(returnedData){
-console.log("syncData call returned: " + returnedData);
-    	var returnedDataHash = JSON.parse(returnedData);
-    	if ((!sentLastUpdateDate && returnedDataHash["lastUpdate"]) 
-    		|| returnedDataHash["lastUpdate"] > sentLastUpdateDate) {
-console.log("saving data");
-    		save_data(returnedDataHash);
-    		window.alert("Pulled an update from the server");
-    		//just refresh everything.  Note, this could be nicer!
-    		window.location = "index.html";
-    	}
-    	else {
-    		console.log("Client version is newer than server, not updating");
-    	}
-    });
+	$.ajax({
+		type: "POST",
+		url: LISTEY_HOME + "ajax",
+		data: params,
+		success: function(returnedData){
+			console.log("syncData call returned: " + returnedData);
+			var returnedDataHash = JSON.parse(returnedData);
+			if ((!sentLastUpdateDate && returnedDataHash["lastUpdate"]) 
+					|| returnedDataHash["lastUpdate"] > sentLastUpdateDate) {
+				console.log("saving data");
+				save_data(returnedDataHash);
+				window.alert("Pulled an update from the server");
+				//just refresh everything.  Note, this could be nicer!
+				window.location = "index.html";
+			}
+			else {
+				console.log("Client version is newer than server, not updating");
+			}
+		},
+		statusCode: {
+			403: function() {
+				handleNotLoggedIn();
+			}
+		}
+	});//ajax
 }//syncData
 
 
