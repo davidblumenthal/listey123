@@ -11,6 +11,7 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Text;
 
 
 
@@ -44,7 +45,7 @@ public class ListeyServlet extends HttpServlet {
         	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         	try {
         		Entity userData = datastore.get(userKey);
-        		currentSerializedHash = (String) userData.getProperty("content");
+        		currentSerializedHash = ((Text) userData.getProperty("content")).getValue();
         		if (userData.hasProperty("lastUpdate")) {
         			currentLastUpdateTS = Long.parseLong((String) (userData).getProperty("lastUpdate"));
         		}
@@ -60,7 +61,7 @@ public class ListeyServlet extends HttpServlet {
         	if (passedLastUpdateTS != null
         			&& (currentLastUpdateTS == null || currentLastUpdateTS < passedLastUpdateTS)) {
         		Entity userData = new Entity(userKey);
-        		userData.setProperty("content", passedSerializedHash);
+        		userData.setProperty("content", new Text(passedSerializedHash));
         		userData.setProperty("lastUpdate", passedLastUpdateTS.toString());
         		log.info("doPost: updating datastore.  lastUpdateTS=" + passedLastUpdateTS + ", serializedHash=" + passedSerializedHash);
         		datastore.put(userData);
@@ -70,6 +71,7 @@ public class ListeyServlet extends HttpServlet {
         	}
         }//if user
         else {
+        	resp.setStatus(403);//unauthorized
         	log.info("doPost: no user defined");
         }
         resp.setContentType("text/plain");
@@ -85,13 +87,15 @@ public class ListeyServlet extends HttpServlet {
         User user = userService.getCurrentUser();
 
 		resp.setContentType("text/plain");
-		String listJSON = "{}";
-        if (user != null) {
+		Text listJSON = new Text("{}");
+        if (user == null) {
+        	resp.setStatus(403);//unauthorized
+        } else {
         	Key userKey = KeyFactory.createKey("user", user.getEmail());
         	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         	try {
         		Entity userData = datastore.get(userKey);
-        		listJSON = (String) userData.getProperty("content");
+        		listJSON = (Text) userData.getProperty("content");
         	} catch (EntityNotFoundException e) {
         	    //No data exists yet for this user, use default
         	}
