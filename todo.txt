@@ -4,6 +4,7 @@
 * Add rename/delete dialog.
 * Add uncheck-all option (ask if should uncheck for just the selected stores or all stores)
 * Implement item configuration update
+  * Count, custom amount text.  "+" "-" "Custom" instead of More/Less.  +/- greyed out if non-numeric "Custom" entered
 * Finish category maintenance
 * Finish item category save
 * Add auto-suggest of items from standard list + deleted items
@@ -16,8 +17,18 @@
 * Add SyncML layer
 * Add ability to send list as email
 * Add manual ordering/reordering
-
+* Select multiple stores on long-press, but on short-press open a single-select quick dropdown to select a single store.
+* Change list name to selected store name (if 1) or e.g. "Store N... + 2 others"
 * Option to use location services to figure out what store you're at?
+* If size is wide enough, show date item was added/removed
+* Options where you can turn that feature on/off.
+* Add logout option
+* Option to share particular lists with other users, in full or read-only mode.
+* Option to remember me.
+** Server option to log out all remembered logins.
+* Option to import/export from csv file.
+* Ads
+* Better colors/some graphics
 
 * Adjust to add features for larger screens (option to display categories inline?)
 
