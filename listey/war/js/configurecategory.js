@@ -24,6 +24,12 @@ function configureCategory() {
     $('.ui-dialog').dialog('close');
 }
 
+$(document).on('pagebeforeshow', '#config-cat-dialog', function() {
+    var listName = getUrlVars()["list"];
+
+    $('#configCatDialogListInput').val(listName);
+});
+
 $(document).on('click', '#saveCategory', function() {
     console.log("Clicked on saveCategory");
     configureCategory();
