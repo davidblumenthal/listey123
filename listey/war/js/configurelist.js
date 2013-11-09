@@ -45,6 +45,14 @@ $(document).on('click', '#saveConfigureList', function() {
 });
 
 
+var shareListButtonClicked = false;
+$(document).on('click', '#shareListButton', function() {
+    console.log("Clicked on shareListButton, closing");
+    shareListButtonClicked = true;
+    $('.ui-dialog').dialog('close');
+});
+
+
 $(document).on('submit', '#config-list-dialog-form', function(eventObject) {
     console.log("config-list-dialog-form submitted");
     configureList();
@@ -71,3 +79,11 @@ $(document).on('pagebeforeshow', '#configure-list-dialog', function() {
     }
 });
 
+$(document).on('pagehide','#configure-list-dialog', function() {
+	console.log("configure-list-dialog pagehide");
+	if (shareListButtonClicked === true) {
+		shareListButtonClicked = false;
+		console.log("Loading shareList.html");
+		$.mobile.changePage("shareList.html", {transition: 'pop', role: 'dialog'});
+	}
+});
