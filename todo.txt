@@ -1,5 +1,7 @@
 ##################################################################
 ####PhoneGap Client Side####
+* Periodically check the server to pull down updates
+* Option to share particular lists with other users, in full or read-only mode.
 * Add delete options
 * Add rename/delete dialog.
 * Add uncheck-all option (ask if should uncheck for just the selected stores or all stores)
@@ -14,7 +16,7 @@
 * In location config, add page where you can check off all items from that store that belong in that location
 * Support multiple locations, or just single?
 * Replace error alerts with dialogs
-* Add SyncML layer
+* Add SyncML layer, or rework to be more granular and more parsimonious of bandwidth.
 * Add ability to send list as email
 * Add manual ordering/reordering
 * Select multiple stores on long-press, but on short-press open a single-select quick dropdown to select a single store.
@@ -23,7 +25,6 @@
 * If size is wide enough, show date item was added/removed
 * Options where you can turn that feature on/off.
 * Add logout option
-* Option to share particular lists with other users, in full or read-only mode.
 * Option to remember me.
 ** Server option to log out all remembered logins.
 * Option to import/export from csv file.
