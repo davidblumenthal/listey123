@@ -1,9 +1,19 @@
 
 function shareList() {
+	var oneEmail, emailList=[];
     console.log("shareList - top\n");
 
-
-
+    $(".shareEmailClass").each(function(){
+    	oneEmail = trim($(this).val());
+    	if (oneEmail.length > 0) {
+    		console.log("Sharing with " + oneEmail);
+    	    emailList.push(oneEmail);
+    	}
+    });//each
+    
+    if (emailList.length > 0) {
+    	//send an AJAX request to the server to share with these
+    }
     //close the dialog
     $('.ui-dialog').dialog('close');
 }
@@ -17,7 +27,12 @@ $(document).on('click', '#saveShareList', function() {
 
 $(document).on('click', '#shareListAddAnotherEmailButton', function() {
     console.log("Clicked on shareListAddAnotherEmailButton");
-    shareList();
+    var lastInput = $("[name='shareEmailAddress']:last");
+    if (lastInput.length == 0) {
+    	console.log("unable to find last input");
+    }else {console.log("found last input");}
+    var clone = lastInput.clone(); 
+    lastInput.parent().append(clone);
 });
 
 
