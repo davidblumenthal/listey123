@@ -30,6 +30,9 @@
 * Option to import/export from csv file.
 * Ads
 * Better colors/some graphics
+* Need a way to log remember login or not, at least on the web version.
+  * If remembering, add a logout button.
+  * If not remembering, don't store data in localStorage.
 
 * Adjust to add features for larger screens (option to display categories inline?)
 
