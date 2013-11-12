@@ -1,30 +1,28 @@
 /*
   Data format:
-  "lastUpdate": "1234567890",
-  "lists" :
-    listName {"items" : [{"name" : "Milk",
-                           "lastUpdate": "1234567890",
-                          },
-                          ],
-                 "crossedOffItems" : [{"name" : "Butter",
-                                     "count": 2,
-                                     "lastUpdate": "1234567890",
-                                    },
-                                   ],
-                 "deletedItems" : [{"name" : "Eggs",
-                                  "count": 2,
-                                  "lastUpdate": "1234567890",
-                                 },
-                                ],
-                 "purgedItems" : [{"name" : "Doritos",
-                                 "count": 2,
-                                 "lastUpdate": "1234567890",
-                                },
-                               ],
-
-                 lastUpdate: "1234567890"
-                }
-
+  
+  {
+  	    "lastUpdate": "1234567890",
+  		"lists" : {
+    		'self' : {
+    		     <listName> : {
+    		         "items" :
+    		               [{"name" : "<NAME1>",
+    		                 "categories" : {"<CATEGORY1>" : true, ...},
+    		                 "count" : <NUMBER>
+                             "lastUpdate": "1234567890",
+                            },
+                            ...
+                           ],
+                     "crossedOffItems" : [... SEE "items" above]
+                     "lastUpdate": "1234567890",
+                     "categories": [{name="<CATEGORY_NAME>", "lastUpdate"=123456789}, ...],
+                     "selectedCategories" : ["<CATEGORY1>", ...]
+                 }//<listName>
+            },
+            '<OTHER_USER_EMAIL>' : {... see "self" above}
+        }//lists
+  }//top-level
 */
 
 var LISTS = 'lists';
