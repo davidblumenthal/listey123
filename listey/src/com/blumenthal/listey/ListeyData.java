@@ -53,5 +53,5 @@ public class ListeyData {
 		public Set<String> selectedCategories = new HashSet();
 	}
 	public Long lastUpdate;
-	public Map<String, Map<String, ListInfo>> lists;
+	public Map<String, ListInfo> lists;
 }
