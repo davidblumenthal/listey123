@@ -30,13 +30,17 @@
 <!-- ************************************************************************ -->
 <div data-role="page" id="login-page">
   <div data-role="header">
-    <h1>Welcome to Listey!</h1>
+    <h1>Welcome to Listey123!</h1>
   </div><!-- header -->
 
   <div data-role="content">
+    <p><img src="img/logo.png" alt="Listey123 logo" style="display: block; margin-left: auto; margin-right: auto"></p>
     <p>
-    This site allows you to keep lists access them on many different
-    devices.  Please sign in and get started!
+    This site allows you to keep lists and access them on many different
+    devices.  You can log in using your GMail account.
+    </p>
+    <p>
+    Please sign in and get started!
     </p>
     <a href="<%= userService.createLoginURL(request.getRequestURI()) %>" rel="external" data-role="button">Log In</a>
   </div><!-- content -->
