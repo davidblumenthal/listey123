@@ -8,8 +8,8 @@
     		     <listName> : {
     		         "items" :
     		               [{"name" : "<NAME1>",
-    		                 "categories" : {"<CATEGORY1>" : true, ...},
-    		                 "count" : <NUMBER>
+    		                 "categories" : {"<CATEGORY1>" : {status:"XXX", lastUpdate:"342324134"}, ...},
+    		                 "count" : <NUMBER>,
                              "lastUpdate": "1234567890",
                             },
                             ...

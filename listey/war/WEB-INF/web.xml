@@ -12,6 +12,15 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<servlet-name>Listey</servlet-name>
 		<url-pattern>/ajax</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DataStoreTest</servlet-name>
+		<servlet-class>com.blumenthal.listey.DataStoreTest</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DataStoreTest</servlet-name>
+		<url-pattern>/datastore_test</url-pattern>
+	</servlet-mapping>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>

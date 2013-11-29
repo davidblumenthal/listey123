@@ -11,47 +11,15 @@ import java.util.Set;
  * JSON Data Format
    {
   	    "lastUpdate": "1234567890",
-  		"lists" : {
-    		'self' : {
-    		     <listName> : {
-    		         "items" :
-    		               [{"name" : "<NAME1>",
-    		                 "categories" : {"<CATEGORY1>" : true, ...},
-    		                 "count" : <NUMBER>
-                             "lastUpdate": "1234567890",
-                            },
-                            ...
-                           ],
-                     "crossedOffItems" : [... SEE "items" above]
-                     "lastUpdate": "1234567890",
-                     "categories": [{name="<CATEGORY_NAME>", "lastUpdate"=123456789}, ...],
-                     "selectedCategories" : ["<CATEGORY1>", ...]
-                 }//<listName>
+  		"userData" : {
+    		'<CURRENT_USER_EMAIL' : {
+				<SEE ListyDataOneUser>
             },
-            '<OTHER_USER_EMAIL>' : {... see "self" above}
+            '<OTHER_USER_EMAIL>' : {... see <CURRENT_USER_EMAIL> above}
         }//lists
   }//top-level
  */
 public class ListeyDataMultipleUsers {
-	static class ItemInfo {
-		public String name;
-		public Integer count;
-		public Map<String, Boolean> categories = new HashMap();
-		public Long lastUpdate;
-	}
-	
-	static class CategoryInfo {
-		public String name;
-		public Long lastUpdate;
-	}
-	
-	static class ListInfo {
-		public List<ItemInfo> items = new ArrayList();
-		public List<ItemInfo> crossedOffItems = new ArrayList();
-		public List<CategoryInfo> categories = new ArrayList();
-		public Long lastUpdate;
-		public Set<String> selectedCategories = new HashSet();
-	}
 	public Long lastUpdate;
-	public Map< String, Map<String, ListInfo>> lists;
+	public Map< String, ListeyDataOneUser> userData;
 }//ListeyDataV2

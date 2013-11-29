@@ -83,3 +83,56 @@
 ################################################################
 #### Implement IOS-Native ####
   * Reuse as much of the PhoneGap code as possible, but also implement background Sync
+  
+  
+  
+  
+###Notes
+Server need to store
+  * users lists
+      * other users allowed to see each list
+  
+    * user is entity (kind=user)
+      * name: user email address
+      * each list is a separate entity with ancestor of the owner:(kind=list)
+        * name: from sharded unique ID generator
+        * displayName: property of the user-defined list name
+        * current selectedCategories (categories to display) is only stored on client?
+        * lastUpdate: last update time property
+        
+        * each other user allowed to view the list is added with an ancestor of the list: (kind=other_user_list)
+          * name: other user email address
+          * lastUpdate: last update time property
+          * privLevel: property with possible values VIEW or FULL
+          
+        * each category is separate entity with ancestor of the list (kind=category)
+          * name: unique name from sharded unique ID generator
+          * displayName: property of the user-defined category name
+          * lastUpdate: last update time property
+          
+        * each item is a separate entity (kind=item)
+          * displayName: property of the user-defined item name
+          * count: property of the number of items desired
+          * status: property with possible values ACTIVE | COMPLETED | DELETED
+          * lastUpdate: last update time property
+          
+          * each category the item is configured with is set up as a separate entity (kind=itemCategory)
+            * name: category sharded name
+            * lastUpdate: last update time property
+            * status: property with possible values ACTIVE | DELETED (so we can compare timestamp if category is removed then readded in conflict)
+            
+        
+      
+      * shard counters to create a unique identifier for all items we add.
+      https://developers.google.com/appengine/articles/sharding_counters
+          e.g. entity1:1
+
+* Given a user:
+  * find their lists by looking up lists by the owner property.
+  * find other user's lists they should be able to edit by looking up lists by other_user property (does this work with multiple values??)
+  * Find who/what they granted privs to by looking up their lists and looking at the other_user property values
+   
+   
+ 
+
+ 
