@@ -55,4 +55,15 @@ public class DataStoreUniqueId {
 		}
 	    return (shardNum + ":" + shardVal);
 	}//getUniqueId
-}
+	
+	/**
+	 * Pass this a unique id and it will return true if this is a temporary ID (created by a client).
+	 * Temporary IDs start with a colon
+	 * 
+	 * @param id A unique id string to check.
+	 * @return Whether id is a temporary id (starts with colon).
+	 */
+	boolean isTemporaryId(String id) {
+		return (id.charAt(0) == ':');
+	}//isTemporaryId
+}//DataStoreUniqueId
