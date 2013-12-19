@@ -2,10 +2,8 @@ package com.blumenthal.listey;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -18,10 +16,13 @@ import com.google.appengine.api.datastore.Query;
  * JSON Data Format
    {
   	    "lastUpdate": "1234567890",
+  	    userData
   		"lists" : {
-    		     <listName> : {
+    		     "<uniqueId>" : {//uniqueId is a unique identifier generated on the server (e.g. 1:3), or temporary on the client (e.g. ':3')
+    		     	"name" : "List Name"
     		         "items" :
-    		               [{"name" : "<NAME1>",
+    		               [{"uniqueId" : "<uniqueId>",
+    		                 "name" : "<NAME1>",
     		                 "categories" : {"<CATEGORY1>" : true, ...},
     		                 "count" : <NUMBER>,
     		                 "state" : "ACTIVE"/"COMPLETED"/"DELETED"
@@ -42,136 +43,8 @@ public class ListeyDataOneUser {
 	public static final String KIND = "user";//kind in the datastore
 	public static DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
 	
-	public static enum ItemStatus {
-	    ACTIVE,
-	    COMPLETED
-	}
-	
-	public static enum ItemCategoryStatus {
-		ACTIVE,
-		DELETED
-	}
-	public static class ListInfo {
-		public static final String KIND = "list";//kind in the datastore
-		public static final String NAME = "displayName";//name in the datastore
-		public static final String LAST_UPDATE = "lastUpdate";//lastUpdate in the datastore
-		
-		public static enum ListInfoStatus {
-			ACTIVE,
-			DELETED
-		}
-		
-		public ListInfoStatus status;
-		
-		public String uniqueId;
-		public String name;
-		public Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
-		public List<CategoryInfo> categories = new ArrayList<CategoryInfo>();
-		public Long lastUpdate;
-		//Note, selectedCategories is not stored on the server, always just mirrored back from the request
-		public Set<String> selectedCategories = new HashSet<String>();
-		
-		/** Default constructor */
-		public ListInfo(){}
-		
-		/**
-		 * @param status
-		 * @param uniqueId
-		 * @param name
-		 * @param items
-		 * @param categories
-		 * @param lastUpdate
-		 * @param selectedCategories
-		 */
-		public ListInfo(ListInfoStatus status, String uniqueId, String name,
-				Long lastUpdate) {
-			super();
-			this.status = status;
-			this.uniqueId = uniqueId;
-			this.name = name;
-			this.lastUpdate = lastUpdate;
-		}
-
-		//Constructor that makes a shallow copy of only the top-level fields
-		public ListInfo(ListInfo source) {
-			this(source.status, source.uniqueId, source.name, source.lastUpdate);
-		}
-		
-		public ListInfo(Entity entity) {
-			if (!entity.getKind().equals(KIND)){
-				//check the entity type and throw if not what we're expecting
-				throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
-			}//if unexpected kind
-			name = (String) entity.getProperty(NAME);
-			uniqueId = (String) entity.getKey().getName();
-			lastUpdate = (Long) entity.getProperty(LAST_UPDATE);
-		}//ListInfo(Entity)
-
-		public Entity toEntity(Key parent) {
-			Entity entity = new Entity(KIND, uniqueId, parent);
-			entity.setProperty(NAME, name);
-			entity.setProperty(LAST_UPDATE, lastUpdate);
-			return entity;
-		}//toEntity
-		
-		public static ListInfo compareAndUpdate(ListInfo serverList, ListInfo clientList,
-				List<Entity> updateEntities, List<Entity> deleteEntities) {
-			ListInfo rv = null;
-			
-			if (serverList == null) {
-				if (clientList.status.equals(ListInfo.ListInfoStatus.ACTIVE)) {
-					//New list
-					
-					//Copy the top-level element
-					rv = new ListInfo(clientList);
-					//Always put the current server time in newly changed objects
-					rv.lastUpdate = System.currentTimeMillis() / 1000L;
-					rv.uniqueId = uniqueIdCreator.getUniqueId();
-					updateEntities(rv.toEntity());
-
-					//copy each low-level element
-				}//new list
-				else {
-					//deleted on client, don't add to server, nothing to do
-				}
-			}//serverList == null
-
-			else {//serverList exists
-				serverList = new ListInfo();
-				
-			}
-			
-			return rv;
-		}//compareAndUpdate
-	}//ListInfo
-	
 	public Long lastUpdate;
 	public Map<String, ListInfo> lists;
-	private Map<String, String> tempToPermanentId = new HashMap<String,String>();
-	
-	/**
-	 * Returns a permanent ID to use for the given id.
-	 * If id is already a permanent ID, then it is returned.
-	 * Otherwise, if id is a temporary ID, then a permanent one is created and returned.
-	 * Once a permanent id is created for a temporary id, the 
-	 * same permanent id is always returned for the same temporary one (for the same object instance). 
-	 */
-	public String ensurePermanentId(String id){
-		if (uniqueIdCreator.isTemporaryId(id)) {
-			if (tempToPermanentId.containsKey(id)){
-				id = tempToPermanentId.get(id);
-			}
-			else {
-				String newId = uniqueIdCreator.getUniqueId();
-				tempToPermanentId.put(id, newId);
-				id = newId;
-			}
-		}//if isTemporaryId
-		
-		return id;
-	}//ensurePermanentId
-	
-	
 	
 	/** Default constructor */
 	public ListeyDataOneUser(){}
@@ -256,7 +129,8 @@ public class ListeyDataOneUser {
 				}//if list found
 			}//foreach entity
 		}//if any items defined  		
-	}//constructor
+	}//constructor load from datastore
+	
 	
 	
 	/** Compare 2 ListeyDataOneUser objects and return lists of entities
