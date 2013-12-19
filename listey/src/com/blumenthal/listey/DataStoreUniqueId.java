@@ -3,6 +3,9 @@
  */
 package com.blumenthal.listey;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -16,19 +19,9 @@ import com.google.appengine.api.datastore.Transaction;
  *
  */
 public class DataStoreUniqueId {
-	int numShards = 20;
+	public static final int numShards = 20;
 	
-	public DataStoreUniqueId(){
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Key numShardsKey = KeyFactory.createKey("numShards", "singleton");
-		Entity numShardsEntity;
-		try {
-			numShardsEntity = datastore.get(numShardsKey);
-			numShards = (Integer) numShardsEntity.getProperty("numShards");
-		} catch (EntityNotFoundException e) {
-			// If it's not found, we'll just use the default
-		}
-	}//constructor
+	private Map<String, String> tempToPermanentId = new HashMap<String,String>();
 	
 	public String getUniqueId() {
 		int shardNum = (int) ((Math.random()*numShards)) + 1;//1-numShards
@@ -66,4 +59,28 @@ public class DataStoreUniqueId {
 	boolean isTemporaryId(String id) {
 		return (id.charAt(0) == ':');
 	}//isTemporaryId
+	
+	
+
+	/**
+	 * Returns a permanent ID to use for the given id.
+	 * If id is already a permanent ID, then it is returned.
+	 * Otherwise, if id is a temporary ID, then a permanent one is created and returned.
+	 * Once a permanent id is created for a temporary id, the 
+	 * same permanent id is always returned for the same temporary one (for the same object instance). 
+	 */
+	public String ensurePermanentId(String id){
+		if (isTemporaryId(id)) {
+			if (tempToPermanentId.containsKey(id)){
+				id = tempToPermanentId.get(id);
+			}
+			else {
+				String newId = getUniqueId();
+				tempToPermanentId.put(id, newId);
+				id = newId;
+			}
+		}//if isTemporaryId
+		
+		return id;
+	}//ensurePermanentId
 }//DataStoreUniqueId
