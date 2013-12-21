@@ -16,8 +16,6 @@ import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * This allows the client to load/sync data from the server info.
@@ -77,8 +75,7 @@ public class ListeyServlet extends HttpServlet {
         	//TODO
 
         	//Parse the passed data
-        	Gson gson = new GsonBuilder().registerTypeAdapter(ListInfoDeserializer.class, new ListInfoDeserializer()).create();
-    		ListeyDataMultipleUsers passedData = gson.fromJson(passedSerializedHash, ListeyDataMultipleUsers.class);
+    		ListeyDataMultipleUsers passedData = ListeyDataMultipleUsers.fromJson(passedSerializedHash);
     		
     		//Compare the stored and the passed data.
         	//If the passed data element is newer than the current data element, replace
