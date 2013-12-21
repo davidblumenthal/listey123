@@ -64,6 +64,7 @@
 
 ################################################################
 #### Implement server side ####
+  * Add abstraction layer around Google-specific code, in case I want to move it
   * Implement OpenID
   * Add ability to upload list
   * Add ability to export list
