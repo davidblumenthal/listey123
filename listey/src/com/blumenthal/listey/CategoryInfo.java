@@ -3,7 +3,6 @@
  */
 package com.blumenthal.listey;
 
-import com.blumenthal.listey.ItemInfo.ItemStatus;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
