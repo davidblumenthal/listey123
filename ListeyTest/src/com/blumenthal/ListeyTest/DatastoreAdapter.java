@@ -95,7 +95,7 @@ public class DatastoreAdapter {
 		Key listKey = KeyFactory.createKey(userKey, ListInfo.KIND, "1:1");
 		Key itemKey = KeyFactory.createKey(listKey, ItemCategoryInfo.KIND, "2:1");
 		ItemCategoryInfo itemCat = new ItemCategoryInfo();
-		itemCat.uniqueCategoryId = "2:1";
+		itemCat.uniqueId = "2:1";
 		itemCat.status=ItemCategoryInfo.ItemCategoryStatus.ACTIVE;
 		itemCat.lastUpdate = 54321L;
 		
@@ -107,7 +107,7 @@ public class DatastoreAdapter {
 		
 		//verify all the fields of the new object match the original
 		assertEquals(itemCat.status, itemCat2.status);
-		assertEquals(itemCat.uniqueCategoryId, itemCat2.uniqueCategoryId);
+		assertEquals(itemCat.uniqueId, itemCat2.uniqueId);
 		assertEquals(itemCat.lastUpdate, itemCat2.lastUpdate);
 	}//testItemCatToFromEntity
 	
