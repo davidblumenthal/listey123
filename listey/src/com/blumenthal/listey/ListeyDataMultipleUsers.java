@@ -30,14 +30,20 @@ public class ListeyDataMultipleUsers {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public static Gson getGson() {
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(ListInfo.class, new ListInfoJsonAdapter());
+		gsonBuilder.registerTypeAdapter(ItemInfo.class,  new ItemInfoJsonAdapter());
+		return gsonBuilder.create();
+	}//getGson
+	
+	
+	
 	/**
 	 * Return an object from serialized JSON string
 	 */
 	public static ListeyDataMultipleUsers fromJson(String jsonString) {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.registerTypeAdapter(ListInfo.class, new ListInfoJsonAdapter());
-		gsonBuilder.registerTypeAdapter(ItemInfo.class,  new ItemInfoJsonAdapter());
-		Gson gson = gsonBuilder.create();
+		Gson gson = getGson();
 		ListeyDataMultipleUsers rv = gson.fromJson(jsonString, ListeyDataMultipleUsers.class);
 		return rv;
 	}//fromJson
