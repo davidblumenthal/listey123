@@ -15,16 +15,19 @@ import com.google.appengine.api.datastore.Key;
 
 public class ListInfo {
 	public static final String KIND = "list";//kind in the datastore
-	public static final String NAME = "displayName";//name in the datastore
+	public static final String NAME = "name";//name in the datastore
 	public static final String LAST_UPDATE = "lastUpdate";//lastUpdate in the datastore
 	public static final String STATUS = "status";//status in the datastore
+	public static final String ITEMS = "items";
+	public static final String CATEGORIES = "categories";
+	public static final String SELECTED_CATEGORIES = "selectedCategories";
 	
 	public static enum ListInfoStatus {
 		ACTIVE,
 		DELETED
 	}
 	
-	public ListInfo.ListInfoStatus status;
+	public ListInfoStatus status;
 	
 	public String uniqueId;
 	public String name;
@@ -55,7 +58,10 @@ public class ListInfo {
 		this.lastUpdate = lastUpdate;
 	}
 
-	//Constructor that makes a shallow copy of only the top-level fields
+	/** Constructor that makes a shallow copy of only the top-level fields
+	 * 
+	 * @param source
+	 */
 	public ListInfo(ListInfo source) {
 		this(source.status, source.uniqueId, source.name, source.lastUpdate);
 	}
@@ -102,13 +108,13 @@ public class ListInfo {
 		}//serverList == null
 
 		else if (clientList == null) {
-			
+			//XXX
 		}//clientList == null
 		
 		else {//serverList exists
 			rv = new ListInfo();
 			
-		}
+		}//neither list is null
 		
 		return rv;
 	}//compareAndUpdate
