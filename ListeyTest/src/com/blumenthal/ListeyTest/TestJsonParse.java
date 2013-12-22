@@ -74,13 +74,15 @@ public class TestJsonParse {
 	}//testParseEnum
 	
 	public static final String ITEM1_JSON = 
-			"{'uniqueId':'2:1'"+
-			",'state':'ACTIVE'"+
-			",'count':'2'"+
-			",'lastUpdate':'1234567890'" +
-			",'name': 'Item 1 Name'"+
-			",'categories': {'3:1':{'lastUpdate':'2234567890', 'status':'ACTIVE'}}"+
-			"}";
+		"{\"count\":2," +
+		"\"lastUpdate\":1234567890," +
+		"\"name\":\"Item 1 Name\"," +
+		"\"status\":\"ACTIVE\"," +
+		"\"uniqueId\":\"2:1\"," +
+		"\"categories\":{" +
+			"\"3:1\":{" +
+				"\"status\":\"ACTIVE\"," +
+				"\"lastUpdate\":2234567890}}}";
 	
 	/** Make sure item is exactly what we'd expect to be parsed from ITEM1_JSON
 	 * 
@@ -106,8 +108,17 @@ public class TestJsonParse {
 	@Test
 	public void testItem(){
 		Gson gson = new GsonBuilder().registerTypeAdapter(ItemInfo.class, new ItemInfoJsonAdapter()).create();
+		
+		//deserialize ITEM1_JSON into object
 		ItemInfo item = gson.fromJson(ITEM1_JSON, ItemInfo.class);
+		
+		//validate the object looks like we expect
 		testItem1(item);
+		
+		//serialize the item back into a JSON string
+		String newItem1Json = gson.toJson(item);
+		
+		assertEquals(ITEM1_JSON, newItem1Json);
 	}//testItem
 	
 	
@@ -165,15 +176,5 @@ public class TestJsonParse {
 		assertEquals(1, listInfo.selectedCategories.size());
 		assertEquals("4:1", listInfo.selectedCategories.toArray()[0]);
 	}//testOneUser
-	
-	@Test
-	public void testUniqueId(){
-		//parse json, but first replace everything that looks like a permanent ID with something
-		//that looks like a temporary id
-		ListeyDataMultipleUsers parsed = ListeyDataMultipleUsers.fromJson(USER1_JSON.replaceAll("\\d+:(\\d+)", ":$1"));
-		
-		//Now, replace all the temporary ids with permanent ones
-		
-	}//testUniqueId
 
 }//TestJsonParse
