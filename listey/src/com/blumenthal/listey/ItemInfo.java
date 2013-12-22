@@ -15,6 +15,8 @@ public class ItemInfo {
 	public static final String STATUS = "status";
 	public static final String COUNT = "count";
 	public static final String LAST_UPDATE = "lastUpdate";
+	public static final String UNIQUE_ID = "uniqueId";
+	public static final String CATEGORIES = "categories";
 	
 	public static enum ItemStatus {
 	    ACTIVE,
