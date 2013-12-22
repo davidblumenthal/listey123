@@ -15,8 +15,9 @@ public class ItemCategoryInfo {
 	public static final String KIND = "itemCategory";//kind in the datastore
 	public static final String STATUS = "status";
 	public static final String LAST_UPDATE = "lastUpdate";
+	public static final String UNIQUE_ID = "uniqueId";
 	
-	public String uniqueCategoryId;
+	public String uniqueId;
 	public ItemCategoryStatus status;
 	public Long lastUpdate;
 	
@@ -29,7 +30,7 @@ public class ItemCategoryInfo {
 			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
 		}//if unexpected kind
 		lastUpdate = (Long) entity.getProperty(LAST_UPDATE);
-		uniqueCategoryId = (String) entity.getKey().getName();
+		uniqueId = (String) entity.getKey().getName();
 		status = ItemCategoryStatus.valueOf((String) entity.getProperty(STATUS));
 	}//ItemCategoryInfo(Entity)
 	
@@ -40,7 +41,7 @@ public class ItemCategoryInfo {
 	 * @return an entity that represents this object
 	 */
 	public Entity toEntity(Key parent) {
-		Entity entity = new Entity(KIND, uniqueCategoryId, parent);
+		Entity entity = new Entity(KIND, uniqueId, parent);
 		entity.setProperty(STATUS, status.toString());
 		entity.setProperty(LAST_UPDATE, lastUpdate);
 		return entity;
