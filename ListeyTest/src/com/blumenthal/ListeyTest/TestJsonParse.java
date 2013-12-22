@@ -123,22 +123,22 @@ public class TestJsonParse {
 	
 	
 	public static final String USER1_JSON =
-			"{'lastUpdate': '1111'," +
-			"'userData' : {" +
-				"'test@test.com' : {" +
-					"'lastUpdate':'2222'," +
-					"'lists' : {" +
-						"'1:1':{" +
-							"'name':'Test List'"+
-							",'lastUpdate':'1234567890'"+
-							",'status' : 'ACTIVE'" +
-							",'items': [" +
+			"{\"lastUpdate\":1111," +
+			"\"userData\":{" +
+				"\"test@test.com\":{" +
+					"\"lastUpdate\":2222," +
+					"\"lists\":{" +
+						"\"1:1\":{" +
+							"\"lastUpdate\":1234567890"+
+							",\"name\":\"Test List\""+
+							",\"status\":\"ACTIVE\"" +
+							",\"items\":[" +
 							ITEM1_JSON +
 							"]" + //items
-							",'categories' : [" +
-							    "{'name':'Test Category', 'uniqueId':'4:1', 'lastUpdate':'312345'}" +
+							",\"categories\":[" +
+							    "{\"name\":\"Test Category\",\"uniqueId\":\"4:1\",\"lastUpdate\":312345}" +
 							"]" + //categories
-							",'selectedCategories': ['4:1']" +
+							",\"selectedCategories\":[\"4:1\"]" +
 						"}" + //test list
 					"}" + //lists
 				"}" + //test@test.com
@@ -175,6 +175,11 @@ public class TestJsonParse {
 		
 		assertEquals(1, listInfo.selectedCategories.size());
 		assertEquals("4:1", listInfo.selectedCategories.toArray()[0]);
+		
+		//serialize the user back into a JSON string
+		String newJson = ListeyDataMultipleUsers.getGson().toJson(parsed);
+		
+		assertEquals(USER1_JSON, newJson);
 	}//testOneUser
 
 }//TestJsonParse
