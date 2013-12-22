@@ -72,7 +72,7 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 		JsonObject rv = new JsonObject();
 		rv.addProperty(ListInfo.LAST_UPDATE, listInfo.lastUpdate);
 		rv.addProperty(ListInfo.NAME, listInfo.name);
-		rv.addProperty(ListInfo.STATUS, ListInfo.STATUS.toString());
+		rv.addProperty(ListInfo.STATUS, listInfo.status.toString());
 		
 		if (!listInfo.items.isEmpty()){
 			JsonArray itemsJson = new JsonArray();
