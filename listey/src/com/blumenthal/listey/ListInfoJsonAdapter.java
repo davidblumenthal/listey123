@@ -4,7 +4,9 @@
 package com.blumenthal.listey;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -14,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 
 public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSerializer<ListInfo> {
 	/**
@@ -26,12 +29,12 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 		ListInfo listInfo = new ListInfo();
 
 		JsonObject topMap = json.getAsJsonObject();
-		listInfo.lastUpdate = topMap.get("lastUpdate").getAsLong();
-		listInfo.name = topMap.get("name").getAsString();
-		listInfo.status = ListInfo.ListInfoStatus.valueOf(topMap.get("status").getAsString());
+		listInfo.lastUpdate = topMap.get(ListInfo.LAST_UPDATE).getAsLong();
+		listInfo.name = topMap.get(ListInfo.NAME).getAsString();
+		listInfo.status = ListInfo.ListInfoStatus.valueOf(topMap.get(ListInfo.STATUS).getAsString());
 
-		if (topMap.has("items")) {
-			JsonArray itemsJson = topMap.get("items").getAsJsonArray();
+		if (topMap.has(ListInfo.ITEMS)) {
+			JsonArray itemsJson = topMap.get(ListInfo.ITEMS).getAsJsonArray();
 			for (JsonElement itemJsonElement : itemsJson) {
 				ItemInfo item = context.deserialize(itemJsonElement, ItemInfo.class);
 
@@ -40,17 +43,20 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			}//for itemsJson
 		}//if has items
 
-		if (topMap.has("categories")) {
-			JsonArray categoriesJson = topMap.get("categories").getAsJsonArray();
-			for ( JsonElement catElement : categoriesJson){
-				CategoryInfo catInfo = context.deserialize(catElement,  CategoryInfo.class);
-				listInfo.categories.add(catInfo);
-			}//for categoriesJson
+		if (topMap.has(ListInfo.CATEGORIES)) {
+			JsonArray categoriesJson = topMap.get(ListInfo.CATEGORIES).getAsJsonArray();
+			//Hack needed to make it deserialize to an ArrayList correctly.
+			//http://stackoverflow.com/questions/5554217/google-gson-deserialize-listclass-object-generic-type
+			Type listType = new TypeToken<ArrayList<CategoryInfo>>() {
+            }.getType();
+			listInfo.categories = context.deserialize(categoriesJson, listType);
 		}//if has categories
 		
-		if (topMap.has("selectedCategories")) {
-			JsonArray selCatJson = topMap.get("selectedCategories").getAsJsonArray();
-			listInfo.selectedCategories = context.deserialize(selCatJson, HashSet.class);
+		if (topMap.has(ListInfo.SELECTED_CATEGORIES)) {
+			JsonArray selCatJson = topMap.get(ListInfo.SELECTED_CATEGORIES).getAsJsonArray();
+			Type listType = new TypeToken<HashSet<String>>() {
+            }.getType();
+			listInfo.selectedCategories = context.deserialize(selCatJson, listType);
 		}//if has selectedCategories
 
 		return listInfo;
@@ -63,7 +69,32 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 	@Override
 	public JsonElement serialize(ListInfo listInfo, Type type,
 			JsonSerializationContext context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		JsonObject rv = new JsonObject();
+		rv.addProperty(ListInfo.LAST_UPDATE, listInfo.lastUpdate);
+		rv.addProperty(ListInfo.NAME, listInfo.name);
+		rv.addProperty(ListInfo.STATUS, ListInfo.STATUS.toString());
+		
+		if (!listInfo.items.isEmpty()){
+			JsonArray itemsJson = new JsonArray();
+			for (Entry<String, ItemInfo> entry : listInfo.items.entrySet()) {
+				ItemInfo item = entry.getValue();
+				JsonObject itemJson = context.serialize(item).getAsJsonObject();
+				itemJson.addProperty(ItemInfo.UNIQUE_ID, item.uniqueId);
+				itemsJson.add(itemJson);
+			}//for each entry
+			rv.add(ListInfo.ITEMS, itemsJson);
+		}//if items
+		
+		if (!listInfo.categories.isEmpty()) {
+			JsonElement categoriesJson = context.serialize(listInfo.categories);
+			rv.add(ListInfo.CATEGORIES, categoriesJson);			
+		}
+		
+		if (!listInfo.selectedCategories.isEmpty()) {
+			JsonElement selectedCategoriesJson = context.serialize(listInfo.selectedCategories);
+			rv.add(ListInfo.SELECTED_CATEGORIES, selectedCategoriesJson);			
+		}
+		
+		return rv;
+	}//serialize
 }//ListInfoJsonAdapter
