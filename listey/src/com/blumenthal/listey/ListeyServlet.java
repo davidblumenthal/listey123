@@ -65,14 +65,7 @@ public class ListeyServlet extends HttpServlet {
         	String currentSerializedHash = "{}";
         	Long currentLastUpdateTS = null;
         	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        	ListeyDataMultipleUsers currentData = new ListeyDataMultipleUsers();
-        	
-        	//Load the current user data from the datastore by the user's email address
-        	ListeyDataOneUser currentUserData = new ListeyDataOneUser(datastore, user.getEmail());
-        	currentData.userData.put(user.getEmail(), currentUserData);
-        	
-        	//Load other user's lists that this user should have access to
-        	//TODO
+        	ListeyDataMultipleUsers currentData = new ListeyDataMultipleUsers(datastore, user.getEmail());
 
         	//Parse the passed data
     		ListeyDataMultipleUsers passedData = ListeyDataMultipleUsers.fromJson(passedSerializedHash);
