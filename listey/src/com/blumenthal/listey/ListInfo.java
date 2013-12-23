@@ -21,6 +21,7 @@ public class ListInfo {
 	public static final String ITEMS = "items";
 	public static final String CATEGORIES = "categories";
 	public static final String SELECTED_CATEGORIES = "selectedCategories";
+	public static final String OTHER_USER_PRIVS = "otherUserPrivs";
 	
 	public static enum ListInfoStatus {
 		ACTIVE,
@@ -36,6 +37,8 @@ public class ListInfo {
 	public Long lastUpdate;
 	//Note, selectedCategories is not stored on the server, always just mirrored back from the request
 	public Set<String> selectedCategories = new HashSet<String>();
+	
+	public Map<String, OtherUserPrivOnList> otherUserPrivs = new HashMap<String, OtherUserPrivOnList>();
 	
 	/** Default constructor */
 	public ListInfo(){}

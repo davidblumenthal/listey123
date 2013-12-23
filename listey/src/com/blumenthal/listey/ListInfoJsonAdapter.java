@@ -6,6 +6,7 @@ package com.blumenthal.listey;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gson.JsonArray;
@@ -58,6 +59,15 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
             }.getType();
 			listInfo.selectedCategories = context.deserialize(selCatJson, listType);
 		}//if has selectedCategories
+		
+		if (topMap.has(ListInfo.OTHER_USER_PRIVS)) {
+			JsonObject privsJson = topMap.get(ListInfo.OTHER_USER_PRIVS).getAsJsonObject();
+			for ( Map.Entry<String,JsonElement> privEntry : privsJson.entrySet()){
+				OtherUserPrivOnList privInfo = context.deserialize(privEntry.getValue(), OtherUserPrivOnList.class);
+				privInfo.userId = privEntry.getKey();
+				listInfo.otherUserPrivs.put(privEntry.getKey(), privInfo);
+			}//for categoriesJson
+		}//if has selectedCategories
 
 		return listInfo;
 	}//deserialize
@@ -93,6 +103,14 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 		if (!listInfo.selectedCategories.isEmpty()) {
 			JsonElement selectedCategoriesJson = context.serialize(listInfo.selectedCategories);
 			rv.add(ListInfo.SELECTED_CATEGORIES, selectedCategoriesJson);			
+		}
+		
+		if (!listInfo.otherUserPrivs.isEmpty()) {
+			JsonElement otherUserPrivsJson = context.serialize(listInfo.otherUserPrivs);
+			for (Map.Entry<String, JsonElement> privEntry : otherUserPrivsJson.getAsJsonObject().entrySet()) {
+				privEntry.getValue().getAsJsonObject().remove(OtherUserPrivOnList.USER_ID);
+			}
+			rv.add(ListInfo.OTHER_USER_PRIVS, otherUserPrivsJson);			
 		}
 		
 		return rv;
