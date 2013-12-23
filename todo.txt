@@ -66,6 +66,7 @@
 #### Implement server side ####
   * Add abstraction layer around Google-specific code, in case I want to move it
   * Implement OpenID
+  * Convert all direct field access to getter/setter
   * Add ability to upload list
   * Add ability to export list
   * Add ability to share/revoke share of list
