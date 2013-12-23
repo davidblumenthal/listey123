@@ -53,11 +53,32 @@ public class ListeyDataOneUser {
 	/** Load the whole ListeyDataOneUser object from the datastore using the userEmail
 	 * as the starting place.
 	 */
-	public ListeyDataOneUser (DatastoreService datastore, String userEmail) {
-        // We have one entity group per user
-		Key userKey = KeyFactory.createKey(KIND, userEmail);
+	public static ListeyDataOneUser fromDatastore(DatastoreService datastore, String userEmail) {
+		return fromDatastore(datastore, userEmail, null, null);
+	}//fromDatastore
+	
+	
+	/** Load the info for the user from the datastore.
+	 *
+	 * @param datastore
+	 * @param userEmail
+	 * @param listUniqueId - If not null, only load info for that list only.
+	 * @param oneUser - if not null, add to that and return, otherwise instantiate a new copy.
+	 * @return
+	 */
+	public static ListeyDataOneUser fromDatastore(DatastoreService datastore, String userEmail, String listUniqueId, ListeyDataOneUser oneUser) {
+		if (oneUser == null) {
+			oneUser = new ListeyDataOneUser();
+		}
+
+		//Find all entities for the user, or the user's list if listUniqueId is passed.
+		Key filterKey = KeyFactory.createKey(KIND, userEmail);
+		if (listUniqueId != null) {
+			filterKey = KeyFactory.createKey(filterKey, ListInfo.KIND, listUniqueId);
+		}
+		
 		//Get all entities for this user in one big list
-		Query q =  new Query().setAncestor(userKey);
+		Query q =  new Query().setAncestor(filterKey);
 		List<Entity> results = datastore.prepare(q)
 				.asList(FetchOptions.Builder.withDefaults());
 
@@ -80,7 +101,7 @@ public class ListeyDataOneUser {
 		if (entityList != null) {
 			for (Entity e : entityList) {
 				ListInfo listInfo = new ListInfo(e);
-				lists.put(listInfo.uniqueId, listInfo);
+				oneUser.lists.put(listInfo.uniqueId, listInfo);
 			}//for each list entity
 		}//if any lists defined
 
@@ -90,7 +111,7 @@ public class ListeyDataOneUser {
 			for (Entity e : entityList) {
 				CategoryInfo catInfo = new CategoryInfo(e);
 				String listId = e.getParent().getName();
-				ListInfo listeyList = lists.get(listId);
+				ListInfo listeyList = oneUser.lists.get(listId);
 				if (listeyList != null) {
 					listeyList.categories.add(catInfo);
 				}
@@ -103,7 +124,7 @@ public class ListeyDataOneUser {
 			for (Entity e : entityList) {
 				ItemInfo itemInfo = new ItemInfo(e);
 				String listId = e.getParent().getName();
-				ListInfo listeyList = lists.get(listId);
+				ListInfo listeyList = oneUser.lists.get(listId);
 				if (listeyList != null) {
 					listeyList.items.put(e.getKey().getName(), itemInfo);
 				}
@@ -119,7 +140,7 @@ public class ListeyDataOneUser {
 				String itemId = e.getParent().getName();
 				
 				//find the list it goes in
-				ListInfo listeyList = lists.get(listId);
+				ListInfo listeyList = oneUser.lists.get(listId);
 				if (listeyList != null) {
 					//find the item it goes in
 					ItemInfo item = listeyList.items.get(itemId);
@@ -128,7 +149,8 @@ public class ListeyDataOneUser {
 					}//if item found
 				}//if list found
 			}//foreach entity
-		}//if any items defined  		
+		}//if any items defined
+		return oneUser;
 	}//constructor load from datastore
 	
 	
