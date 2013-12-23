@@ -7,8 +7,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.util.logging.Logger;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +20,7 @@ import com.blumenthal.listey.ListInfo;
 import com.blumenthal.listey.ListInfo.ListInfoStatus;
 import com.blumenthal.listey.ListeyDataMultipleUsers;
 import com.blumenthal.listey.ListeyDataOneUser;
+import com.blumenthal.listey.OtherUserPrivOnList;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
@@ -31,8 +30,6 @@ import com.google.gson.GsonBuilder;
  *
  */
 public class TestJsonParse {
-	private static final Logger log = Logger.getLogger(TestJsonParse.class.getName());
-	
     private final LocalServiceTestHelper helper =
         new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
@@ -139,6 +136,7 @@ public class TestJsonParse {
 							    "{\"name\":\"Test Category\",\"uniqueId\":\"4:1\",\"lastUpdate\":312345}" +
 							"]" + //categories
 							",\"selectedCategories\":[\"4:1\"]" +
+							",\"otherUserPrivs\":{\"foo@bar.com\":{\"priv\":\"FULL\",\"lastUpdate\":44321}}" +
 						"}" + //test list
 					"}" + //lists
 				"}" + //test@test.com
@@ -175,6 +173,11 @@ public class TestJsonParse {
 		
 		assertEquals(1, listInfo.selectedCategories.size());
 		assertEquals("4:1", listInfo.selectedCategories.toArray()[0]);
+		
+		assertEquals(1, listInfo.otherUserPrivs.size());
+		OtherUserPrivOnList privObj = listInfo.otherUserPrivs.get("foo@bar.com");
+		assertEquals(OtherUserPrivOnList.OtherUserPriv.FULL, privObj.priv);
+		assertEquals(new Long(44321L), privObj.lastUpdate);		
 		
 		//serialize the user back into a JSON string
 		String newJson = ListeyDataMultipleUsers.getGson().toJson(parsed);
