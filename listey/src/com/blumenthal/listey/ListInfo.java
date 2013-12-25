@@ -6,9 +6,12 @@ package com.blumenthal.listey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -33,7 +36,7 @@ public class ListInfo {
 	public String uniqueId;
 	public String name;
 	public Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
-	public List<CategoryInfo> categories = new ArrayList<CategoryInfo>();
+	public SortedSet<CategoryInfo> categories = new TreeSet<CategoryInfo>();
 	public Long lastUpdate;
 	//Note, selectedCategories is not stored on the server, always just mirrored back from the request
 	public Set<String> selectedCategories = new HashSet<String>();
@@ -87,6 +90,90 @@ public class ListInfo {
 		entity.setProperty(LAST_UPDATE, lastUpdate);
 		return entity;
 	}//toEntity
+	
+	
+	
+	/** 
+	 * @param parent entity key
+	 * @return a list of all entities for this object and all sub-objects
+	 */
+	public List<Entity> toEntities(Key parent) {
+		List<Entity> entities = new ArrayList<Entity>();
+		Entity thisEntity = toEntity(parent);
+		Key thisKey = thisEntity.getKey();
+		entities.add(thisEntity);
+		for (Map.Entry<String, ItemInfo> entry : items.entrySet()) {
+			entities.addAll(entry.getValue().toEntities(thisKey));
+		}//foreach item
+		for (CategoryInfo cat : categories) {
+			entities.add(cat.toEntity(thisKey));
+		}//foreach category
+		for (Map.Entry<String, OtherUserPrivOnList> entry : otherUserPrivs.entrySet()) {
+			entities.add(entry.getValue().toEntity(thisKey, entry.getKey()));
+		}
+		
+		return entities;
+	}//toEntities
+	
+	
+	
+	/**
+	 * @param other
+	 * @return Returns true if all essential fields of this object
+	 * are the same as other.
+	 */
+	public boolean shallowEquals(ListInfo other) {
+		return (uniqueId.equals(other.uniqueId)
+				&& name.equals(other.name)
+				&& lastUpdate.equals(other.lastUpdate)
+				&& status.equals(other.status));
+	}//shallowEquals
+	
+	
+	/**
+	 * @param other
+	 * @return Returns true if this object is essentially the same
+	 * as other, and all sub-objects are also the same
+	 * (EXCEPT selectedCategories, since
+	 * that is ephemeral we don't compare it)
+	 */
+	public boolean deepEquals(ListInfo other) {
+		if (!shallowEquals(other)
+			|| categories.size() != other.categories.size()
+			|| items.size() != other.items.size()
+			|| otherUserPrivs.size() != other.otherUserPrivs.size()) {
+			return false;
+		}
+		
+		Iterator<CategoryInfo> catIter = categories.iterator();
+		Iterator<CategoryInfo> otherCatIter = other.categories.iterator();
+		while (catIter.hasNext()) {
+			CategoryInfo cat = catIter.next();
+			CategoryInfo otherCat = otherCatIter.next();
+			if (!cat.deepEquals(otherCat)) {
+				return false;
+			}
+		}//foreach category
+		
+		for (Map.Entry<String, ItemInfo> entry : items.entrySet()) {
+			ItemInfo otherItem = other.items.get(entry.getKey());
+			if (!entry.getValue().deepEquals(otherItem)) {
+				return false;
+			}
+		}//foreach item
+		
+		for (Map.Entry<String, OtherUserPrivOnList> entry : otherUserPrivs.entrySet()) {
+			OtherUserPrivOnList otherPriv = other.otherUserPrivs.get(entry.getKey());
+			if (!entry.getValue().deepEquals(otherPriv)) {
+				return false;
+			}
+		}//foreach otherUserPrivs
+		
+		//If we get to here, everything is equal
+		return true;
+	}//deepEquals
+	
+	
 	
 	public static ListInfo compareAndUpdate(ListInfo serverList, ListInfo clientList,
 			List<Entity> updateEntities, List<Entity> deleteEntities) {
