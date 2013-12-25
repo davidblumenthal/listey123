@@ -23,7 +23,7 @@ public class ItemInfoJsonAdapter implements JsonDeserializer<ItemInfo>, JsonSeri
 		ItemInfo item = new ItemInfo();
 		item.uniqueId = itemJson.get(ItemInfo.UNIQUE_ID).getAsString();
 		if (itemJson.has(ItemInfo.COUNT)) {
-			item.count = itemJson.get(ItemInfo.COUNT).getAsInt();
+			item.count = itemJson.get(ItemInfo.COUNT).getAsLong();
 		}
 		item.name = itemJson.get(ItemInfo.NAME).getAsString();
 		if (itemJson.has(ItemInfo.STATUS)) {
