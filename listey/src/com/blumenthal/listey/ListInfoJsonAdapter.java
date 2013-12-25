@@ -4,10 +4,10 @@
 package com.blumenthal.listey;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -48,7 +48,7 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			JsonArray categoriesJson = topMap.get(ListInfo.CATEGORIES).getAsJsonArray();
 			//Hack needed to make it deserialize to an ArrayList correctly.
 			//http://stackoverflow.com/questions/5554217/google-gson-deserialize-listclass-object-generic-type
-			Type listType = new TypeToken<ArrayList<CategoryInfo>>() {
+			Type listType = new TypeToken<TreeSet<CategoryInfo>>() {
             }.getType();
 			listInfo.categories = context.deserialize(categoriesJson, listType);
 		}//if has categories
