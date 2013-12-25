@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.blumenthal.listey.ListInfo.ListInfoStatus;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -43,8 +44,7 @@ public class ListeyDataOneUser {
 	public static final String KIND = "user";//kind in the datastore
 	public static DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
 	
-	public Long lastUpdate;
-	public Map<String, ListInfo> lists;
+	public Map<String, ListInfo> lists = new HashMap<String, ListInfo>();
 	
 	/** Default constructor */
 	public ListeyDataOneUser(){}
@@ -56,6 +56,13 @@ public class ListeyDataOneUser {
 	public static ListeyDataOneUser fromDatastore(DatastoreService datastore, String userEmail) {
 		return fromDatastore(datastore, userEmail, null, null);
 	}//fromDatastore
+	
+	
+	public static Key getEntityKey(String userEmail) {
+		//Find all entities for the user, or the user's list if listUniqueId is passed.
+		return KeyFactory.createKey(KIND, userEmail);
+	}//getEntityKey
+	
 	
 	
 	/** Load the info for the user from the datastore.
@@ -72,7 +79,7 @@ public class ListeyDataOneUser {
 		}
 
 		//Find all entities for the user, or the user's list if listUniqueId is passed.
-		Key filterKey = KeyFactory.createKey(KIND, userEmail);
+		Key filterKey = getEntityKey(userEmail);
 		if (listUniqueId != null) {
 			filterKey = KeyFactory.createKey(filterKey, ListInfo.KIND, listUniqueId);
 		}
@@ -132,7 +139,7 @@ public class ListeyDataOneUser {
 		}//if any items defined
 
 		//Load all item categories for this list
-		entityList = entitiesByKind.get("itemCategory");
+		entityList = entitiesByKind.get(ItemCategoryInfo.KIND);
 		if (entityList != null) {
 			for (Entity e : entityList) {
 				ItemCategoryInfo itemCategoryInfo = new ItemCategoryInfo(e);
@@ -150,8 +157,64 @@ public class ListeyDataOneUser {
 				}//if list found
 			}//foreach entity
 		}//if any items defined
+		
+		//Load all other user priv on list for this list
+		//Note, if listId was passed, then we should't load this
+		//because listUniqueId is only passed when we're pulling in a different users list,
+		//and we don't want to show the other users that different user has granted privs to
+		if (listUniqueId == null) {
+			entityList = entitiesByKind.get(OtherUserPrivOnList.KIND);
+			if (entityList != null) {
+				for (Entity e : entityList) {
+					OtherUserPrivOnList priv = new OtherUserPrivOnList(e);
+					String listId = e.getParent().getName();
+					ListInfo listeyList = oneUser.lists.get(listId);
+					if (listeyList != null) {
+						listeyList.otherUserPrivs.put(e.getKey().getName(), priv);
+					}
+				}//foreach entity
+			}//if any items defined
+		}//if listUniqueId not passed
 		return oneUser;
 	}//constructor load from datastore
+	
+	
+	/** 
+	 * @param parent entity key
+	 * @return a list of all entities for this object and all sub-objects
+	 */
+	public List<Entity> toEntities(String userEmail) {
+		List<Entity> entities = new ArrayList<Entity>();
+		Key thisKey = getEntityKey(userEmail);
+		for (Map.Entry<String, ListInfo> entry : lists.entrySet()) {
+			entities.addAll(entry.getValue().toEntities(thisKey));
+		}//foreach item
+		
+		return entities;
+	}//toEntities
+	
+	
+	
+	/**
+	 * @param other
+	 * @return Returns true if this object is essentially the same
+	 * as other, and all sub-objects are also the same
+	 */
+	public boolean deepEquals(ListeyDataOneUser other) {
+		if (lists.size() != other.lists.size()) {
+			return false;
+		}
+		
+		for (Map.Entry<String, ListInfo> entry : lists.entrySet()) {
+			ListInfo otherList = other.lists.get(entry.getKey());
+			if (!entry.getValue().deepEquals(otherList)) {
+				return false;
+			}
+		}//foreach list
+		
+		//If we get to here, everything is equal
+		return true;
+	}//deepEquals
 	
 	
 	
@@ -166,11 +229,20 @@ public class ListeyDataOneUser {
 			ListInfo serverList = serverData.lists.get(clientList.uniqueId);
 
 			ListInfo updatedListInfo = ListInfo.compareAndUpdate(serverList, clientList, updateEntities, deleteEntities);
-			//If they deleted the list, don't pass it back to the client
+			
+			//If the list was deleted on the server, don't pass it back to the client
 			if (updatedListInfo != null) {
 				rv.lists.put(updatedListInfo.uniqueId, updatedListInfo);
 			}//updatedListInfo != null
 		}//for lists
+		
+		//check and see if any new lists were added on the server
+		for (ListInfo serverList : serverData.lists.values()) {
+			if (serverList.status.equals(ListInfoStatus.ACTIVE)
+				&& !clientData.lists.containsKey(serverList.uniqueId)) {
+				//TODO add it to the client
+			}
+		}//foreach server list
 		
 		return rv;
 	}//compareAndUpdate
