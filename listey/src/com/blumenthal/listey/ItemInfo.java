@@ -3,7 +3,9 @@
  */
 package com.blumenthal.listey;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.appengine.api.datastore.Entity;
@@ -25,7 +27,7 @@ public class ItemInfo {
 	
 	public String name;
 	public String uniqueId;
-	public Integer count = 1;
+	public Long count = 1L;
 	public ItemStatus status;
 	public Map<String, ItemCategoryInfo> categories = new HashMap<String, ItemCategoryInfo>();
 	public Long lastUpdate;
@@ -43,7 +45,7 @@ public class ItemInfo {
 		lastUpdate = (Long) entity.getProperty(LAST_UPDATE);
 		name = (String) entity.getProperty(NAME);
 		uniqueId = (String) entity.getKey().getName();
-		count = (Integer) entity.getProperty(COUNT);
+		count = (Long) entity.getProperty(COUNT);
 		status = ItemStatus.valueOf((String) entity.getProperty(STATUS));
 	}//ItemInfo(Entity)
 	
@@ -61,4 +63,57 @@ public class ItemInfo {
 		entity.setProperty(LAST_UPDATE, lastUpdate);
 		return entity;
 	}//toEntity
+	
+	
+	
+	/** Returns a list of all entities for this object and all sub-objects
+	 * 
+	 * @param parent
+	 * @return
+	 */
+	public List<Entity> toEntities(Key parent) {
+		List<Entity> entities = new ArrayList<Entity>();
+		Entity thisEntity = toEntity(parent);
+		entities.add(thisEntity);
+		for (Map.Entry<String, ItemCategoryInfo> entry : categories.entrySet()) {
+			entities.add(entry.getValue().toEntity(thisEntity.getKey()));
+		}//foreach category
+		return entities;
+	}//toEntities
+	
+	
+	/**
+	 * @param other
+	 * @return Returns true if all essential fields of this object
+	 * are the same as other.
+	 */
+	public boolean shallowEquals(ItemInfo other) {
+		return (uniqueId.equals(other.uniqueId)
+				&& name.equals(other.name)
+				&& lastUpdate.equals(other.lastUpdate)
+				&& status.equals(other.status)
+				&& count.equals(other.count));
+	}//shallowEquals
+	
+	
+	/**
+	 * @param other
+	 * @return Returns true if this object is essentially the same
+	 * as other, and all sub-objects are also.
+	 */
+	public boolean deepEquals(ItemInfo other) {
+		if (!shallowEquals(other)
+			|| categories.size() != other.categories.size()) {
+			return false;
+		}
+		for (Map.Entry<String, ItemCategoryInfo> entry : categories.entrySet()) {
+			ItemCategoryInfo otherCat = other.categories.get(entry.getKey());
+			if (!entry.getValue().deepEquals(otherCat)) {
+				return false;
+			}
+		}//foreach category
+		
+		//If we get to here, everything is equal
+		return true;
+	}//deepEquals
 }//ItemInfo
