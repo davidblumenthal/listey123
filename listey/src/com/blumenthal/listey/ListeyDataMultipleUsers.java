@@ -1,6 +1,8 @@
 package com.blumenthal.listey;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -25,7 +27,6 @@ import com.google.gson.GsonBuilder;
   }//top-level
  */
 public class ListeyDataMultipleUsers {
-	public Long lastUpdate;
 	public Map< String, ListeyDataOneUser> userData = new HashMap<String, ListeyDataOneUser>();
 	
 	/**
@@ -46,8 +47,8 @@ public class ListeyDataMultipleUsers {
     	userData.put(userEmail, currentUserData);
     	
     	//Load other user's lists that this user should be able to access
-		Query q =  new Query()
-			.setFilter(new FilterPredicate(Entity.KEY_RESERVED_PROPERTY,
+		Query q =  new Query(OtherUserPrivOnList.KIND)
+			.setFilter(new FilterPredicate(OtherUserPrivOnList.USER_ID,
                 Query.FilterOperator.EQUAL,
                 userEmail));
 		PreparedQuery pq = datastore.prepare(q);
@@ -66,6 +67,43 @@ public class ListeyDataMultipleUsers {
 	}//Constructor
 	
 	
+	/** 
+	 * @param parent entity key
+	 * @return a list of all entities for this object and all sub-objects
+	 */
+	public List<Entity> toEntities() {
+		List<Entity> entities = new ArrayList<Entity>();
+		for (Map.Entry<String, ListeyDataOneUser> entry : userData.entrySet()) {
+			entities.addAll(entry.getValue().toEntities(entry.getKey()));
+		}//foreach item
+		
+		return entities;
+	}//toEntities
+	
+	
+	
+	/**
+	 * @param other
+	 * @return Returns true if this object is essentially the same
+	 * as other, and all sub-objects are also the same
+	 */
+	public boolean deepEquals(ListeyDataMultipleUsers other) {
+		if (userData.size() != other.userData.size()) {
+			return false;
+		}
+		
+		for (Map.Entry<String, ListeyDataOneUser> entry : userData.entrySet()) {
+			ListeyDataOneUser otherUser = other.userData.get(entry.getKey());
+			if (!entry.getValue().deepEquals(otherUser)) {
+				return false;
+			}
+		}//foreach list
+		
+		//If we get to here, everything is equal
+		return true;
+	}//deepEquals
+
+	
 	
 	public static Gson getGson() {
 		GsonBuilder gsonBuilder = new GsonBuilder();
@@ -82,6 +120,17 @@ public class ListeyDataMultipleUsers {
 	public static ListeyDataMultipleUsers fromJson(String jsonString) {
 		Gson gson = getGson();
 		ListeyDataMultipleUsers rv = gson.fromJson(jsonString, ListeyDataMultipleUsers.class);
+		return rv;
+	}//fromJson
+	
+	
+	
+	/**
+	 * Return an object from serialized JSON string
+	 */
+	public String toJson() {
+		Gson gson = getGson();
+		String rv = gson.toJson(this);
 		return rv;
 	}//fromJson
 }//ListeyDataMultipleUsers
