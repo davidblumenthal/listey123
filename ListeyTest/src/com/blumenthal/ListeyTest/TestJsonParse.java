@@ -49,7 +49,6 @@ public class TestJsonParse {
 		String jsonString = "{}";
 		ListeyDataMultipleUsers parsed = ListeyDataMultipleUsers.fromJson(jsonString);
 		assertNotNull("Something should have been parsed", parsed);
-		assertNull("lastUpdate should be null", parsed.lastUpdate);
 		assertEquals("userData should be empty", parsed.userData.size(), 0);
 	}//testEmptyHash
 	
@@ -87,7 +86,7 @@ public class TestJsonParse {
 	 */
 	public void testItem1(ItemInfo item) {
 		assertEquals("2:1", item.uniqueId);
-		assertEquals(new Integer(2), item.count);
+		assertEquals(new Long(2), item.count);
 		assertEquals(new Long(1234567890L), item.lastUpdate);
 		assertEquals("Item 1 Name", item.name);
 		assertEquals(1, item.categories.size());
@@ -147,12 +146,10 @@ public class TestJsonParse {
 	public void testOneUser() {
 		ListeyDataMultipleUsers parsed = ListeyDataMultipleUsers.fromJson(USER1_JSON);
 		assertNotNull("Something should have been parsed", parsed);
-		assertEquals("top hash lastUpdate wasn't parsed right", new Long(1111L), parsed.lastUpdate);
 		assertEquals("userData should have 1 item", 1, parsed.userData.size());
 		
 		ListeyDataOneUser oneUserData = parsed.userData.get("test@test.com");
 		assertNotNull("oneUserData for test@test.com should not be null", oneUserData);
-		assertEquals("test@test.com lastUpdate wasn't parsed right", new Long(2222L), oneUserData.lastUpdate);
 		assertNotNull("lists should not be null", oneUserData.lists);
 		
 		ListInfo listInfo = oneUserData.lists.get("1:1");
@@ -166,7 +163,7 @@ public class TestJsonParse {
 		testItem1(item);
 		
 		assertEquals(1, listInfo.categories.size());
-		CategoryInfo cat = listInfo.categories.get(0);
+		CategoryInfo cat = listInfo.categories.first();
 		assertEquals("Test Category", cat.name);
 		assertEquals("4:1", cat.uniqueId);
 		assertEquals(new Long(312345L), cat.lastUpdate);
