@@ -35,6 +35,30 @@ public class ItemCategoryInfo {
 	}//ItemCategoryInfo(Entity)
 	
 	
+	/**
+	 * @param other
+	 * @return Returns true if all essential fields of this object
+	 * are the same as other.
+	 */
+	public boolean shallowEquals(ItemCategoryInfo other) {
+		return (uniqueId.equals(other.uniqueId)
+				&& lastUpdate.equals(other.lastUpdate)
+				&& status.equals(other.status));
+	}//shallowEquals
+	
+	
+	/**
+	 * @param other
+	 * @return Returns true if this object is essentially the same
+	 * as other, and all sub-objects are also.
+	 * 
+	 * This has no other layers below it, so deepEquals can just call shallowEquals
+	 */
+	public boolean deepEquals(ItemCategoryInfo other) {
+		return (shallowEquals(other));
+	}//deepEquals
+	
+	
 	
 	/**
 	 * @param parent
