@@ -6,7 +6,7 @@ package com.blumenthal.listey;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
-public class CategoryInfo {
+public class CategoryInfo implements Comparable<CategoryInfo> {
 	public static final String KIND = "category";//kind in the datastore
 	public static final String STATUS = "status";
 	public static final String NAME = "name";
@@ -14,7 +14,7 @@ public class CategoryInfo {
 	
 	public static enum CategoryStatus {
 	    ACTIVE,
-	    COMPLETED
+	    DELETED
 	}
 	
 	public String name;
@@ -50,4 +50,38 @@ public class CategoryInfo {
 		return entity;
 	}//toEntity
 
+	
+	/**
+	 * @param other
+	 * @return Returns true if all essential fields of this object
+	 * are the same as other.
+	 */
+	public boolean shallowEquals(CategoryInfo other) {
+		return (uniqueId.equals(other.uniqueId)
+				&& name.equals(other.name)
+				&& lastUpdate.equals(other.lastUpdate)
+				&& status.equals(other.status));
+	}//shallowEquals
+	
+	
+	/**
+	 * @param other
+	 * @return Returns true if this object is essentially the same
+	 * as other, and all sub-objects are also.
+	 * 
+	 * This has no other layers below it, so deepEquals can just call shallowEquals
+	 */
+	public boolean deepEquals(CategoryInfo other) {
+		return (shallowEquals(other));
+	}//deepEquals
+	
+	
+
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(CategoryInfo o) {
+		return name.compareTo(o.name);
+	}
 }//CategoryInfo
