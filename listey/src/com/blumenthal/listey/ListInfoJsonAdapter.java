@@ -24,15 +24,16 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 	 * Deserialize the list info.  Note, the ListInfo uniqueID is actually the key of the
 	 * parent map and not included in this at all.
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public ListInfo deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 			throws JsonParseException {
 		ListInfo listInfo = new ListInfo();
 
 		JsonObject topMap = json.getAsJsonObject();
-		listInfo.lastUpdate = topMap.get(ListInfo.LAST_UPDATE).getAsLong();
-		listInfo.name = topMap.get(ListInfo.NAME).getAsString();
-		listInfo.status = ListInfo.ListInfoStatus.valueOf(topMap.get(ListInfo.STATUS).getAsString());
+		listInfo.setLastUpdate(topMap.get(ListInfo.LAST_UPDATE).getAsLong());
+		listInfo.setName(topMap.get(ListInfo.NAME).getAsString());
+		listInfo.setStatus(ListInfo.ListInfoStatus.valueOf(topMap.get(ListInfo.STATUS).getAsString()));
 
 		if (topMap.has(ListInfo.ITEMS)) {
 			JsonArray itemsJson = topMap.get(ListInfo.ITEMS).getAsJsonArray();
@@ -40,7 +41,7 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 				ItemInfo item = context.deserialize(itemJsonElement, ItemInfo.class);
 
 				//Add it to the map.  Note, order is lost, but since it's always alphabetical order it's ok
-				listInfo.items.put(item.uniqueId, item);
+				listInfo.getItems().put(item.getUniqueId(), item);
 			}//for itemsJson
 		}//if has items
 
@@ -50,14 +51,14 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			//http://stackoverflow.com/questions/5554217/google-gson-deserialize-listclass-object-generic-type
 			Type listType = new TypeToken<TreeSet<CategoryInfo>>() {
             }.getType();
-			listInfo.categories = context.deserialize(categoriesJson, listType);
+			listInfo.setCategories((TreeSet<CategoryInfo>)context.deserialize(categoriesJson, listType));
 		}//if has categories
 		
 		if (topMap.has(ListInfo.SELECTED_CATEGORIES)) {
 			JsonArray selCatJson = topMap.get(ListInfo.SELECTED_CATEGORIES).getAsJsonArray();
 			Type listType = new TypeToken<HashSet<String>>() {
             }.getType();
-			listInfo.selectedCategories = context.deserialize(selCatJson, listType);
+			listInfo.setSelectedCategories((HashSet<String>) context.deserialize(selCatJson, listType));
 		}//if has selectedCategories
 		
 		if (topMap.has(ListInfo.OTHER_USER_PRIVS)) {
@@ -65,7 +66,7 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			for ( Map.Entry<String,JsonElement> privEntry : privsJson.entrySet()){
 				OtherUserPrivOnList privInfo = context.deserialize(privEntry.getValue(), OtherUserPrivOnList.class);
 				privInfo.userId = privEntry.getKey();
-				listInfo.otherUserPrivs.put(privEntry.getKey(), privInfo);
+				listInfo.getOtherUserPrivs().put(privEntry.getKey(), privInfo);
 			}//for categoriesJson
 		}//if has selectedCategories
 
@@ -80,33 +81,33 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 	public JsonElement serialize(ListInfo listInfo, Type type,
 			JsonSerializationContext context) {
 		JsonObject rv = new JsonObject();
-		rv.addProperty(ListInfo.LAST_UPDATE, listInfo.lastUpdate);
-		rv.addProperty(ListInfo.NAME, listInfo.name);
-		rv.addProperty(ListInfo.STATUS, listInfo.status.toString());
+		rv.addProperty(ListInfo.LAST_UPDATE, listInfo.getLastUpdate());
+		rv.addProperty(ListInfo.NAME, listInfo.getName());
+		rv.addProperty(ListInfo.STATUS, listInfo.getStatus().toString());
 		
-		if (!listInfo.items.isEmpty()){
+		if (!listInfo.getItems().isEmpty()){
 			JsonArray itemsJson = new JsonArray();
-			for (Entry<String, ItemInfo> entry : listInfo.items.entrySet()) {
+			for (Entry<String, ItemInfo> entry : listInfo.getItems().entrySet()) {
 				ItemInfo item = entry.getValue();
 				JsonObject itemJson = context.serialize(item).getAsJsonObject();
-				itemJson.addProperty(ItemInfo.UNIQUE_ID, item.uniqueId);
+				itemJson.addProperty(ItemInfo.UNIQUE_ID, item.getUniqueId());
 				itemsJson.add(itemJson);
 			}//for each entry
 			rv.add(ListInfo.ITEMS, itemsJson);
 		}//if items
 		
-		if (!listInfo.categories.isEmpty()) {
-			JsonElement categoriesJson = context.serialize(listInfo.categories);
+		if (!listInfo.getCategories().isEmpty()) {
+			JsonElement categoriesJson = context.serialize(listInfo.getCategories());
 			rv.add(ListInfo.CATEGORIES, categoriesJson);			
 		}
 		
-		if (!listInfo.selectedCategories.isEmpty()) {
-			JsonElement selectedCategoriesJson = context.serialize(listInfo.selectedCategories);
+		if (!listInfo.getSelectedCategories().isEmpty()) {
+			JsonElement selectedCategoriesJson = context.serialize(listInfo.getSelectedCategories());
 			rv.add(ListInfo.SELECTED_CATEGORIES, selectedCategoriesJson);			
 		}
 		
-		if (!listInfo.otherUserPrivs.isEmpty()) {
-			JsonElement otherUserPrivsJson = context.serialize(listInfo.otherUserPrivs);
+		if (!listInfo.getOtherUserPrivs().isEmpty()) {
+			JsonElement otherUserPrivsJson = context.serialize(listInfo.getOtherUserPrivs());
 			for (Map.Entry<String, JsonElement> privEntry : otherUserPrivsJson.getAsJsonObject().entrySet()) {
 				privEntry.getValue().getAsJsonObject().remove(OtherUserPrivOnList.USER_ID);
 			}

@@ -1,5 +1,5 @@
 /**
- * 
+ * Stores info about a list, e.g. a shopping list of items.
  */
 package com.blumenthal.listey;
 
@@ -15,6 +15,8 @@ import java.util.TreeSet;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.memcache.InvalidValueException;
+import com.google.gson.Gson;
 
 public class ListInfo {
 	public static final String KIND = "list";//kind in the datastore
@@ -31,17 +33,17 @@ public class ListInfo {
 		DELETED
 	}
 	
-	public ListInfoStatus status;
+	private ListInfoStatus status;
 	
-	public String uniqueId;
-	public String name;
-	public Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
-	public SortedSet<CategoryInfo> categories = new TreeSet<CategoryInfo>();
-	public Long lastUpdate;
+	private String uniqueId;
+	private String name;
+	private Map<String, ItemInfo> items = new HashMap<String, ItemInfo>();
+	private SortedSet<CategoryInfo> categories = new TreeSet<CategoryInfo>();
+	private Long lastUpdate;
 	//Note, selectedCategories is not stored on the server, always just mirrored back from the request
-	public Set<String> selectedCategories = new HashSet<String>();
+	private Set<String> selectedCategories = new HashSet<String>();
 	
-	public Map<String, OtherUserPrivOnList> otherUserPrivs = new HashMap<String, OtherUserPrivOnList>();
+	private Map<String, OtherUserPrivOnList> otherUserPrivs = new HashMap<String, OtherUserPrivOnList>();
 	
 	/** Default constructor */
 	public ListInfo(){}
@@ -58,10 +60,10 @@ public class ListInfo {
 	public ListInfo(ListInfo.ListInfoStatus status, String uniqueId, String name,
 			Long lastUpdate) {
 		super();
-		this.status = status;
-		this.uniqueId = uniqueId;
-		this.name = name;
-		this.lastUpdate = lastUpdate;
+		this.setStatus(status);
+		this.setUniqueId(uniqueId);
+		this.setName(name);
+		this.setLastUpdate(lastUpdate);
 	}
 
 	/** Constructor that makes a shallow copy of only the top-level fields
@@ -69,7 +71,7 @@ public class ListInfo {
 	 * @param source
 	 */
 	public ListInfo(ListInfo source) {
-		this(source.status, source.uniqueId, source.name, source.lastUpdate);
+		this(source.getStatus(), source.getUniqueId(), source.getName(), source.getLastUpdate());
 	}
 	
 	public ListInfo(Entity entity) {
@@ -77,17 +79,144 @@ public class ListInfo {
 			//check the entity type and throw if not what we're expecting
 			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
 		}//if unexpected kind
-		name = (String) entity.getProperty(NAME);
-		uniqueId = (String) entity.getKey().getName();
-		lastUpdate = (Long) entity.getProperty(LAST_UPDATE);
-		status = ListInfoStatus.valueOf((String) entity.getProperty(STATUS));
+		setName((String) entity.getProperty(NAME));
+		setUniqueId((String) entity.getKey().getName());
+		setLastUpdate((Long) entity.getProperty(LAST_UPDATE));
+		setStatus(ListInfoStatus.valueOf((String) entity.getProperty(STATUS)));
 	}//ListInfo(Entity)
+	
+	
+	
+	
+	/**
+	 * @return the status
+	 */
+	public ListInfoStatus getStatus() {
+		return status;
+	}
 
-	public Entity toEntity(Key parent) {
-		Entity entity = new Entity(KIND, uniqueId, parent);
-		entity.setProperty(STATUS, status.toString());
-		entity.setProperty(NAME, name);
-		entity.setProperty(LAST_UPDATE, lastUpdate);
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(ListInfoStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the uniqueId
+	 */
+	public String getUniqueId() {
+		return uniqueId;
+	}
+
+	/**
+	 * @param uniqueId the uniqueId to set
+	 */
+	public void setUniqueId(String uniqueId) {
+		this.uniqueId = uniqueId;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the items
+	 */
+	public Map<String, ItemInfo> getItems() {
+		return items;
+	}
+
+	/**
+	 * @param items the items to set
+	 */
+	public void setItems(Map<String, ItemInfo> items) {
+		this.items = items;
+	}
+
+	/**
+	 * @return the categories
+	 */
+	public SortedSet<CategoryInfo> getCategories() {
+		return categories;
+	}
+
+	/**
+	 * @param categories the categories to set
+	 */
+	public void setCategories(SortedSet<CategoryInfo> categories) {
+		this.categories = categories;
+	}
+
+	/**
+	 * @return the lastUpdate
+	 */
+	public Long getLastUpdate() {
+		return lastUpdate;
+	}
+
+	/**
+	 * @param lastUpdate the lastUpdate to set
+	 */
+	public void setLastUpdate(Long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
+	/**
+	 * @return the selectedCategories
+	 */
+	public Set<String> getSelectedCategories() {
+		return selectedCategories;
+	}
+
+	/**
+	 * @param selectedCategories the selectedCategories to set
+	 */
+	public void setSelectedCategories(Set<String> selectedCategories) {
+		this.selectedCategories = selectedCategories;
+	}
+
+	/**
+	 * @return the otherUserPrivs
+	 */
+	public Map<String, OtherUserPrivOnList> getOtherUserPrivs() {
+		return otherUserPrivs;
+	}
+
+	/**
+	 * @param otherUserPrivs the otherUserPrivs to set
+	 */
+	public void setOtherUserPrivs(Map<String, OtherUserPrivOnList> otherUserPrivs) {
+		this.otherUserPrivs = otherUserPrivs;
+	}
+
+	/** Copy constructor using json serialization */
+	public static ListInfo makeCopy(ListInfo orig) {
+		Gson gson = ListeyDataMultipleUsers.getGson();
+		String json = gson.toJson(orig);
+		ListInfo copy = gson.fromJson(json, orig.getClass());
+		return copy;
+	}//makeCopy
+
+	
+	
+	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
+		//Before converting this to an entity, change the id to a permanent if it's not already
+		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
+		Entity entity = new Entity(KIND, getUniqueId(), parent);
+		entity.setProperty(STATUS, getStatus().toString());
+		entity.setProperty(NAME, getName());
+		entity.setProperty(LAST_UPDATE, getLastUpdate());
 		return entity;
 	}//toEntity
 	
@@ -97,18 +226,19 @@ public class ListInfo {
 	 * @param parent entity key
 	 * @return a list of all entities for this object and all sub-objects
 	 */
-	public List<Entity> toEntities(Key parent) {
+	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		List<Entity> entities = new ArrayList<Entity>();
-		Entity thisEntity = toEntity(parent);
+		Entity thisEntity = toEntity(uniqueIdCreator, parent);
 		Key thisKey = thisEntity.getKey();
 		entities.add(thisEntity);
-		for (Map.Entry<String, ItemInfo> entry : items.entrySet()) {
-			entities.addAll(entry.getValue().toEntities(thisKey));
+		for (Map.Entry<String, ItemInfo> entry : getItems().entrySet()) {
+			entities.addAll(entry.getValue().toEntities(uniqueIdCreator, thisKey));
 		}//foreach item
-		for (CategoryInfo cat : categories) {
+		for (CategoryInfo cat : getCategories()) {
 			entities.add(cat.toEntity(thisKey));
 		}//foreach category
-		for (Map.Entry<String, OtherUserPrivOnList> entry : otherUserPrivs.entrySet()) {
+		for (Map.Entry<String, OtherUserPrivOnList> entry : getOtherUserPrivs().entrySet()) {
+			//note, this has no auto-generated uniqueId, so it doesn't need uniqueIdCreator
 			entities.add(entry.getValue().toEntity(thisKey, entry.getKey()));
 		}
 		
@@ -123,10 +253,10 @@ public class ListInfo {
 	 * are the same as other.
 	 */
 	public boolean shallowEquals(ListInfo other) {
-		return (uniqueId.equals(other.uniqueId)
-				&& name.equals(other.name)
-				&& lastUpdate.equals(other.lastUpdate)
-				&& status.equals(other.status));
+		return (getUniqueId().equals(other.getUniqueId())
+				&& getName().equals(other.getName())
+				&& getLastUpdate().equals(other.getLastUpdate())
+				&& getStatus().equals(other.getStatus()));
 	}//shallowEquals
 	
 	
@@ -139,14 +269,14 @@ public class ListInfo {
 	 */
 	public boolean deepEquals(ListInfo other) {
 		if (!shallowEquals(other)
-			|| categories.size() != other.categories.size()
-			|| items.size() != other.items.size()
-			|| otherUserPrivs.size() != other.otherUserPrivs.size()) {
+			|| getCategories().size() != other.getCategories().size()
+			|| getItems().size() != other.getItems().size()
+			|| getOtherUserPrivs().size() != other.getOtherUserPrivs().size()) {
 			return false;
 		}
 		
-		Iterator<CategoryInfo> catIter = categories.iterator();
-		Iterator<CategoryInfo> otherCatIter = other.categories.iterator();
+		Iterator<CategoryInfo> catIter = getCategories().iterator();
+		Iterator<CategoryInfo> otherCatIter = other.getCategories().iterator();
 		while (catIter.hasNext()) {
 			CategoryInfo cat = catIter.next();
 			CategoryInfo otherCat = otherCatIter.next();
@@ -155,15 +285,15 @@ public class ListInfo {
 			}
 		}//foreach category
 		
-		for (Map.Entry<String, ItemInfo> entry : items.entrySet()) {
-			ItemInfo otherItem = other.items.get(entry.getKey());
+		for (Map.Entry<String, ItemInfo> entry : getItems().entrySet()) {
+			ItemInfo otherItem = other.getItems().get(entry.getKey());
 			if (!entry.getValue().deepEquals(otherItem)) {
 				return false;
 			}
 		}//foreach item
 		
-		for (Map.Entry<String, OtherUserPrivOnList> entry : otherUserPrivs.entrySet()) {
-			OtherUserPrivOnList otherPriv = other.otherUserPrivs.get(entry.getKey());
+		for (Map.Entry<String, OtherUserPrivOnList> entry : getOtherUserPrivs().entrySet()) {
+			OtherUserPrivOnList otherPriv = other.getOtherUserPrivs().get(entry.getKey());
 			if (!entry.getValue().deepEquals(otherPriv)) {
 				return false;
 			}
@@ -175,35 +305,38 @@ public class ListInfo {
 	
 	
 	
-	public static ListInfo compareAndUpdate(ListInfo serverList, ListInfo clientList,
+	public static ListInfo compareAndUpdate(DataStoreUniqueId uniqueIdCreator, Key parent, ListInfo serverList, ListInfo clientList,
 			List<Entity> updateEntities, List<Entity> deleteEntities) {
 		ListInfo rv = null;
 		
+		//New from the client
 		if (serverList == null) {
-			if (clientList.status.equals(ListInfo.ListInfoStatus.ACTIVE)) {
-				//New list
-				
-				//Copy the top-level element
-				rv = new ListInfo(clientList);
-				//Always put the current server time in newly changed objects
-				rv.lastUpdate = System.currentTimeMillis() / 1000L;
-				rv.uniqueId = ListeyDataOneUser.uniqueIdCreator.getUniqueId();
-				updateEntities.add(rv.toEntity(null));//XXX fix this!!
-
-				//copy each low-level element
+			if (clientList.getStatus().equals(ListInfo.ListInfoStatus.ACTIVE)) {
+				rv = ListInfo.makeCopy(clientList);
+				updateEntities.addAll(rv.toEntities(uniqueIdCreator, parent));
 			}//new list
 			else {
 				//deleted on client, don't add to server, nothing to do
 			}
 		}//serverList == null
 
+		//New from the server
 		else if (clientList == null) {
-			//XXX
+			rv = ListInfo.makeCopy(serverList);
+			//no need to update any entities on the server, just the client
 		}//clientList == null
 		
-		else {//serverList exists
-			rv = new ListInfo();
-			
+		else {//both lists already exist
+			//use the most recent top-level object, or the client version if they're the same
+			if (clientList.shallowEquals(serverList)) {
+				rv = ListInfo.makeCopy(clientList);
+			} else {
+				ListInfo newer = serverList.getLastUpdate() > clientList.getLastUpdate() ? serverList : clientList;
+				rv = ListInfo.makeCopy(newer);
+				updateEntities.add(rv.toEntity(uniqueIdCreator, parent));
+			}
+
+			//Now compare and update each sub-level object
 		}//neither list is null
 		
 		return rv;

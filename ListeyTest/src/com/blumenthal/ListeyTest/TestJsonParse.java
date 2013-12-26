@@ -85,18 +85,18 @@ public class TestJsonParse {
 	 * @param item Item to be compared
 	 */
 	public void testItem1(ItemInfo item) {
-		assertEquals("2:1", item.uniqueId);
-		assertEquals(new Long(2), item.count);
-		assertEquals(new Long(1234567890L), item.lastUpdate);
-		assertEquals("Item 1 Name", item.name);
-		assertEquals(1, item.categories.size());
-		assertEquals("Should have parsed ACTIVE", ItemInfo.ItemStatus.ACTIVE, item.status);
-		assertNotNull("Categories shouldn't be null", item.categories);
-		assertEquals(item.categories.size(), 1);
-		ItemCategoryInfo parsedCatInfo = item.categories.get("3:1");
+		assertEquals("2:1", item.getUniqueId());
+		assertEquals(new Long(2), item.getCount());
+		assertEquals(new Long(1234567890L), item.getLastUpdate());
+		assertEquals("Item 1 Name", item.getName());
+		assertEquals(1, item.getCategories().size());
+		assertEquals("Should have parsed ACTIVE", ItemInfo.ItemStatus.ACTIVE, item.getStatus());
+		assertNotNull("Categories shouldn't be null", item.getCategories());
+		assertEquals(item.getCategories().size(), 1);
+		ItemCategoryInfo parsedCatInfo = item.getCategories().get("3:1");
 		assertNotNull("ItemCategory 3:1 should not be null", parsedCatInfo);
-		assertEquals(new Long(2234567890L), parsedCatInfo.lastUpdate);
-		assertEquals(ItemCategoryStatus.ACTIVE, parsedCatInfo.status);	
+		assertEquals(new Long(2234567890L), parsedCatInfo.getLastUpdate());
+		assertEquals(ItemCategoryStatus.ACTIVE, parsedCatInfo.getStatus());	
 	}//testItem1
 	
 	
@@ -119,10 +119,8 @@ public class TestJsonParse {
 	
 	
 	public static final String USER1_JSON =
-			"{\"lastUpdate\":1111," +
-			"\"userData\":{" +
+			"{\"userData\":{" +
 				"\"test@test.com\":{" +
-					"\"lastUpdate\":2222," +
 					"\"lists\":{" +
 						"\"1:1\":{" +
 							"\"lastUpdate\":1234567890"+
@@ -154,25 +152,25 @@ public class TestJsonParse {
 		
 		ListInfo listInfo = oneUserData.lists.get("1:1");
 		assertNotNull("testList should not be null", listInfo);
-		assertEquals("Test List", listInfo.name);
-		assertEquals(ListInfoStatus.ACTIVE, listInfo.status);
-		assertEquals(new Long(1234567890L), listInfo.lastUpdate);
+		assertEquals("Test List", listInfo.getName());
+		assertEquals(ListInfoStatus.ACTIVE, listInfo.getStatus());
+		assertEquals(new Long(1234567890L), listInfo.getLastUpdate());
 		
-		assertEquals(1, listInfo.items.size());
-		ItemInfo item = listInfo.items.get("2:1");
+		assertEquals(1, listInfo.getItems().size());
+		ItemInfo item = listInfo.getItems().get("2:1");
 		testItem1(item);
 		
-		assertEquals(1, listInfo.categories.size());
-		CategoryInfo cat = listInfo.categories.first();
-		assertEquals("Test Category", cat.name);
-		assertEquals("4:1", cat.uniqueId);
-		assertEquals(new Long(312345L), cat.lastUpdate);
+		assertEquals(1, listInfo.getCategories().size());
+		CategoryInfo cat = listInfo.getCategories().first();
+		assertEquals("Test Category", cat.getName());
+		assertEquals("4:1", cat.getUniqueId());
+		assertEquals(new Long(312345L), cat.getLastUpdate());
 		
-		assertEquals(1, listInfo.selectedCategories.size());
-		assertEquals("4:1", listInfo.selectedCategories.toArray()[0]);
+		assertEquals(1, listInfo.getSelectedCategories().size());
+		assertEquals("4:1", listInfo.getSelectedCategories().toArray()[0]);
 		
-		assertEquals(1, listInfo.otherUserPrivs.size());
-		OtherUserPrivOnList privObj = listInfo.otherUserPrivs.get("foo@bar.com");
+		assertEquals(1, listInfo.getOtherUserPrivs().size());
+		OtherUserPrivOnList privObj = listInfo.getOtherUserPrivs().get("foo@bar.com");
 		assertEquals(OtherUserPrivOnList.OtherUserPriv.FULL, privObj.priv);
 		assertEquals(new Long(44321L), privObj.lastUpdate);		
 		

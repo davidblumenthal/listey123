@@ -21,26 +21,26 @@ public class ItemInfoJsonAdapter implements JsonDeserializer<ItemInfo>, JsonSeri
 			throws JsonParseException {			
 		JsonObject itemJson = json.getAsJsonObject();
 		ItemInfo item = new ItemInfo();
-		item.uniqueId = itemJson.get(ItemInfo.UNIQUE_ID).getAsString();
+		item.setUniqueId(itemJson.get(ItemInfo.UNIQUE_ID).getAsString());
 		if (itemJson.has(ItemInfo.COUNT)) {
-			item.count = itemJson.get(ItemInfo.COUNT).getAsLong();
+			item.setCount(itemJson.get(ItemInfo.COUNT).getAsLong());
 		}
-		item.name = itemJson.get(ItemInfo.NAME).getAsString();
+		item.setName(itemJson.get(ItemInfo.NAME).getAsString());
 		if (itemJson.has(ItemInfo.STATUS)) {
 			String statusString = itemJson.get(ItemInfo.STATUS).getAsString();
-			item.status = ItemStatus.valueOf(statusString);
+			item.setStatus(ItemStatus.valueOf(statusString));
 		}
 		else {
-			item.status = ItemStatus.ACTIVE;
+			item.setStatus(ItemStatus.ACTIVE);
 		}
 		
-		item.lastUpdate = itemJson.get(ItemInfo.LAST_UPDATE).getAsLong();
+		item.setLastUpdate(itemJson.get(ItemInfo.LAST_UPDATE).getAsLong());
 		if (itemJson.has(ItemInfo.CATEGORIES)) {
 			JsonObject categoriesJson = itemJson.get(ItemInfo.CATEGORIES).getAsJsonObject();
 			for ( Map.Entry<String,JsonElement> catEntry : categoriesJson.entrySet()){
 				ItemCategoryInfo catInfo = context.deserialize(catEntry.getValue(), ItemCategoryInfo.class);
-				catInfo.uniqueId = catEntry.getKey();
-				item.categories.put(catEntry.getKey(), catInfo);
+				catInfo.setUniqueId(catEntry.getKey());
+				item.getCategories().put(catEntry.getKey(), catInfo);
 			}//for categoriesJson
 		}//if has categories
 
@@ -54,14 +54,14 @@ public class ItemInfoJsonAdapter implements JsonDeserializer<ItemInfo>, JsonSeri
 	public JsonElement serialize(ItemInfo item, Type type,
 			JsonSerializationContext context) {
 		JsonObject rv = new JsonObject();
-		rv.addProperty(ItemInfo.COUNT, item.count);
-		rv.addProperty(ItemInfo.LAST_UPDATE, item.lastUpdate);
-		rv.addProperty(ItemInfo.NAME, item.name);
-		rv.addProperty(ItemInfo.STATUS, item.status.toString());
-		rv.addProperty(ItemInfo.UNIQUE_ID, item.uniqueId);
+		rv.addProperty(ItemInfo.COUNT, item.getCount());
+		rv.addProperty(ItemInfo.LAST_UPDATE, item.getLastUpdate());
+		rv.addProperty(ItemInfo.NAME, item.getName());
+		rv.addProperty(ItemInfo.STATUS, item.getStatus().toString());
+		rv.addProperty(ItemInfo.UNIQUE_ID, item.getUniqueId());
 		
-		if (!item.categories.isEmpty()){
-			JsonElement categoriesJson = context.serialize(item.categories);
+		if (!item.getCategories().isEmpty()){
+			JsonElement categoriesJson = context.serialize(item.getCategories());
 			for (Map.Entry<String, JsonElement> categoryEntry : categoriesJson.getAsJsonObject().entrySet()) {
 				categoryEntry.getValue().getAsJsonObject().remove(ItemCategoryInfo.UNIQUE_ID);
 			}

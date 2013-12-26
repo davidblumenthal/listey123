@@ -1,3 +1,11 @@
+/**
+ * Top-level object for holding all the information for a particular login.
+ * 
+ * Note, since users can share lists, a ListeyDataMultipleUsers object can contain information
+ * for the user who logs in AND other user's lists that were shared with him/her.
+ * 
+ * This and its sub-objects is intended to map pretty directly to the JSON stored on the client.
+ */
 package com.blumenthal.listey;
 
 import java.util.ArrayList;
@@ -71,10 +79,10 @@ public class ListeyDataMultipleUsers {
 	 * @param parent entity key
 	 * @return a list of all entities for this object and all sub-objects
 	 */
-	public List<Entity> toEntities() {
+	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator) {
 		List<Entity> entities = new ArrayList<Entity>();
 		for (Map.Entry<String, ListeyDataOneUser> entry : userData.entrySet()) {
-			entities.addAll(entry.getValue().toEntities(entry.getKey()));
+			entities.addAll(entry.getValue().toEntities(uniqueIdCreator, entry.getKey()));
 		}//foreach item
 		
 		return entities;

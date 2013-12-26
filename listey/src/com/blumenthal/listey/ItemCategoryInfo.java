@@ -1,5 +1,5 @@
 /**
- * 
+ * Links the item to a category (aka store)
  */
 package com.blumenthal.listey;
 
@@ -17,9 +17,9 @@ public class ItemCategoryInfo {
 	public static final String LAST_UPDATE = "lastUpdate";
 	public static final String UNIQUE_ID = "uniqueId";
 	
-	public String uniqueId;
-	public ItemCategoryStatus status;
-	public Long lastUpdate;
+	private String uniqueId;
+	private ItemCategoryStatus status;
+	private Long lastUpdate;
 	
 	/** Default constructor */
 	public ItemCategoryInfo(){}
@@ -29,21 +29,63 @@ public class ItemCategoryInfo {
 			//check the entity type and throw if not what we're expecting
 			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
 		}//if unexpected kind
-		lastUpdate = (Long) entity.getProperty(LAST_UPDATE);
-		uniqueId = (String) entity.getKey().getName();
-		status = ItemCategoryStatus.valueOf((String) entity.getProperty(STATUS));
+		setLastUpdate((Long) entity.getProperty(LAST_UPDATE));
+		setUniqueId((String) entity.getKey().getName());
+		setStatus(ItemCategoryStatus.valueOf((String) entity.getProperty(STATUS)));
 	}//ItemCategoryInfo(Entity)
 	
 	
+	/**
+	 * @return the uniqueId
+	 */
+	public String getUniqueId() {
+		return uniqueId;
+	}
+
+	/**
+	 * @param uniqueId the uniqueId to set
+	 */
+	public void setUniqueId(String uniqueId) {
+		this.uniqueId = uniqueId;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public ItemCategoryStatus getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(ItemCategoryStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the lastUpdate
+	 */
+	public Long getLastUpdate() {
+		return lastUpdate;
+	}
+
+	/**
+	 * @param lastUpdate the lastUpdate to set
+	 */
+	public void setLastUpdate(Long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
 	/**
 	 * @param other
 	 * @return Returns true if all essential fields of this object
 	 * are the same as other.
 	 */
 	public boolean shallowEquals(ItemCategoryInfo other) {
-		return (uniqueId.equals(other.uniqueId)
-				&& lastUpdate.equals(other.lastUpdate)
-				&& status.equals(other.status));
+		return (getUniqueId().equals(other.getUniqueId())
+				&& getLastUpdate().equals(other.getLastUpdate())
+				&& getStatus().equals(other.getStatus()));
 	}//shallowEquals
 	
 	
@@ -61,13 +103,16 @@ public class ItemCategoryInfo {
 	
 	
 	/**
+	 * @param uniqueIdCreator Need to pass this along to possibly translate a temporary id to a unique one
 	 * @param parent
 	 * @return an entity that represents this object
 	 */
-	public Entity toEntity(Key parent) {
-		Entity entity = new Entity(KIND, uniqueId, parent);
-		entity.setProperty(STATUS, status.toString());
-		entity.setProperty(LAST_UPDATE, lastUpdate);
+	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
+		//Before converting this to an entity, change the id to a permanent if it's not already
+		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
+		Entity entity = new Entity(KIND, getUniqueId(), parent);
+		entity.setProperty(STATUS, getStatus().toString());
+		entity.setProperty(LAST_UPDATE, getLastUpdate());
 		return entity;
 	}//toEntity
 }//ItemCategoryInfo

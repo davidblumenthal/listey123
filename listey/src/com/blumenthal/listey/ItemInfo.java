@@ -1,5 +1,5 @@
 /**
- * 
+ * Stores info about a list item.
  */
 package com.blumenthal.listey;
 
@@ -25,12 +25,12 @@ public class ItemInfo {
 	    COMPLETED
 	}
 	
-	public String name;
-	public String uniqueId;
-	public Long count = 1L;
-	public ItemStatus status;
-	public Map<String, ItemCategoryInfo> categories = new HashMap<String, ItemCategoryInfo>();
-	public Long lastUpdate;
+	private String name;
+	private String uniqueId;
+	private Long count = 1L;
+	private ItemStatus status;
+	private Map<String, ItemCategoryInfo> categories = new HashMap<String, ItemCategoryInfo>();
+	private Long lastUpdate;
 	
 	/** Default constructor */
 	public ItemInfo(){}
@@ -42,25 +42,91 @@ public class ItemInfo {
 			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
 		}//if unexpected kind
 		
-		lastUpdate = (Long) entity.getProperty(LAST_UPDATE);
-		name = (String) entity.getProperty(NAME);
-		uniqueId = (String) entity.getKey().getName();
-		count = (Long) entity.getProperty(COUNT);
-		status = ItemStatus.valueOf((String) entity.getProperty(STATUS));
+		setLastUpdate((Long) entity.getProperty(LAST_UPDATE));
+		setName((String) entity.getProperty(NAME));
+		setUniqueId((String) entity.getKey().getName());
+		setCount((Long) entity.getProperty(COUNT));
+		setStatus(ItemStatus.valueOf((String) entity.getProperty(STATUS)));
 	}//ItemInfo(Entity)
 	
 	
 	
 	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	/**
+	 * @return the count
+	 */
+	public Long getCount() {
+		return count;
+	}
+
+
+	/**
+	 * @param count the count to set
+	 */
+	public void setCount(Long count) {
+		this.count = count;
+	}
+
+
+	/**
+	 * @return the status
+	 */
+	public ItemStatus getStatus() {
+		return status;
+	}
+
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(ItemStatus status) {
+		this.status = status;
+	}
+
+
+	/**
+	 * @return the lastUpdate
+	 */
+	public Long getLastUpdate() {
+		return lastUpdate;
+	}
+
+
+	/**
+	 * @param lastUpdate the lastUpdate to set
+	 */
+	public void setLastUpdate(Long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
+
+	/**
 	 * @param parent
 	 * @return an entity that represents this object (but not its child objects)
 	 */
-	public Entity toEntity(Key parent) {
-		Entity entity = new Entity(KIND, uniqueId, parent);
-		entity.setProperty(STATUS, status.toString());
-		entity.setProperty(NAME, name);
-		entity.setProperty(COUNT,  count);
-		entity.setProperty(LAST_UPDATE, lastUpdate);
+	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
+		//Before converting this to an entity, change the id to a permanent if it's not already
+		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
+		Entity entity = new Entity(KIND, getUniqueId(), parent);
+		entity.setProperty(STATUS, getStatus().toString());
+		entity.setProperty(NAME, getName());
+		entity.setProperty(COUNT,  getCount());
+		entity.setProperty(LAST_UPDATE, getLastUpdate());
 		return entity;
 	}//toEntity
 	
@@ -71,12 +137,12 @@ public class ItemInfo {
 	 * @param parent
 	 * @return
 	 */
-	public List<Entity> toEntities(Key parent) {
+	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		List<Entity> entities = new ArrayList<Entity>();
-		Entity thisEntity = toEntity(parent);
+		Entity thisEntity = toEntity(uniqueIdCreator, parent);
 		entities.add(thisEntity);
-		for (Map.Entry<String, ItemCategoryInfo> entry : categories.entrySet()) {
-			entities.add(entry.getValue().toEntity(thisEntity.getKey()));
+		for (Map.Entry<String, ItemCategoryInfo> entry : getCategories().entrySet()) {
+			entities.add(entry.getValue().toEntity(uniqueIdCreator, thisEntity.getKey()));
 		}//foreach category
 		return entities;
 	}//toEntities
@@ -88,11 +154,11 @@ public class ItemInfo {
 	 * are the same as other.
 	 */
 	public boolean shallowEquals(ItemInfo other) {
-		return (uniqueId.equals(other.uniqueId)
-				&& name.equals(other.name)
-				&& lastUpdate.equals(other.lastUpdate)
-				&& status.equals(other.status)
-				&& count.equals(other.count));
+		return (getUniqueId().equals(other.getUniqueId())
+				&& getName().equals(other.getName())
+				&& getLastUpdate().equals(other.getLastUpdate())
+				&& getStatus().equals(other.getStatus())
+				&& getCount().equals(other.getCount()));
 	}//shallowEquals
 	
 	
@@ -103,11 +169,11 @@ public class ItemInfo {
 	 */
 	public boolean deepEquals(ItemInfo other) {
 		if (!shallowEquals(other)
-			|| categories.size() != other.categories.size()) {
+			|| getCategories().size() != other.getCategories().size()) {
 			return false;
 		}
-		for (Map.Entry<String, ItemCategoryInfo> entry : categories.entrySet()) {
-			ItemCategoryInfo otherCat = other.categories.get(entry.getKey());
+		for (Map.Entry<String, ItemCategoryInfo> entry : getCategories().entrySet()) {
+			ItemCategoryInfo otherCat = other.getCategories().get(entry.getKey());
 			if (!entry.getValue().deepEquals(otherCat)) {
 				return false;
 			}
@@ -116,4 +182,36 @@ public class ItemInfo {
 		//If we get to here, everything is equal
 		return true;
 	}//deepEquals
+
+
+	/**
+	 * @return the uniqueId
+	 */
+	public String getUniqueId() {
+		return uniqueId;
+	}
+
+
+	/**
+	 * @param uniqueId the uniqueId to set
+	 */
+	public void setUniqueId(String uniqueId) {
+		this.uniqueId = uniqueId;
+	}
+
+
+	/**
+	 * @return the categories
+	 */
+	public Map<String, ItemCategoryInfo> getCategories() {
+		return categories;
+	}
+
+
+	/**
+	 * @param categories the categories to set
+	 */
+	public void setCategories(Map<String, ItemCategoryInfo> categories) {
+		this.categories = categories;
+	}
 }//ItemInfo

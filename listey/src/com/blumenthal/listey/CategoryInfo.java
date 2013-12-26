@@ -1,5 +1,5 @@
 /**
- * Stores category (store) information for a list.
+ * Stores category (aka store) information for a list.
  */
 package com.blumenthal.listey;
 
@@ -17,10 +17,10 @@ public class CategoryInfo implements Comparable<CategoryInfo> {
 	    DELETED
 	}
 	
-	public String name;
-	public String uniqueId;
-	public Long lastUpdate;
-	public CategoryStatus status;
+	private String name;
+	private String uniqueId;
+	private Long lastUpdate;
+	private CategoryStatus status;
 	
 	/** Default constructor */
 	public CategoryInfo(){}
@@ -30,10 +30,10 @@ public class CategoryInfo implements Comparable<CategoryInfo> {
 			//check the entity type and throw if not what we're expecting
 			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
 		}//if unexpected kind
-		lastUpdate = (Long) entity.getProperty("lastUpdate");
-		name = (String) entity.getProperty(NAME);
-		uniqueId = (String) entity.getKey().getName();
-		status = CategoryStatus.valueOf((String) entity.getProperty(STATUS));
+		setLastUpdate((Long) entity.getProperty("lastUpdate"));
+		setName((String) entity.getProperty(NAME));
+		setUniqueId((String) entity.getKey().getName());
+		setStatus(CategoryStatus.valueOf((String) entity.getProperty(STATUS)));
 	}//CategoryInfo(Entity)
 	
 	
@@ -43,10 +43,10 @@ public class CategoryInfo implements Comparable<CategoryInfo> {
 	 * @return an entity that represents this object
 	 */
 	public Entity toEntity(Key parent) {
-		Entity entity = new Entity(KIND, uniqueId, parent);
-		entity.setProperty(STATUS, status.toString());
-		entity.setProperty(NAME, name);
-		entity.setProperty(LAST_UPDATE, lastUpdate);
+		Entity entity = new Entity(KIND, getUniqueId(), parent);
+		entity.setProperty(STATUS, getStatus().toString());
+		entity.setProperty(NAME, getName());
+		entity.setProperty(LAST_UPDATE, getLastUpdate());
 		return entity;
 	}//toEntity
 
@@ -57,10 +57,10 @@ public class CategoryInfo implements Comparable<CategoryInfo> {
 	 * are the same as other.
 	 */
 	public boolean shallowEquals(CategoryInfo other) {
-		return (uniqueId.equals(other.uniqueId)
-				&& name.equals(other.name)
-				&& lastUpdate.equals(other.lastUpdate)
-				&& status.equals(other.status));
+		return (getUniqueId().equals(other.getUniqueId())
+				&& getName().equals(other.getName())
+				&& getLastUpdate().equals(other.getLastUpdate())
+				&& getStatus().equals(other.getStatus()));
 	}//shallowEquals
 	
 	
@@ -82,6 +82,62 @@ public class CategoryInfo implements Comparable<CategoryInfo> {
 	 */
 	@Override
 	public int compareTo(CategoryInfo o) {
-		return name.compareTo(o.name);
+		return getName().compareTo(o.getName());
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the uniqueId
+	 */
+	public String getUniqueId() {
+		return uniqueId;
+	}
+
+	/**
+	 * @param uniqueId the uniqueId to set
+	 */
+	public void setUniqueId(String uniqueId) {
+		this.uniqueId = uniqueId;
+	}
+
+	/**
+	 * @return the lastUpdate
+	 */
+	public Long getLastUpdate() {
+		return lastUpdate;
+	}
+
+	/**
+	 * @param lastUpdate the lastUpdate to set
+	 */
+	public void setLastUpdate(Long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public CategoryStatus getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(CategoryStatus status) {
+		this.status = status;
 	}
 }//CategoryInfo

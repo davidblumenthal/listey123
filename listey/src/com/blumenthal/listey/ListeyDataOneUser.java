@@ -1,17 +1,22 @@
+/**
+ * Holder for the set of lists owned by a single user.
+ */
 package com.blumenthal.listey;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import com.blumenthal.listey.ListInfo.ListInfoStatus;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.gson.Gson;
 
 /** This class is a java implementation of the JSON primitive for spec version 1
  * JSON Data Format
@@ -42,12 +47,19 @@ import com.google.appengine.api.datastore.Query;
 
 public class ListeyDataOneUser {
 	public static final String KIND = "user";//kind in the datastore
-	public static DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
 	
 	public Map<String, ListInfo> lists = new HashMap<String, ListInfo>();
 	
 	/** Default constructor */
 	public ListeyDataOneUser(){}
+	
+	/** Copy constructor using json serialization */
+	public ListeyDataOneUser makeCopy(ListeyDataOneUser orig) {
+		Gson gson = ListeyDataMultipleUsers.getGson();
+		String json = gson.toJson(this);
+		ListeyDataOneUser copy = gson.fromJson(json, this.getClass());
+		return copy;
+	}//makeCopy
 	
 	
 	/** Load the whole ListeyDataOneUser object from the datastore using the userEmail
@@ -108,7 +120,7 @@ public class ListeyDataOneUser {
 		if (entityList != null) {
 			for (Entity e : entityList) {
 				ListInfo listInfo = new ListInfo(e);
-				oneUser.lists.put(listInfo.uniqueId, listInfo);
+				oneUser.lists.put(listInfo.getUniqueId(), listInfo);
 			}//for each list entity
 		}//if any lists defined
 
@@ -120,7 +132,7 @@ public class ListeyDataOneUser {
 				String listId = e.getParent().getName();
 				ListInfo listeyList = oneUser.lists.get(listId);
 				if (listeyList != null) {
-					listeyList.categories.add(catInfo);
+					listeyList.getCategories().add(catInfo);
 				}
 			}//foreach list entity
 		}//if any categories defined
@@ -133,7 +145,7 @@ public class ListeyDataOneUser {
 				String listId = e.getParent().getName();
 				ListInfo listeyList = oneUser.lists.get(listId);
 				if (listeyList != null) {
-					listeyList.items.put(e.getKey().getName(), itemInfo);
+					listeyList.getItems().put(e.getKey().getName(), itemInfo);
 				}
 			}//foreach entity
 		}//if any items defined
@@ -150,9 +162,9 @@ public class ListeyDataOneUser {
 				ListInfo listeyList = oneUser.lists.get(listId);
 				if (listeyList != null) {
 					//find the item it goes in
-					ItemInfo item = listeyList.items.get(itemId);
+					ItemInfo item = listeyList.getItems().get(itemId);
 					if (item != null) {
-						item.categories.put(e.getKey().getName(), itemCategoryInfo);
+						item.getCategories().put(e.getKey().getName(), itemCategoryInfo);
 					}//if item found
 				}//if list found
 			}//foreach entity
@@ -170,7 +182,7 @@ public class ListeyDataOneUser {
 					String listId = e.getParent().getName();
 					ListInfo listeyList = oneUser.lists.get(listId);
 					if (listeyList != null) {
-						listeyList.otherUserPrivs.put(e.getKey().getName(), priv);
+						listeyList.getOtherUserPrivs().put(e.getKey().getName(), priv);
 					}
 				}//foreach entity
 			}//if any items defined
@@ -183,11 +195,11 @@ public class ListeyDataOneUser {
 	 * @param parent entity key
 	 * @return a list of all entities for this object and all sub-objects
 	 */
-	public List<Entity> toEntities(String userEmail) {
+	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator, String userEmail) {
 		List<Entity> entities = new ArrayList<Entity>();
 		Key thisKey = getEntityKey(userEmail);
 		for (Map.Entry<String, ListInfo> entry : lists.entrySet()) {
-			entities.addAll(entry.getValue().toEntities(thisKey));
+			entities.addAll(entry.getValue().toEntities(uniqueIdCreator, thisKey));
 		}//foreach item
 		
 		return entities;
@@ -221,28 +233,24 @@ public class ListeyDataOneUser {
 	/** Compare 2 ListeyDataOneUser objects and return lists of entities
 	 *  to add+update and a new up-to-date ListeyDataOneUser
 	 */
-	public static ListeyDataOneUser compareAndUpdate(ListeyDataOneUser serverData, ListeyDataOneUser clientData, 
+	public static ListeyDataOneUser compareAndUpdate(DataStoreUniqueId uniqueIdCreator, String userEmail, ListeyDataOneUser serverData, ListeyDataOneUser clientData, 
 			List<Entity> updateEntities, List<Entity> deleteEntities) {
 		ListeyDataOneUser rv = new ListeyDataOneUser();
 		
-		for (ListInfo clientList : clientData.lists.values()) {
-			ListInfo serverList = serverData.lists.get(clientList.uniqueId);
+		Set<ListInfo> fullSet = new HashSet<ListInfo>(clientData.lists.values());
+		fullSet.addAll(serverData.lists.values());
+		
+		for (ListInfo fullSetList : fullSet) {
+			ListInfo clientObj = clientData.lists.get(fullSetList.getUniqueId());
+			ListInfo serverObj = serverData.lists.get(fullSetList.getUniqueId());
 
-			ListInfo updatedListInfo = ListInfo.compareAndUpdate(serverList, clientList, updateEntities, deleteEntities);
+			ListInfo updatedListInfo = ListInfo.compareAndUpdate(uniqueIdCreator, getEntityKey(userEmail), serverObj, clientObj, updateEntities, deleteEntities);
 			
 			//If the list was deleted on the server, don't pass it back to the client
 			if (updatedListInfo != null) {
-				rv.lists.put(updatedListInfo.uniqueId, updatedListInfo);
+				rv.lists.put(updatedListInfo.getUniqueId(), updatedListInfo);
 			}//updatedListInfo != null
 		}//for lists
-		
-		//check and see if any new lists were added on the server
-		for (ListInfo serverList : serverData.lists.values()) {
-			if (serverList.status.equals(ListInfoStatus.ACTIVE)
-				&& !clientData.lists.containsKey(serverList.uniqueId)) {
-				//TODO add it to the client
-			}
-		}//foreach server list
 		
 		return rv;
 	}//compareAndUpdate
