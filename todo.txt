@@ -64,6 +64,8 @@
 
 ################################################################
 #### Implement server side ####
+  * Handle added something whose name matches something that already exists.
+    * e.g. add foo list on client A, but don't sync, add foo list on client B and sync.  When A syncs, it should just merge the 2 Foo lists...  
   * Add abstraction layer around Google-specific code, in case I want to move it
   * Implement OpenID
   * Convert all direct field access to getter/setter
