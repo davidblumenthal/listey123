@@ -33,7 +33,7 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 		JsonObject topMap = json.getAsJsonObject();
 		listInfo.setLastUpdate(topMap.get(ListInfo.LAST_UPDATE).getAsLong());
 		listInfo.setName(topMap.get(ListInfo.NAME).getAsString());
-		listInfo.setStatus(ListInfo.ListInfoStatus.valueOf(topMap.get(ListInfo.STATUS).getAsString()));
+		listInfo.setStatus(TimeStampedNode.Status.valueOf(topMap.get(ListInfo.STATUS).getAsString()));
 
 		if (topMap.has(ListInfo.ITEMS)) {
 			JsonArray itemsJson = topMap.get(ListInfo.ITEMS).getAsJsonArray();

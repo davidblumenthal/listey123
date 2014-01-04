@@ -15,10 +15,9 @@ import java.util.TreeSet;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.memcache.InvalidValueException;
 import com.google.gson.Gson;
 
-public class ListInfo {
+public class ListInfo extends TimeStampedNode{
 	public static final String KIND = "list";//kind in the datastore
 	public static final String NAME = "name";//name in the datastore
 	public static final String LAST_UPDATE = "lastUpdate";//lastUpdate in the datastore
@@ -28,12 +27,7 @@ public class ListInfo {
 	public static final String SELECTED_CATEGORIES = "selectedCategories";
 	public static final String OTHER_USER_PRIVS = "otherUserPrivs";
 	
-	public static enum ListInfoStatus {
-		ACTIVE,
-		DELETED
-	}
-	
-	private ListInfoStatus status;
+	private Status status;
 	
 	private String uniqueId;
 	private String name;
@@ -57,7 +51,7 @@ public class ListInfo {
 	 * @param lastUpdate
 	 * @param selectedCategories
 	 */
-	public ListInfo(ListInfo.ListInfoStatus status, String uniqueId, String name,
+	public ListInfo(Status status, String uniqueId, String name,
 			Long lastUpdate) {
 		super();
 		this.setStatus(status);
@@ -82,7 +76,7 @@ public class ListInfo {
 		setName((String) entity.getProperty(NAME));
 		setUniqueId((String) entity.getKey().getName());
 		setLastUpdate((Long) entity.getProperty(LAST_UPDATE));
-		setStatus(ListInfoStatus.valueOf((String) entity.getProperty(STATUS)));
+		setStatus(Status.valueOf((String) entity.getProperty(STATUS)));
 	}//ListInfo(Entity)
 	
 	
@@ -91,20 +85,22 @@ public class ListInfo {
 	/**
 	 * @return the status
 	 */
-	public ListInfoStatus getStatus() {
+	@Override
+	public Status getStatus() {
 		return status;
 	}
 
 	/**
 	 * @param status the status to set
 	 */
-	public void setStatus(ListInfoStatus status) {
+	public void setStatus(Status status) {
 		this.status = status;
 	}
 
 	/**
 	 * @return the uniqueId
 	 */
+	@Override
 	public String getUniqueId() {
 		return uniqueId;
 	}
@@ -161,6 +157,7 @@ public class ListInfo {
 	/**
 	 * @return the lastUpdate
 	 */
+	@Override
 	public Long getLastUpdate() {
 		return lastUpdate;
 	}
@@ -200,16 +197,18 @@ public class ListInfo {
 		this.otherUserPrivs = otherUserPrivs;
 	}
 
-	/** Copy constructor using json serialization */
-	public static ListInfo makeCopy(ListInfo orig) {
+	/** Make a copy using json serialization */
+	@Override
+	public ListInfo makeCopy() {
 		Gson gson = ListeyDataMultipleUsers.getGson();
-		String json = gson.toJson(orig);
-		ListInfo copy = gson.fromJson(json, orig.getClass());
+		String json = gson.toJson(this);
+		ListInfo copy = gson.fromJson(json, this.getClass());
 		return copy;
 	}//makeCopy
 
 	
 	
+	@Override
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		//Before converting this to an entity, change the id to a permanent if it's not already
 		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
@@ -226,6 +225,7 @@ public class ListInfo {
 	 * @param parent entity key
 	 * @return a list of all entities for this object and all sub-objects
 	 */
+	@Override
 	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		List<Entity> entities = new ArrayList<Entity>();
 		Entity thisEntity = toEntity(uniqueIdCreator, parent);
@@ -234,12 +234,13 @@ public class ListInfo {
 		for (Map.Entry<String, ItemInfo> entry : getItems().entrySet()) {
 			entities.addAll(entry.getValue().toEntities(uniqueIdCreator, thisKey));
 		}//foreach item
+		
 		for (CategoryInfo cat : getCategories()) {
-			entities.add(cat.toEntity(thisKey));
+			entities.add(cat.toEntity(uniqueIdCreator, thisKey));
 		}//foreach category
+
 		for (Map.Entry<String, OtherUserPrivOnList> entry : getOtherUserPrivs().entrySet()) {
-			//note, this has no auto-generated uniqueId, so it doesn't need uniqueIdCreator
-			entities.add(entry.getValue().toEntity(thisKey, entry.getKey()));
+			entities.add(entry.getValue().toEntity(uniqueIdCreator, thisKey));
 		}
 		
 		return entities;
@@ -252,7 +253,12 @@ public class ListInfo {
 	 * @return Returns true if all essential fields of this object
 	 * are the same as other.
 	 */
-	public boolean shallowEquals(ListInfo other) {
+	@Override
+	public boolean shallowEquals(TimeStampedNode obj) {
+		if (obj == null) return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ListInfo other = (ListInfo) obj;
 		return (getUniqueId().equals(other.getUniqueId())
 				&& getName().equals(other.getName())
 				&& getLastUpdate().equals(other.getLastUpdate())
@@ -304,41 +310,45 @@ public class ListInfo {
 	}//deepEquals
 	
 	
+	/** 
+	 * 
+	 * @return This returns an array of Lists. Each of the Lists in the array
+	 * is a subList of other TimeSTampedNodes that needs to be compared.
+	 */
+	@Override
+	public List<Iterable<? extends TimeStampedNode>> subIterablesToCompare() {
+		List<Iterable<? extends TimeStampedNode>> rv = new ArrayList<Iterable<? extends TimeStampedNode>>();
+		rv.add(categories);
+		return (rv);
+	}//subIterablesToCompare
 	
-	public static ListInfo compareAndUpdate(DataStoreUniqueId uniqueIdCreator, Key parent, ListInfo serverList, ListInfo clientList,
-			List<Entity> updateEntities, List<Entity> deleteEntities) {
-		ListInfo rv = null;
-		
-		//New from the client
-		if (serverList == null) {
-			if (clientList.getStatus().equals(ListInfo.ListInfoStatus.ACTIVE)) {
-				rv = ListInfo.makeCopy(clientList);
-				updateEntities.addAll(rv.toEntities(uniqueIdCreator, parent));
-			}//new list
-			else {
-				//deleted on client, don't add to server, nothing to do
-			}
-		}//serverList == null
 
-		//New from the server
-		else if (clientList == null) {
-			rv = ListInfo.makeCopy(serverList);
-			//no need to update any entities on the server, just the client
-		}//clientList == null
+	
+	/** 
+	 * 
+	 * @return This returns an array of Lists. Each of the Lists in the array
+	 * is a subList of other TimeStampedNodes that needs to be compared.
+	 * This returns the items Map.
+	 */
+	@Override
+	public List<Map<String, ? extends TimeStampedNode>> subMapsToCompare() {
+		List<Map<String, ? extends TimeStampedNode>> rv = new ArrayList<Map<String, ? extends TimeStampedNode>>();
 		
-		else {//both lists already exist
-			//use the most recent top-level object, or the client version if they're the same
-			if (clientList.shallowEquals(serverList)) {
-				rv = ListInfo.makeCopy(clientList);
-			} else {
-				ListInfo newer = serverList.getLastUpdate() > clientList.getLastUpdate() ? serverList : clientList;
-				rv = ListInfo.makeCopy(newer);
-				updateEntities.add(rv.toEntity(uniqueIdCreator, parent));
-			}
+		rv.add(items);
+		rv.add(otherUserPrivs);
+		
+		return (rv);
+	}//subMapsToCompare
+	
 
-			//Now compare and update each sub-level object
-		}//neither list is null
-		
-		return rv;
-	}//compareAndUpdate
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#addSubIterEntries(java.util.List)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void addSubIterEntries(List<List<? extends TimeStampedNode>> subIterEntriesToAdd) {
+		List<CategoryInfo> catInfos = (List<CategoryInfo>) subIterEntriesToAdd.get(0);
+		categories.addAll(catInfos);
+	}//addSubIterEntries
 }//ListInfo

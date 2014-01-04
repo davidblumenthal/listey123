@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -35,6 +36,8 @@ import com.google.gson.GsonBuilder;
   }//top-level
  */
 public class ListeyDataMultipleUsers {
+	private static final Logger log = Logger.getLogger(TimeStampedNode.class.getName());
+	
 	public Map< String, ListeyDataOneUser> userData = new HashMap<String, ListeyDataOneUser>();
 	
 	/**
@@ -61,6 +64,7 @@ public class ListeyDataMultipleUsers {
                 userEmail));
 		PreparedQuery pq = datastore.prepare(q);
     	
+getLog().warning("Looking for other users' lists which " + userEmail + " can see.");
     	//Look up and insert info for each other user's list individually
 		for (Entity privEntity : pq.asIterable()) {
 			Key listKey = privEntity.getKey().getParent();
@@ -71,6 +75,8 @@ public class ListeyDataMultipleUsers {
 			//Append the other user info for this list to existing other user info, or create the other user info if it doesn't exist
 			ListeyDataOneUser otherUserData = ListeyDataOneUser.fromDatastore(datastore, otherUserEmail, listUniqueId, userData.get(otherUserEmail));
 			userData.put(otherUserEmail, otherUserData);
+			
+getLog().warning("  " + otherUserEmail + " can view list " + listUniqueId);
 		}//foreach privEntity
 	}//Constructor
 	
@@ -141,4 +147,11 @@ public class ListeyDataMultipleUsers {
 		String rv = gson.toJson(this);
 		return rv;
 	}//fromJson
+
+	/**
+	 * @return the log
+	 */
+	private static Logger getLog() {
+		return log;
+	}
 }//ListeyDataMultipleUsers

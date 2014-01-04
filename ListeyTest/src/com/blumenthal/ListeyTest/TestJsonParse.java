@@ -13,14 +13,13 @@ import org.junit.Test;
 
 import com.blumenthal.listey.CategoryInfo;
 import com.blumenthal.listey.ItemCategoryInfo;
-import com.blumenthal.listey.ItemCategoryInfo.ItemCategoryStatus;
 import com.blumenthal.listey.ItemInfo;
 import com.blumenthal.listey.ItemInfoJsonAdapter;
 import com.blumenthal.listey.ListInfo;
-import com.blumenthal.listey.ListInfo.ListInfoStatus;
 import com.blumenthal.listey.ListeyDataMultipleUsers;
 import com.blumenthal.listey.ListeyDataOneUser;
 import com.blumenthal.listey.OtherUserPrivOnList;
+import com.blumenthal.listey.TimeStampedNode;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gson.Gson;
@@ -54,15 +53,18 @@ public class TestJsonParse {
 	
 	@Test
 	public void testParseEnum() {
-		ItemInfo.ItemStatus itemStatus = ItemInfo.ItemStatus.valueOf("ACTIVE");
-		assertEquals("Should have parsed ACTIVE", ItemInfo.ItemStatus.ACTIVE, itemStatus);
+		TimeStampedNode.Status itemStatus = TimeStampedNode.Status.valueOf("ACTIVE");
+		assertEquals("Should have parsed ACTIVE", TimeStampedNode.Status.ACTIVE, itemStatus);
 		
-		itemStatus = ItemInfo.ItemStatus.valueOf("COMPLETED");
-		assertEquals("Should have parsed COMPLETED", ItemInfo.ItemStatus.COMPLETED, itemStatus);
+		itemStatus = TimeStampedNode.Status.valueOf("COMPLETED");
+		assertEquals("Should have parsed COMPLETED", TimeStampedNode.Status.COMPLETED, itemStatus);
+		
+		itemStatus = TimeStampedNode.Status.valueOf("DELETED");
+		assertEquals("Should have parsed DELETED", TimeStampedNode.Status.DELETED, itemStatus);
 		
 		itemStatus = null;
 		try {
-			itemStatus = ItemInfo.ItemStatus.valueOf("FOO");
+			itemStatus = TimeStampedNode.Status.valueOf("FOO");
 		} catch (IllegalArgumentException e) {
 			//expected
 		}
@@ -90,13 +92,13 @@ public class TestJsonParse {
 		assertEquals(new Long(1234567890L), item.getLastUpdate());
 		assertEquals("Item 1 Name", item.getName());
 		assertEquals(1, item.getCategories().size());
-		assertEquals("Should have parsed ACTIVE", ItemInfo.ItemStatus.ACTIVE, item.getStatus());
+		assertEquals("Should have parsed ACTIVE", TimeStampedNode.Status.ACTIVE, item.getStatus());
 		assertNotNull("Categories shouldn't be null", item.getCategories());
 		assertEquals(item.getCategories().size(), 1);
 		ItemCategoryInfo parsedCatInfo = item.getCategories().get("3:1");
 		assertNotNull("ItemCategory 3:1 should not be null", parsedCatInfo);
 		assertEquals(new Long(2234567890L), parsedCatInfo.getLastUpdate());
-		assertEquals(ItemCategoryStatus.ACTIVE, parsedCatInfo.getStatus());	
+		assertEquals(TimeStampedNode.Status.ACTIVE, parsedCatInfo.getStatus());	
 	}//testItem1
 	
 	
@@ -153,7 +155,7 @@ public class TestJsonParse {
 		ListInfo listInfo = oneUserData.lists.get("1:1");
 		assertNotNull("testList should not be null", listInfo);
 		assertEquals("Test List", listInfo.getName());
-		assertEquals(ListInfoStatus.ACTIVE, listInfo.getStatus());
+		assertEquals(TimeStampedNode.Status.ACTIVE, listInfo.getStatus());
 		assertEquals(new Long(1234567890L), listInfo.getLastUpdate());
 		
 		assertEquals(1, listInfo.getItems().size());

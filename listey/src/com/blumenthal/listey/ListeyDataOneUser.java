@@ -5,10 +5,8 @@ package com.blumenthal.listey;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -227,31 +225,5 @@ public class ListeyDataOneUser {
 		//If we get to here, everything is equal
 		return true;
 	}//deepEquals
-	
-	
-	
-	/** Compare 2 ListeyDataOneUser objects and return lists of entities
-	 *  to add+update and a new up-to-date ListeyDataOneUser
-	 */
-	public static ListeyDataOneUser compareAndUpdate(DataStoreUniqueId uniqueIdCreator, String userEmail, ListeyDataOneUser serverData, ListeyDataOneUser clientData, 
-			List<Entity> updateEntities, List<Entity> deleteEntities) {
-		ListeyDataOneUser rv = new ListeyDataOneUser();
-		
-		Set<ListInfo> fullSet = new HashSet<ListInfo>(clientData.lists.values());
-		fullSet.addAll(serverData.lists.values());
-		
-		for (ListInfo fullSetList : fullSet) {
-			ListInfo clientObj = clientData.lists.get(fullSetList.getUniqueId());
-			ListInfo serverObj = serverData.lists.get(fullSetList.getUniqueId());
 
-			ListInfo updatedListInfo = ListInfo.compareAndUpdate(uniqueIdCreator, getEntityKey(userEmail), serverObj, clientObj, updateEntities, deleteEntities);
-			
-			//If the list was deleted on the server, don't pass it back to the client
-			if (updatedListInfo != null) {
-				rv.lists.put(updatedListInfo.getUniqueId(), updatedListInfo);
-			}//updatedListInfo != null
-		}//for lists
-		
-		return rv;
-	}//compareAndUpdate
 }//ListeyDataOneUser

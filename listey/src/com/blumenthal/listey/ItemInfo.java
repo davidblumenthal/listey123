@@ -11,7 +11,7 @@ import java.util.Map;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
-public class ItemInfo {
+public class ItemInfo extends TimeStampedNode {
 	public static final String KIND = "item";//kind in the datastore
 	public static final String NAME = "name";
 	public static final String STATUS = "status";
@@ -20,15 +20,10 @@ public class ItemInfo {
 	public static final String UNIQUE_ID = "uniqueId";
 	public static final String CATEGORIES = "categories";
 	
-	public static enum ItemStatus {
-	    ACTIVE,
-	    COMPLETED
-	}
-	
 	private String name;
 	private String uniqueId;
 	private Long count = 1L;
-	private ItemStatus status;
+	private Status status;
 	private Map<String, ItemCategoryInfo> categories = new HashMap<String, ItemCategoryInfo>();
 	private Long lastUpdate;
 	
@@ -46,7 +41,7 @@ public class ItemInfo {
 		setName((String) entity.getProperty(NAME));
 		setUniqueId((String) entity.getKey().getName());
 		setCount((Long) entity.getProperty(COUNT));
-		setStatus(ItemStatus.valueOf((String) entity.getProperty(STATUS)));
+		setStatus(Status.valueOf((String) entity.getProperty(STATUS)));
 	}//ItemInfo(Entity)
 	
 	
@@ -86,7 +81,7 @@ public class ItemInfo {
 	/**
 	 * @return the status
 	 */
-	public ItemStatus getStatus() {
+	public Status getStatus() {
 		return status;
 	}
 
@@ -94,7 +89,7 @@ public class ItemInfo {
 	/**
 	 * @param status the status to set
 	 */
-	public void setStatus(ItemStatus status) {
+	public void setStatus(Status status) {
 		this.status = status;
 	}
 
@@ -102,6 +97,7 @@ public class ItemInfo {
 	/**
 	 * @return the lastUpdate
 	 */
+	@Override
 	public Long getLastUpdate() {
 		return lastUpdate;
 	}
@@ -119,6 +115,7 @@ public class ItemInfo {
 	 * @param parent
 	 * @return an entity that represents this object (but not its child objects)
 	 */
+	@Override
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		//Before converting this to an entity, change the id to a permanent if it's not already
 		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
@@ -137,6 +134,7 @@ public class ItemInfo {
 	 * @param parent
 	 * @return
 	 */
+	@Override
 	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		List<Entity> entities = new ArrayList<Entity>();
 		Entity thisEntity = toEntity(uniqueIdCreator, parent);
@@ -153,7 +151,12 @@ public class ItemInfo {
 	 * @return Returns true if all essential fields of this object
 	 * are the same as other.
 	 */
-	public boolean shallowEquals(ItemInfo other) {
+	@Override
+	public boolean shallowEquals(TimeStampedNode obj) {
+		if (obj == null) return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ItemInfo other = (ItemInfo) obj;
 		return (getUniqueId().equals(other.getUniqueId())
 				&& getName().equals(other.getName())
 				&& getLastUpdate().equals(other.getLastUpdate())
@@ -187,6 +190,7 @@ public class ItemInfo {
 	/**
 	 * @return the uniqueId
 	 */
+	@Override
 	public String getUniqueId() {
 		return uniqueId;
 	}
@@ -214,4 +218,29 @@ public class ItemInfo {
 	public void setCategories(Map<String, ItemCategoryInfo> categories) {
 		this.categories = categories;
 	}
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#subMaps()
+	 */
+	@Override
+	public List<Map<String, ? extends TimeStampedNode>> subMapsToCompare() {
+		List<Map<String, ? extends TimeStampedNode>> rv = new ArrayList<Map<String, ? extends TimeStampedNode>>();
+		rv.add(getCategories());
+		return (rv);
+	}//subMapsToCompare
+	
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#addSubMapEntries(java.util.List)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void addSubMapEntries(List<List<? extends TimeStampedNode>> subMapEntriesToAdd) {
+		List<ItemCategoryInfo> catInfos = (List<ItemCategoryInfo>) subMapEntriesToAdd.get(0);
+		for (ItemCategoryInfo catInfo : catInfos) {
+			categories.put(catInfo.getUniqueId(), catInfo);
+		}
+	}//addSubMapEntries
 }//ItemInfo

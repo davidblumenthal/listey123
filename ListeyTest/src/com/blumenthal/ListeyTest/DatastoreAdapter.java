@@ -14,10 +14,10 @@ import com.blumenthal.listey.DataStoreUniqueId;
 import com.blumenthal.listey.ItemCategoryInfo;
 import com.blumenthal.listey.ItemInfo;
 import com.blumenthal.listey.ListInfo;
-import com.blumenthal.listey.ListInfo.ListInfoStatus;
 import com.blumenthal.listey.ListeyDataMultipleUsers;
 import com.blumenthal.listey.ListeyDataOneUser;
 import com.blumenthal.listey.OtherUserPrivOnList;
+import com.blumenthal.listey.TimeStampedNode;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -64,7 +64,7 @@ public class DatastoreAdapter {
 		multiUser.userData.put(FOO_EMAIL, fooUser);
 		
 		//Create Foo list1
-		ListInfo fooList1 = new ListInfo(ListInfoStatus.ACTIVE, uniqCreator.getUniqueId(), "Foo List 1", uniqueTime++);
+		ListInfo fooList1 = new ListInfo(TimeStampedNode.Status.ACTIVE, uniqCreator.getUniqueId(), "Foo List 1", uniqueTime++);
 		fooUser.lists.put(fooList1.getUniqueId(), fooList1);
 		
 		OtherUserPrivOnList barPrivOnFoo1 = new OtherUserPrivOnList();
@@ -76,7 +76,7 @@ public class DatastoreAdapter {
 		CategoryInfo fooList1Cat1 = new CategoryInfo();
 		fooList1Cat1.setLastUpdate(uniqueTime++);
 		fooList1Cat1.setName("Foo List 1 Category 1");
-		fooList1Cat1.setStatus(CategoryInfo.CategoryStatus.ACTIVE);
+		fooList1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
 		fooList1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		fooList1.getCategories().add(fooList1Cat1);
 		
@@ -85,31 +85,31 @@ public class DatastoreAdapter {
 		fooList1.getItems().put(fooList1Item1.getUniqueId(), fooList1Item1);
 		fooList1Item1.setLastUpdate(uniqueTime++);
 		fooList1Item1.setName("Foo List 1 Item 1");
-		fooList1Item1.setStatus(ItemInfo.ItemStatus.ACTIVE);
+		fooList1Item1.setStatus(TimeStampedNode.Status.ACTIVE);
 		fooList1Item1.setCount(2L);
 		ItemCategoryInfo fooList1Item1Cat1 = new ItemCategoryInfo();
 		fooList1Item1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		fooList1Item1.getCategories().put(fooList1Item1Cat1.getUniqueId(), fooList1Item1Cat1);
 		fooList1Item1Cat1.setLastUpdate(uniqueTime++);
-		fooList1Item1Cat1.setStatus(ItemCategoryInfo.ItemCategoryStatus.ACTIVE);
+		fooList1Item1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
 		
 		//Add list for bar user
 		//Create Bar list1
 		ListeyDataOneUser barUser = new ListeyDataOneUser();
 		multiUser.userData.put(BAR_EMAIL, barUser);
-		ListInfo barList1 = new ListInfo(ListInfoStatus.ACTIVE, uniqCreator.getUniqueId(), "Bar List 1", uniqueTime++);
+		ListInfo barList1 = new ListInfo(TimeStampedNode.Status.ACTIVE, uniqCreator.getUniqueId(), "Bar List 1", uniqueTime++);
 		barUser.lists.put(barList1.getUniqueId(), barList1);
 				
 		OtherUserPrivOnList fooPrivOnBar1 = new OtherUserPrivOnList();
 		fooPrivOnBar1.userId = FOO_EMAIL;
 		fooPrivOnBar1.lastUpdate = uniqueTime++;
 		fooPrivOnBar1.priv = OtherUserPrivOnList.OtherUserPriv.FULL;
-		barList1.getOtherUserPrivs().put(FOO_EMAIL, barPrivOnFoo1);
+		barList1.getOtherUserPrivs().put(FOO_EMAIL, fooPrivOnBar1);
 				
 		CategoryInfo barList1Cat1 = new CategoryInfo();
 		barList1Cat1.setLastUpdate(uniqueTime++);
 		barList1Cat1.setName("Bar List 1 Category 1");
-		barList1Cat1.setStatus(CategoryInfo.CategoryStatus.ACTIVE);
+		barList1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
 		barList1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		barList1.getCategories().add(barList1Cat1);
 
@@ -118,13 +118,13 @@ public class DatastoreAdapter {
 		barList1.getItems().put(barList1Item1.getUniqueId(), barList1Item1);
 		barList1Item1.setLastUpdate(uniqueTime++);
 		barList1Item1.setName("Bar List 1 Item 1");
-		barList1Item1.setStatus(ItemInfo.ItemStatus.ACTIVE);
+		barList1Item1.setStatus(TimeStampedNode.Status.ACTIVE);
 		barList1Item1.setCount(2L);
 		ItemCategoryInfo barList1Item1Cat1 = new ItemCategoryInfo();
 		barList1Item1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		barList1Item1.getCategories().put(barList1Item1Cat1.getUniqueId(), barList1Item1Cat1);
 		barList1Item1Cat1.setLastUpdate(uniqueTime++);
-		barList1Item1Cat1.setStatus(ItemCategoryInfo.ItemCategoryStatus.ACTIVE);
+		barList1Item1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
 		
 		//Convert multiUser to entities and write all the entities to the datastore at once
 		List<Entity> entities = multiUser.toEntities(uniqCreator);
@@ -155,7 +155,5 @@ public class DatastoreAdapter {
 		assertEquals("before/after multi-user jsons don't match", multiUser.toJson(), loadedMultiUser.toJson());
 		assertEquals("loadedMultiUser doesn't match original", true, multiUser.deepEquals(loadedMultiUser));
 	}//testLoadAndSaveUser
-	
-	
 
 }//DatastoreAdapter

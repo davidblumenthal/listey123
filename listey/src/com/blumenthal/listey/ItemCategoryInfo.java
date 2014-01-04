@@ -6,19 +6,14 @@ package com.blumenthal.listey;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
-public class ItemCategoryInfo {
-	public static enum ItemCategoryStatus {
-		ACTIVE,
-		DELETED
-	}
-	
+public class ItemCategoryInfo extends TimeStampedNode {
 	public static final String KIND = "itemCategory";//kind in the datastore
 	public static final String STATUS = "status";
 	public static final String LAST_UPDATE = "lastUpdate";
 	public static final String UNIQUE_ID = "uniqueId";
 	
 	private String uniqueId;
-	private ItemCategoryStatus status;
+	private Status status;
 	private Long lastUpdate;
 	
 	/** Default constructor */
@@ -31,13 +26,14 @@ public class ItemCategoryInfo {
 		}//if unexpected kind
 		setLastUpdate((Long) entity.getProperty(LAST_UPDATE));
 		setUniqueId((String) entity.getKey().getName());
-		setStatus(ItemCategoryStatus.valueOf((String) entity.getProperty(STATUS)));
+		setStatus(Status.valueOf((String) entity.getProperty(STATUS)));
 	}//ItemCategoryInfo(Entity)
 	
 	
 	/**
 	 * @return the uniqueId
 	 */
+	@Override
 	public String getUniqueId() {
 		return uniqueId;
 	}
@@ -52,20 +48,22 @@ public class ItemCategoryInfo {
 	/**
 	 * @return the status
 	 */
-	public ItemCategoryStatus getStatus() {
+	@Override
+	public Status getStatus() {
 		return status;
 	}
 
 	/**
 	 * @param status the status to set
 	 */
-	public void setStatus(ItemCategoryStatus status) {
+	public void setStatus(Status status) {
 		this.status = status;
 	}
 
 	/**
 	 * @return the lastUpdate
 	 */
+	@Override
 	public Long getLastUpdate() {
 		return lastUpdate;
 	}
@@ -82,7 +80,12 @@ public class ItemCategoryInfo {
 	 * @return Returns true if all essential fields of this object
 	 * are the same as other.
 	 */
-	public boolean shallowEquals(ItemCategoryInfo other) {
+	@Override
+	public boolean shallowEquals(TimeStampedNode obj) {
+		if (obj == null) return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ItemCategoryInfo other = (ItemCategoryInfo) obj;
 		return (getUniqueId().equals(other.getUniqueId())
 				&& getLastUpdate().equals(other.getLastUpdate())
 				&& getStatus().equals(other.getStatus()));
@@ -107,6 +110,7 @@ public class ItemCategoryInfo {
 	 * @param parent
 	 * @return an entity that represents this object
 	 */
+	@Override
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		//Before converting this to an entity, change the id to a permanent if it's not already
 		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));

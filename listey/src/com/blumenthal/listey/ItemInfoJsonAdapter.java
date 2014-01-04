@@ -6,7 +6,6 @@ package com.blumenthal.listey;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import com.blumenthal.listey.ItemInfo.ItemStatus;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -28,10 +27,10 @@ public class ItemInfoJsonAdapter implements JsonDeserializer<ItemInfo>, JsonSeri
 		item.setName(itemJson.get(ItemInfo.NAME).getAsString());
 		if (itemJson.has(ItemInfo.STATUS)) {
 			String statusString = itemJson.get(ItemInfo.STATUS).getAsString();
-			item.setStatus(ItemStatus.valueOf(statusString));
+			item.setStatus(TimeStampedNode.Status.valueOf(statusString));
 		}
 		else {
-			item.setStatus(ItemStatus.ACTIVE);
+			item.setStatus(TimeStampedNode.Status.ACTIVE);
 		}
 		
 		item.setLastUpdate(itemJson.get(ItemInfo.LAST_UPDATE).getAsLong());
