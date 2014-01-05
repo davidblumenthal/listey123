@@ -46,7 +46,7 @@ public class TestJsonParse {
 	@Test
 	public void testEmptyHash() {
 		String jsonString = "{}";
-		ListeyDataMultipleUsers parsed = ListeyDataMultipleUsers.fromJson(jsonString);
+		ListeyDataMultipleUsers parsed = ListeyDataMultipleUsers.fromJson(USER1_EMAIL, jsonString);
 		assertNotNull("Something should have been parsed", parsed);
 		assertEquals("userData should be empty", parsed.userData.size(), 0);
 	}//testEmptyHash
@@ -120,11 +120,13 @@ public class TestJsonParse {
 	}//testItem
 	
 	
+	public static final String USER1_EMAIL = "test@test.com";
+	
 	public static final String USER1_JSON =
 			"{\"userData\":{" +
-				"\"test@test.com\":{" +
-				    "\"userEmail\":\"test@test.com\"," +  //this isn't actually required, but it'll get mirrored back unless I make
-				                                          //a custom deserializer
+				"\"" + USER1_EMAIL + "\":{" +
+				    "\"userEmail\":\"" + USER1_EMAIL + "\"," +  //this isn't actually required, but it'll get mirrored back unless I make
+				                                                //a custom deserializer
 					"\"lists\":{" +
 						"\"1:1\":{" +
 							"\"lastUpdate\":1234567890"+
@@ -146,11 +148,11 @@ public class TestJsonParse {
 	
 	@Test
 	public void testOneUser() {
-		ListeyDataMultipleUsers parsed = ListeyDataMultipleUsers.fromJson(USER1_JSON);
+		ListeyDataMultipleUsers parsed = ListeyDataMultipleUsers.fromJson(USER1_EMAIL, USER1_JSON);
 		assertNotNull("Something should have been parsed", parsed);
 		assertEquals("userData should have 1 item", 1, parsed.userData.size());
 		
-		ListeyDataOneUser oneUserData = parsed.userData.get("test@test.com");
+		ListeyDataOneUser oneUserData = parsed.userData.get(USER1_EMAIL);
 		assertNotNull("oneUserData for test@test.com should not be null", oneUserData);
 		assertNotNull("lists should not be null", oneUserData.lists);
 		
