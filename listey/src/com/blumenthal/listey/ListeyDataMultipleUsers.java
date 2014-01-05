@@ -36,6 +36,7 @@ import com.google.gson.GsonBuilder;
   }//top-level
  */
 public class ListeyDataMultipleUsers {
+	public static final String USER_DATA = "userData";
 	private static final Logger log = Logger.getLogger(TimeStampedNode.class.getName());
 	
 	public Map< String, ListeyDataOneUser> userData = new HashMap<String, ListeyDataOneUser>();
@@ -45,7 +46,6 @@ public class ListeyDataMultipleUsers {
 	 */
 	public ListeyDataMultipleUsers() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	
 	/** 
@@ -63,8 +63,7 @@ public class ListeyDataMultipleUsers {
                 Query.FilterOperator.EQUAL,
                 userEmail));
 		PreparedQuery pq = datastore.prepare(q);
-    	
-getLog().warning("Looking for other users' lists which " + userEmail + " can see.");
+
     	//Look up and insert info for each other user's list individually
 		for (Entity privEntity : pq.asIterable()) {
 			Key listKey = privEntity.getKey().getParent();
@@ -75,8 +74,6 @@ getLog().warning("Looking for other users' lists which " + userEmail + " can see
 			//Append the other user info for this list to existing other user info, or create the other user info if it doesn't exist
 			ListeyDataOneUser otherUserData = ListeyDataOneUser.fromDatastore(datastore, otherUserEmail, listUniqueId, userData.get(otherUserEmail));
 			userData.put(otherUserEmail, otherUserData);
-			
-getLog().warning("  " + otherUserEmail + " can view list " + listUniqueId);
 		}//foreach privEntity
 	}//Constructor
 	
@@ -122,7 +119,8 @@ getLog().warning("  " + otherUserEmail + " can view list " + listUniqueId);
 	public static Gson getGson() {
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder.registerTypeAdapter(ListInfo.class, new ListInfoJsonAdapter());
-		gsonBuilder.registerTypeAdapter(ItemInfo.class,  new ItemInfoJsonAdapter());
+		gsonBuilder.registerTypeAdapter(ItemInfo.class, new ItemInfoJsonAdapter());
+		gsonBuilder.registerTypeAdapter(ListeyDataMultipleUsers.class, new ListeyDataMultipleUsersJsonAdapter());
 		return gsonBuilder.create();
 	}//getGson
 	
