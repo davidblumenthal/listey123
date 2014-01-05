@@ -14,7 +14,6 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.gson.Gson;
 
 /** This class is a java implementation of the JSON primitive for spec version 1
  * JSON Data Format
@@ -43,21 +42,14 @@ import com.google.gson.Gson;
  */
 
 
-public class ListeyDataOneUser {
+public class ListeyDataOneUser extends TimeStampedNode {
 	public static final String KIND = "user";//kind in the datastore
 	
+	private String userEmail;
 	public Map<String, ListInfo> lists = new HashMap<String, ListInfo>();
 	
 	/** Default constructor */
 	public ListeyDataOneUser(){}
-	
-	/** Copy constructor using json serialization */
-	public ListeyDataOneUser makeCopy(ListeyDataOneUser orig) {
-		Gson gson = ListeyDataMultipleUsers.getGson();
-		String json = gson.toJson(this);
-		ListeyDataOneUser copy = gson.fromJson(json, this.getClass());
-		return copy;
-	}//makeCopy
 	
 	
 	/** Load the whole ListeyDataOneUser object from the datastore using the userEmail
@@ -86,6 +78,7 @@ public class ListeyDataOneUser {
 	public static ListeyDataOneUser fromDatastore(DatastoreService datastore, String userEmail, String listUniqueId, ListeyDataOneUser oneUser) {
 		if (oneUser == null) {
 			oneUser = new ListeyDataOneUser();
+			oneUser.userEmail = userEmail;
 		}
 
 		//Find all entities for the user, or the user's list if listUniqueId is passed.
@@ -225,5 +218,94 @@ public class ListeyDataOneUser {
 		//If we get to here, everything is equal
 		return true;
 	}//deepEquals
+	
+	
 
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getLastUpdate()
+	 * @return Hard-coded to return 0, since it can't ever really be updated
+	 */
+	@Override
+	public Long getLastUpdate() {
+		return 0L;
+	}
+
+	
+	
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getUniqueId()
+	 * @return userEmail
+	 */
+	@Override
+	public String getUniqueId() {
+		return userEmail;
+	}
+
+	/**
+	 * @param newUniqueId stored in userEmail
+	 */
+	public void setUniqueId(String newUniqueId) {
+		userEmail = newUniqueId;
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getStatus()
+	 * Just hard-code ACTIVE
+	 */
+	@Override
+	public Status getStatus() {
+		return Status.ACTIVE;
+	}
+
+	
+	
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#toEntity(com.blumenthal.listey.DataStoreUniqueId, com.google.appengine.api.datastore.Key)
+	 * Since there's no actual entity for this, just returns null.
+	 */
+	@Override
+	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
+		return null;
+	}
+
+	
+	
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#shallowEquals(com.blumenthal.listey.TimeStampedNode)
+	 */
+	@Override
+	public boolean shallowEquals(TimeStampedNode other) {
+		if (other == null) return false;
+		if (getClass() != other.getClass())
+			return false;
+		return (getUniqueId().equals(other.getUniqueId()));
+	}//shallowEquals
+	
+	
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#subMaps()
+	 */
+	@Override
+	public List<Map<String, ? extends TimeStampedNode>> subMapsToCompare() {
+		List<Map<String, ? extends TimeStampedNode>> rv = new ArrayList<Map<String, ? extends TimeStampedNode>>();
+		rv.add(lists);
+		return (rv);
+	}//subMapsToCompare
+	
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#addSubMapEntries(java.util.List)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void addSubMapEntries(List<List<? extends TimeStampedNode>> subMapEntriesToAdd) {
+		List<ListInfo> listList = (List<ListInfo>) subMapEntriesToAdd.get(0);
+		for (ListInfo list : listList) {
+			lists.put(list.getUniqueId(), list);
+		}
+	}//addSubMapEntries
+	
 }//ListeyDataOneUser
