@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -38,7 +39,7 @@ import com.google.gson.GsonBuilder;
 public class ListeyDataMultipleUsers {
 	public static final String USER_DATA = "userData";
 	private static final Logger log = Logger.getLogger(TimeStampedNode.class.getName());
-	
+	private String thisUserEmail;
 	public Map< String, ListeyDataOneUser> userData = new HashMap<String, ListeyDataOneUser>();
 	
 	/**
@@ -53,6 +54,7 @@ public class ListeyDataMultipleUsers {
 	 * @return
 	 */
 	public ListeyDataMultipleUsers(DatastoreService datastore, String userEmail) {
+		setThisUserEmail(userEmail);
     	//Load the current user data from the datastore by the user's email address
     	ListeyDataOneUser currentUserData = ListeyDataOneUser.fromDatastore(datastore, userEmail);
     	userData.put(userEmail, currentUserData);
@@ -84,12 +86,37 @@ public class ListeyDataMultipleUsers {
 	 */
 	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator) {
 		List<Entity> entities = new ArrayList<Entity>();
-		for (Map.Entry<String, ListeyDataOneUser> entry : userData.entrySet()) {
-			entities.addAll(entry.getValue().toEntities(uniqueIdCreator, entry.getKey()));
+		for (ListeyDataOneUser userInfo : userData.values()) {
+			entities.addAll(userInfo.toEntities(uniqueIdCreator, null));
 		}//foreach item
 		
 		return entities;
 	}//toEntities
+	
+	
+	
+	public static ListeyDataMultipleUsers compareAndUpdate(DataStoreUniqueId uniqueIdCreator, ListeyDataMultipleUsers serverObj, ListeyDataMultipleUsers clientObj,
+			List<Entity> updateEntities, List<Entity> deleteEntities) {
+		ListeyDataMultipleUsers rv = new ListeyDataMultipleUsers();
+		
+		Map<String, ListeyDataOneUser> clientUserMap = clientObj.userData;
+		Map<String, ListeyDataOneUser> serverUserMap = serverObj.userData;
+
+		//iterate only through the server set, because if a user only exists on the client and not on the server
+		//that means they shouldn't have privs
+		Set<String> userEmails = serverUserMap.keySet();
+		//Add this user email even if nothing set up on server
+		userEmails.add(serverObj.getThisUserEmail());
+
+		for (String userEmail : userEmails) {
+			ListeyDataOneUser clientSubObj = clientUserMap.get(userEmail);
+			ListeyDataOneUser serverSubObj = serverUserMap.get(userEmail);
+
+			ListeyDataOneUser updatedObj = (ListeyDataOneUser) ListeyDataOneUser.compareAndUpdate(uniqueIdCreator, null, serverSubObj, clientSubObj, updateEntities, deleteEntities);
+			rv.userData.put(updatedObj.getUniqueId(), updatedObj);
+		}//for each subObj
+		return rv;
+	}//compareAndUpdate
 	
 	
 	
@@ -115,12 +142,18 @@ public class ListeyDataMultipleUsers {
 	}//deepEquals
 
 	
-	
 	public static Gson getGson() {
+		return getGson(false);
+	}
+	
+	
+	
+	public static Gson getGson(boolean doAllFields) {
 		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.registerTypeAdapter(ListInfo.class, new ListInfoJsonAdapter());
-		gsonBuilder.registerTypeAdapter(ItemInfo.class, new ItemInfoJsonAdapter());
-		gsonBuilder.registerTypeAdapter(ListeyDataMultipleUsers.class, new ListeyDataMultipleUsersJsonAdapter());
+		gsonBuilder.registerTypeAdapter(ListInfo.class, new ListInfoJsonAdapter(doAllFields));
+		gsonBuilder.registerTypeAdapter(ItemInfo.class, new ItemInfoJsonAdapter(doAllFields));
+		gsonBuilder.registerTypeAdapter(ListeyDataMultipleUsers.class, new ListeyDataMultipleUsersJsonAdapter(doAllFields));
+		gsonBuilder.registerTypeAdapter(ListeyDataOneUser.class, new ListeyDataOneUserJsonAdapter(doAllFields));
 		return gsonBuilder.create();
 	}//getGson
 	
@@ -129,9 +162,10 @@ public class ListeyDataMultipleUsers {
 	/**
 	 * Return an object from serialized JSON string
 	 */
-	public static ListeyDataMultipleUsers fromJson(String jsonString) {
+	public static ListeyDataMultipleUsers fromJson(String thisUserEmail, String jsonString) {
 		Gson gson = getGson();
 		ListeyDataMultipleUsers rv = gson.fromJson(jsonString, ListeyDataMultipleUsers.class);
+		rv.setThisUserEmail(thisUserEmail);
 		return rv;
 	}//fromJson
 	
@@ -151,5 +185,19 @@ public class ListeyDataMultipleUsers {
 	 */
 	private static Logger getLog() {
 		return log;
+	}
+
+	/**
+	 * @return the thisUserEmail
+	 */
+	public String getThisUserEmail() {
+		return thisUserEmail;
+	}
+
+	/**
+	 * @param thisUserEmail the thisUserEmail to set
+	 */
+	private void setThisUserEmail(String thisUserEmail) {
+		this.thisUserEmail = thisUserEmail;
 	}
 }//ListeyDataMultipleUsers
