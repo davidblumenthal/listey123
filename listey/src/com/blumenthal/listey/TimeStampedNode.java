@@ -286,7 +286,6 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 	/**
 	 * @return the log
 	 */
-	@SuppressWarnings("unused")
 	protected static Logger getLog() {
 		return log;
 	}
