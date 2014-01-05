@@ -26,6 +26,7 @@ public class ListInfo extends TimeStampedNode{
 	public static final String CATEGORIES = "categories";
 	public static final String SELECTED_CATEGORIES = "selectedCategories";
 	public static final String OTHER_USER_PRIVS = "otherUserPrivs";
+	public static final String UNIQUE_ID = "uniqueId";
 	
 	private Status status;
 	
@@ -78,7 +79,15 @@ public class ListInfo extends TimeStampedNode{
 		setLastUpdate((Long) entity.getProperty(LAST_UPDATE));
 		setStatus(Status.valueOf((String) entity.getProperty(STATUS)));
 	}//ListInfo(Entity)
-	
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getKind()
+	 */
+	@Override
+	public String getKind() {
+		return KIND;
+	}
 	
 	
 	
@@ -197,22 +206,13 @@ public class ListInfo extends TimeStampedNode{
 		this.otherUserPrivs = otherUserPrivs;
 	}
 
-	/** Make a copy using json serialization */
-	@Override
-	public ListInfo makeCopy() {
-		Gson gson = ListeyDataMultipleUsers.getGson();
-		String json = gson.toJson(this);
-		ListInfo copy = gson.fromJson(json, this.getClass());
-		return copy;
-	}//makeCopy
-
 	
 	
 	@Override
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		//Before converting this to an entity, change the id to a permanent if it's not already
 		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
-		Entity entity = new Entity(KIND, getUniqueId(), parent);
+		Entity entity = new Entity(getEntityKey(parent));
 		entity.setProperty(STATUS, getStatus().toString());
 		entity.setProperty(NAME, getName());
 		entity.setProperty(LAST_UPDATE, getLastUpdate());
