@@ -68,7 +68,7 @@ public class ListeyServlet extends HttpServlet {
         	ListeyDataMultipleUsers currentData = new ListeyDataMultipleUsers(datastore, user.getEmail());
 
         	//Parse the passed data
-    		ListeyDataMultipleUsers passedData = ListeyDataMultipleUsers.fromJson(passedSerializedHash);
+    		ListeyDataMultipleUsers passedData = ListeyDataMultipleUsers.fromJson(user.getEmail(), passedSerializedHash);
     		
     		//Compare the stored and the passed data.
         	//If the passed data element is newer than the current data element, replace
