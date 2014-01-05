@@ -44,6 +44,7 @@ import com.google.appengine.api.datastore.Query;
 
 public class ListeyDataOneUser extends TimeStampedNode {
 	public static final String KIND = "user";//kind in the datastore
+	public static final String LISTS = "lists";
 	
 	private String userEmail;
 	public Map<String, ListInfo> lists = new HashMap<String, ListInfo>();
@@ -186,7 +187,8 @@ public class ListeyDataOneUser extends TimeStampedNode {
 	 * @param parent entity key
 	 * @return a list of all entities for this object and all sub-objects
 	 */
-	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator, String userEmail) {
+	@Override
+	public List<Entity> toEntities(DataStoreUniqueId uniqueIdCreator, Key ignoredParent) {
 		List<Entity> entities = new ArrayList<Entity>();
 		Key thisKey = getEntityKey(userEmail);
 		for (Map.Entry<String, ListInfo> entry : lists.entrySet()) {
@@ -256,6 +258,15 @@ public class ListeyDataOneUser extends TimeStampedNode {
 	@Override
 	public Status getStatus() {
 		return Status.ACTIVE;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getKind()
+	 */
+	@Override
+	public String getKind() {
+		return KIND;
 	}
 
 	
