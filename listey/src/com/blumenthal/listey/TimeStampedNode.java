@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.Gson;
 
 
@@ -47,8 +48,21 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 	 * @return the status
 	 */
 	public abstract Status getStatus();
-
 	
+	
+	/**
+	 * @return the entity kind
+	 */
+	public abstract String getKind();
+	
+	
+	/**
+	 * @param parent
+	 * @return the entity key for Entity object corresponding to this object
+	 */
+	public Key getEntityKey(Key parent) {
+		return KeyFactory.createKey(parent, getKind(), getUniqueId());
+	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -93,9 +107,11 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 
 	/** Make a copy using json serialization */
 	public TimeStampedNode makeCopy() {
-		Gson gson = ListeyDataMultipleUsers.getGson();
+		//true value means the json string should include all the fields
+		Gson gson = ListeyDataMultipleUsers.getGson(true);
 		String json = gson.toJson(this);
 		TimeStampedNode copy = gson.fromJson(json, this.getClass());
+getLog().warning("makeCopy: " + json);
 		return copy;
 	}//makeCopy
 	
@@ -194,12 +210,14 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 			//no need to update any entities on the server, just the client
 		}//clientList == null
 		
-		else {//both lists already exist
+		else {//both nodes already exist
 			//use the most recent top-level object, or the client version if they're the same
 			TimeStampedNode newer = serverObj.getLastUpdate() > clientObj.getLastUpdate() ? serverObj : clientObj;
 			rv = newer.makeCopy();
+			//If the top-level object changed then push it on the update list
 			Entity thisEntity = rv.toEntity(uniqueIdCreator, parent);
-			updateEntities.add(thisEntity);
+			if (!clientObj.shallowEquals(serverObj) && thisEntity != null) updateEntities.add(thisEntity);
+			Key thisEntityKey = rv.getEntityKey(parent);
 
 			//Now compare and update each sub-level object
 			//MAPS ####################################################
@@ -223,7 +241,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 						TimeStampedNode clientSubObj = clientSubMap.get(fullSetList.getUniqueId());
 						TimeStampedNode serverSubObj = serverSubMap.get(fullSetList.getUniqueId());
 
-						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntity.getKey(), serverSubObj, clientSubObj, updateEntities, deleteEntities);
+						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverSubObj, clientSubObj, updateEntities, deleteEntities);
 						if (updatedObj != null) subMapEntriesToAdd.add(updatedObj);
 					}//for each subObj
 				}//for each submap
