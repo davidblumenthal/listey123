@@ -20,6 +20,13 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 
 public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSerializer<ListInfo> {
+	boolean doAllFields = false;
+	
+	public ListInfoJsonAdapter(){}
+	public ListInfoJsonAdapter(boolean doAllFields) {
+		this.doAllFields = doAllFields;
+	}
+	
 	/**
 	 * Deserialize the list info.  Note, the ListInfo uniqueID is actually the key of the
 	 * parent map and not included in this at all.
@@ -34,6 +41,9 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 		listInfo.setLastUpdate(topMap.get(ListInfo.LAST_UPDATE).getAsLong());
 		listInfo.setName(topMap.get(ListInfo.NAME).getAsString());
 		listInfo.setStatus(TimeStampedNode.Status.valueOf(topMap.get(ListInfo.STATUS).getAsString()));
+		if (topMap.has(ListInfo.UNIQUE_ID)){
+			listInfo.setUniqueId(topMap.get(ListInfo.UNIQUE_ID).getAsString());
+		}
 
 		if (topMap.has(ListInfo.ITEMS)) {
 			JsonArray itemsJson = topMap.get(ListInfo.ITEMS).getAsJsonArray();
@@ -84,6 +94,9 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 		rv.addProperty(ListInfo.LAST_UPDATE, listInfo.getLastUpdate());
 		rv.addProperty(ListInfo.NAME, listInfo.getName());
 		rv.addProperty(ListInfo.STATUS, listInfo.getStatus().toString());
+		if (doAllFields) {
+			rv.addProperty(ListInfo.UNIQUE_ID, listInfo.getUniqueId());
+		}
 		
 		if (!listInfo.getItems().isEmpty()){
 			JsonArray itemsJson = new JsonArray();
