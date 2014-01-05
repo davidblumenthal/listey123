@@ -133,14 +133,6 @@ public class DatastoreAdapter {
 		entities.addAll(barList1.toEntities(uniqCreator, barKey));
 		datastore.put(entities);
 		
-		return multiUser;
-    }//createAndSaveUser
-    
-    
-	
-	@Test
-	public void testSaveAndLoadUser(){
-		ListeyDataMultipleUsers multiUser = createAndSaveUser();
 		
 		//Now wipe the other user privs map from bar, since those won't be reloaded
 		//when we load data for foo
@@ -148,12 +140,24 @@ public class DatastoreAdapter {
 			entry.getValue().getOtherUserPrivs().clear();
 		}
 		
-		//Now, reload (a new copy) back from the datastore
-		ListeyDataMultipleUsers loadedMultiUser = new ListeyDataMultipleUsers(datastore, FOO_EMAIL);
-		
-		//Compare
-		assertEquals("before/after multi-user jsons don't match", multiUser.toJson(), loadedMultiUser.toJson());
-		assertEquals("loadedMultiUser doesn't match original", true, multiUser.deepEquals(loadedMultiUser));
-	}//testLoadAndSaveUser
+		return multiUser;
+    }//createAndSaveUser
+    
+    
+	
+	@Test
+	public void testSaveAndLoadUser(){
+		ListeyDataMultipleUsers clientMultiUser = createAndSaveUser();
 
+		//Now, reload (a new copy) back from the datastore
+		ListeyDataMultipleUsers serverMultiUser = new ListeyDataMultipleUsers(datastore, FOO_EMAIL);
+		
+		//Verify loaded version matches saved version
+		assertEquals("before/after multi-user jsons don't match", clientMultiUser.toJson(), serverMultiUser.toJson());
+		assertEquals("loadedMultiUser doesn't match original", true, clientMultiUser.deepEquals(serverMultiUser));
+		
+		//Now change the client and test compareAndUpdate
+		
+	}//testLoadAndSaveUser
+	
 }//DatastoreAdapter
