@@ -1,7 +1,10 @@
 package com.blumenthal.ListeyTest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +41,10 @@ public class DatastoreAdapter {
 	final String FOO_EMAIL = "foo@test.com";
 	final String BAR_EMAIL = "bar@test.com";
 	
+	private String fooList1Id = null;
+	private String fooList1Item1Id = null;
+	private long uniqueTime = 10000L;
+	
 	static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 	
     private final LocalServiceTestHelper helper =
@@ -58,13 +65,13 @@ public class DatastoreAdapter {
 		DataStoreUniqueId uniqCreator = new DataStoreUniqueId();
 		
 		//Create and flesh out a multi-user data structure
-		long uniqueTime = 10000L;
 		ListeyDataMultipleUsers multiUser = new ListeyDataMultipleUsers();
 		ListeyDataOneUser fooUser = new ListeyDataOneUser();
 		multiUser.userData.put(FOO_EMAIL, fooUser);
 		
 		//Create Foo list1
-		ListInfo fooList1 = new ListInfo(TimeStampedNode.Status.ACTIVE, uniqCreator.getUniqueId(), "Foo List 1", uniqueTime++);
+		fooList1Id = uniqCreator.getUniqueId();
+		ListInfo fooList1 = new ListInfo(TimeStampedNode.Status.ACTIVE, fooList1Id, "Foo List 1", uniqueTime++);
 		fooUser.lists.put(fooList1.getUniqueId(), fooList1);
 		
 		OtherUserPrivOnList barPrivOnFoo1 = new OtherUserPrivOnList();
@@ -81,7 +88,8 @@ public class DatastoreAdapter {
 		fooList1.getCategories().add(fooList1Cat1);
 		
 		ItemInfo fooList1Item1 = new ItemInfo();
-		fooList1Item1.setUniqueId(uniqCreator.getUniqueId());
+		fooList1Item1Id = uniqCreator.getUniqueId();
+		fooList1Item1.setUniqueId(fooList1Item1Id);
 		fooList1.getItems().put(fooList1Item1.getUniqueId(), fooList1Item1);
 		fooList1Item1.setLastUpdate(uniqueTime++);
 		fooList1Item1.setName("Foo List 1 Item 1");
@@ -157,6 +165,26 @@ public class DatastoreAdapter {
 		assertEquals("loadedMultiUser doesn't match original", true, clientMultiUser.deepEquals(serverMultiUser));
 		
 		//Now change the client and test compareAndUpdate
+		DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
+		
+		//Change list name and test
+		ListInfo clientList1 = clientMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
+		clientList1.setName("Foo List 1 new name");
+		clientList1.setLastUpdate(uniqueTime++);
+		ListInfo serverList1 = serverMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
+		
+		List<Entity> updateEntities = new ArrayList<Entity>();
+		List<Entity> deleteEntities = new ArrayList<Entity>();
+		Key fooKey = KeyFactory.createKey(ListeyDataOneUser.KIND, FOO_EMAIL);
+		TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, fooKey, serverList1, clientList1, updateEntities, deleteEntities);
+		assertEquals(0, deleteEntities.size());
+		assertEquals(1, updateEntities.size());
+		assertNotNull(updatedObj);
+		assertTrue(updatedObj.shallowEquals(clientList1));
+		ListInfo listFromEntity = new ListInfo(updateEntities.get(0));
+		assertTrue(listFromEntity.shallowEquals(clientList1));
+		
+		//Change item name and test	
 		
 	}//testLoadAndSaveUser
 	
