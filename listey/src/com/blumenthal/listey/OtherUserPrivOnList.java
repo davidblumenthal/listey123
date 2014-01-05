@@ -48,7 +48,7 @@ public class OtherUserPrivOnList extends TimeStampedNode{
 	 */
 	@Override
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
-		Entity entity = new Entity(KIND, userId, parent);
+		Entity entity = new Entity(getEntityKey(parent));
 		entity.setProperty(USER_ID, userId);
 		entity.setProperty(PRIV, priv.toString());
 		entity.setProperty(LAST_UPDATE, lastUpdate);
@@ -124,6 +124,15 @@ public class OtherUserPrivOnList extends TimeStampedNode{
 	@Override
 	public Status getStatus() {
 		return TimeStampedNode.Status.ACTIVE;
-	}	
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getKind()
+	 */
+	@Override
+	public String getKind() {
+		return KIND;
+	}
 
 }//ItemCategoryInfo

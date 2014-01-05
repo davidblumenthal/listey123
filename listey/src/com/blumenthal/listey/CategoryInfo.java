@@ -39,7 +39,7 @@ public class CategoryInfo extends TimeStampedNode {
 	 */
 	@Override
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
-		Entity entity = new Entity(KIND, getUniqueId(), parent);
+		Entity entity = new Entity(getEntityKey(parent));
 		entity.setProperty(STATUS, getStatus().toString());
 		entity.setProperty(NAME, getName());
 		entity.setProperty(LAST_UPDATE, getLastUpdate());
@@ -150,5 +150,15 @@ public class CategoryInfo extends TimeStampedNode {
 	 */
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+	
+	
+	
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getKind()
+	 */
+	@Override
+	public String getKind() {
+		return KIND;
 	}
 }//CategoryInfo

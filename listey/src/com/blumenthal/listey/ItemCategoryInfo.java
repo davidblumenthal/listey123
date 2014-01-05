@@ -114,9 +114,18 @@ public class ItemCategoryInfo extends TimeStampedNode {
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		//Before converting this to an entity, change the id to a permanent if it's not already
 		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
-		Entity entity = new Entity(KIND, getUniqueId(), parent);
+		Entity entity = new Entity(getEntityKey(parent));
 		entity.setProperty(STATUS, getStatus().toString());
 		entity.setProperty(LAST_UPDATE, getLastUpdate());
 		return entity;
 	}//toEntity
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getKind()
+	 */
+	@Override
+	public String getKind() {
+		return KIND;
+	}
 }//ItemCategoryInfo

@@ -119,7 +119,7 @@ public class ItemInfo extends TimeStampedNode {
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
 		//Before converting this to an entity, change the id to a permanent if it's not already
 		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
-		Entity entity = new Entity(KIND, getUniqueId(), parent);
+		Entity entity = new Entity(getEntityKey(parent));
 		entity.setProperty(STATUS, getStatus().toString());
 		entity.setProperty(NAME, getName());
 		entity.setProperty(COUNT,  getCount());
@@ -243,4 +243,13 @@ public class ItemInfo extends TimeStampedNode {
 			categories.put(catInfo.getUniqueId(), catInfo);
 		}
 	}//addSubMapEntries
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#getKind()
+	 */
+	@Override
+	public String getKind() {
+		return KIND;
+	}
 }//ItemInfo
