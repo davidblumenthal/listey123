@@ -67,6 +67,7 @@ public class DatastoreAdapter {
 		//Create and flesh out a multi-user data structure
 		ListeyDataMultipleUsers multiUser = new ListeyDataMultipleUsers();
 		ListeyDataOneUser fooUser = new ListeyDataOneUser();
+		fooUser.setUniqueId(FOO_EMAIL);
 		multiUser.userData.put(FOO_EMAIL, fooUser);
 		
 		//Create Foo list1
@@ -105,6 +106,7 @@ public class DatastoreAdapter {
 		//Create Bar list1
 		ListeyDataOneUser barUser = new ListeyDataOneUser();
 		multiUser.userData.put(BAR_EMAIL, barUser);
+		barUser.setUniqueId(BAR_EMAIL);
 		ListInfo barList1 = new ListInfo(TimeStampedNode.Status.ACTIVE, uniqCreator.getUniqueId(), "Bar List 1", uniqueTime++);
 		barUser.lists.put(barList1.getUniqueId(), barList1);
 				
@@ -153,26 +155,45 @@ public class DatastoreAdapter {
     
     
 	
-	@Test
-	public void testSaveAndLoadUser(){
+    public ListeyDataMultipleUsers[] createAndReloadUser() {
 		ListeyDataMultipleUsers clientMultiUser = createAndSaveUser();
 
 		//Now, reload (a new copy) back from the datastore
 		ListeyDataMultipleUsers serverMultiUser = new ListeyDataMultipleUsers(datastore, FOO_EMAIL);
 		
+		return new ListeyDataMultipleUsers[] {clientMultiUser, serverMultiUser};
+    }//createAndReloadUser
+    
+    
+	@Test
+	public void testSaveAndLoadUser(){
+		ListeyDataMultipleUsers[] users = createAndReloadUser();
+		ListeyDataMultipleUsers clientMultiUser = users[0];
+		ListeyDataMultipleUsers serverMultiUser = users[1];
+		
 		//Verify loaded version matches saved version
 		assertEquals("before/after multi-user jsons don't match", clientMultiUser.toJson(), serverMultiUser.toJson());
 		assertEquals("loadedMultiUser doesn't match original", true, clientMultiUser.deepEquals(serverMultiUser));
+	}//testLoadAndSaveUser
+	
+	
+	@Test
+	public void testCompare() {
+		ListeyDataMultipleUsers[] users = createAndReloadUser();
+		ListeyDataMultipleUsers clientMultiUser = users[0];
+		ListeyDataMultipleUsers serverMultiUser = users[1];
 		
 		//Now change the client and test compareAndUpdate
 		DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
 		
-		//Change list name and test
+		//*******************************************
+		//Change list name and lastUpdate
 		ListInfo clientList1 = clientMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		clientList1.setName("Foo List 1 new name");
 		clientList1.setLastUpdate(uniqueTime++);
 		ListInfo serverList1 = serverMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		
+		//test compare
 		List<Entity> updateEntities = new ArrayList<Entity>();
 		List<Entity> deleteEntities = new ArrayList<Entity>();
 		Key fooKey = KeyFactory.createKey(ListeyDataOneUser.KIND, FOO_EMAIL);
@@ -185,7 +206,6 @@ public class DatastoreAdapter {
 		assertTrue(listFromEntity.shallowEquals(clientList1));
 		
 		//Change item name and test	
-		
-	}//testLoadAndSaveUser
+	}
 	
 }//DatastoreAdapter
