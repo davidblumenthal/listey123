@@ -11,8 +11,17 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
-public class ListeyDataMultipleUsersJsonAdapter implements JsonDeserializer<ListeyDataMultipleUsers> {
+public class ListeyDataMultipleUsersJsonAdapter implements JsonDeserializer<ListeyDataMultipleUsers>, JsonSerializer<ListeyDataMultipleUsers>{
+	boolean doAllFields = false;
+	
+	public ListeyDataMultipleUsersJsonAdapter(){}
+	public ListeyDataMultipleUsersJsonAdapter(boolean doAllFields) {
+		this.doAllFields = doAllFields;
+	}
+	
 	@Override
 	public ListeyDataMultipleUsers deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 			throws JsonParseException {
@@ -30,4 +39,18 @@ public class ListeyDataMultipleUsersJsonAdapter implements JsonDeserializer<List
 		
 		return multiUserInfo;
 	}//deserialize
+
+	/* (non-Javadoc)
+	 * @see com.google.gson.JsonSerializer#serialize(java.lang.Object, java.lang.reflect.Type, com.google.gson.JsonSerializationContext)
+	 */
+	@Override
+	public JsonElement serialize(ListeyDataMultipleUsers multiUser, Type arg1,
+			JsonSerializationContext context) {
+		JsonObject rv = new JsonObject();
+		if (!multiUser.userData.isEmpty()){
+			JsonElement userDataJson = context.serialize(multiUser.userData);
+			rv.add(ListeyDataMultipleUsers.USER_DATA, userDataJson);
+		}//if categories
+		return rv;
+	}
 }//ListeyDataMultipleUsersJsonAdapter
