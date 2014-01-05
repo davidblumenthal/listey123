@@ -15,6 +15,12 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 public class ItemInfoJsonAdapter implements JsonDeserializer<ItemInfo>, JsonSerializer<ItemInfo> {
+	public ItemInfoJsonAdapter(){}
+	public ItemInfoJsonAdapter(boolean doAllFields) {
+		this.doAllFields = doAllFields;
+	}
+	boolean doAllFields = false;
+	
 	@Override
 	public ItemInfo deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 			throws JsonParseException {			
