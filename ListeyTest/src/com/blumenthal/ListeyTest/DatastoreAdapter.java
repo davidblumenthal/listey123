@@ -199,6 +199,18 @@ public class DatastoreAdapter {
 		clientList2.setUniqueId(":" + tempUniqueId++);
 		clientMultiUser.userData.get(FOO_EMAIL).lists.put(clientList2.getUniqueId(), clientList2);
 		
+		//Change category name
+		CategoryInfo clientList1Cat1 = clientList1.getCategories().first();
+		clientList1Cat1.setName("Foo List 1 Category 1 new name");
+		clientList1Cat1.setLastUpdate(uniqueTime++);
+		
+		//Add new category
+		CategoryInfo clientList1Cat2 = new CategoryInfo();
+		clientList1Cat2.setLastUpdate(uniqueTime++);
+		clientList1Cat2.setName("Foo List 1 Category 2");
+		clientList1Cat2.setUniqueId(":" + tempUniqueId++);
+		clientList1.getCategories().add(clientList1Cat2);
+		
 		//Change item name
 		ItemInfo clientItem1 = clientList1.getItems().get(fooList1Item1Id);
 		clientItem1.setName("Foo List 1 Item 1 new name");
@@ -212,17 +224,11 @@ public class DatastoreAdapter {
 		clientItem2.setName("Foo List 1 Item 2");
 		clientList1.getItems().put(clientItem2.getUniqueId(), clientItem2);
 		
-		//Change category name
-		CategoryInfo clientList1Cat1 = clientList1.getCategories().first();
-		clientList1Cat1.setName("Foo List 1 Category 1 new name");
-		clientList1Cat1.setLastUpdate(uniqueTime++);
-		
-		//Add new category
-		CategoryInfo clientList1Cat2 = new CategoryInfo();
-		clientList1Cat2.setLastUpdate(uniqueTime++);
-		clientList1Cat2.setName("Foo List 1 Category 2");
-		clientList1Cat2.setUniqueId(":" + tempUniqueId++);
-		clientList1.getCategories().add(clientList1Cat2);
+		//Add new ItemCategoryInfo
+		ItemCategoryInfo clientList1Item2Cat2 = new ItemCategoryInfo();
+		clientList1Item2Cat2.setLastUpdate(uniqueTime++);
+		clientList1Item2Cat2.setUniqueId(clientList1Cat2.getUniqueId());
+		clientItem2.getCategories().put(clientList1Item2Cat2.getUniqueId(), clientList1Item2Cat2);
 		
 		//************************************************************************
 		//Test full compare
@@ -285,6 +291,13 @@ public class DatastoreAdapter {
 				clientItem2.getUniqueId().equals(updatedItem2.getUniqueId()));
 		itemFromEntity = new ItemInfo(updateEntities.remove(0));
 		assertTrue(itemFromEntity.shallowEquals(updatedItem2));
+		
+
+		//Verify new ItemCategoryInfo was noticed
+		ItemCategoryInfo updatedItem2CatInfo = updatedItem2.getCategories().values().iterator().next();
+		assertEquals(clientList1Item2Cat2.getLastUpdate(), updatedItem2CatInfo.getLastUpdate());
+		assertEquals(clientList1Item2Cat2.getUniqueId(), updatedItem2CatInfo.getUniqueId());
+		
 		
 		//Verify new category was noticed
 		Iterator<CategoryInfo> catIter = updatedList1.getCategories().iterator();
