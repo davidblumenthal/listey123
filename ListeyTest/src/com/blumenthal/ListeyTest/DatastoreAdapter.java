@@ -205,6 +205,18 @@ public class DatastoreAdapter {
 		ListInfo listFromEntity = new ListInfo(updateEntities.get(0));
 		assertTrue(listFromEntity.shallowEquals(clientList1));
 		
+		//Test full compare
+		updateEntities.clear();
+		deleteEntities.clear();
+		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteEntities);
+		assertNotNull(updatedMultiUser);
+		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
+		assertEquals(0, deleteEntities.size());
+		assertEquals(1, updateEntities.size());
+		assertTrue(updatedList1.shallowEquals(clientList1));
+		listFromEntity = new ListInfo(updateEntities.get(0));
+		assertTrue(listFromEntity.shallowEquals(clientList1));
+		
 		//Change item name and test	
 	}
 	
