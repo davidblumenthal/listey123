@@ -178,7 +178,7 @@ public class DatastoreAdapter {
 	
 	
 	@Test
-	public void testCompare() {
+	public void testClientChange() {
 		ListeyDataMultipleUsers[] users = createAndReloadUser();
 		ListeyDataMultipleUsers clientMultiUser = users[0];
 		ListeyDataMultipleUsers serverMultiUser = users[1];
@@ -192,19 +192,32 @@ public class DatastoreAdapter {
 		clientList1.setName("Foo List 1 new name");
 		clientList1.setLastUpdate(uniqueTime++);
 		
+		//Change item name and lastUpdate
+		ItemInfo clientItem1 = clientList1.getItems().get(fooList1Item1Id);
+		clientItem1.setName("Foo List 1 Item 1 new name");
+		clientItem1.setLastUpdate(uniqueTime++);
+		
 		//Test full compare
 		List<Entity> updateEntities = new ArrayList<Entity>();
 		List<Entity> deleteEntities = new ArrayList<Entity>();
 		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteEntities);
 		assertNotNull(updatedMultiUser);
-		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		assertEquals(0, deleteEntities.size());
-		assertEquals(1, updateEntities.size());
+		assertEquals(2, updateEntities.size());
+		
+		//Verify list change was noticed
+		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		assertTrue(updatedList1.shallowEquals(clientList1));
 		ListInfo listFromEntity = new ListInfo(updateEntities.get(0));
 		assertTrue(listFromEntity.shallowEquals(clientList1));
 		
-		//Change item name and test	
-	}
+		//Verify item change was noticed
+		ItemInfo updatedItem1 = updatedList1.getItems().get(fooList1Item1Id);
+		assertTrue(updatedItem1.shallowEquals(clientItem1));
+		ItemInfo itemFromEntity = new ItemInfo(updateEntities.get(1));
+		assertTrue(itemFromEntity.shallowEquals(clientItem1));
+		
+		
+	}//testClientChange
 	
 }//DatastoreAdapter
