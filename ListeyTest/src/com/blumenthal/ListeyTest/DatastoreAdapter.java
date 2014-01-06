@@ -197,6 +197,14 @@ public class DatastoreAdapter {
 		clientItem1.setName("Foo List 1 Item 1 new name");
 		clientItem1.setLastUpdate(uniqueTime++);
 		
+		//Add new item
+		ItemInfo clientItem2 = new ItemInfo();
+		clientItem2.setUniqueId(":" + tempUniqueId++);
+		clientItem2.setCount(2L);
+		clientItem2.setLastUpdate(uniqueTime++);
+		clientItem2.setName("Foo List 1 Item 2");
+		clientList1.getItems().put(clientItem2.getUniqueId(), clientItem2);
+		
 		//Change category name
 		CategoryInfo clientList1Cat1 = clientList1.getCategories().first();
 		clientList1Cat1.setName("Foo List 1 Category 1 new name");
@@ -206,8 +214,7 @@ public class DatastoreAdapter {
 		CategoryInfo clientList1Cat2 = new CategoryInfo();
 		clientList1Cat2.setLastUpdate(uniqueTime++);
 		clientList1Cat2.setName("Foo List 1 Category 2");
-		String clientList1Cat2TempId = ":" + tempUniqueId++;
-		clientList1Cat2.setUniqueId(clientList1Cat2TempId);
+		clientList1Cat2.setUniqueId(":" + tempUniqueId++);
 		clientList1.getCategories().add(clientList1Cat2);
 		
 		
@@ -230,6 +237,28 @@ public class DatastoreAdapter {
 		assertTrue(updatedItem1.shallowEquals(clientItem1));
 		ItemInfo itemFromEntity = new ItemInfo(updateEntities.remove(0));
 		assertTrue(itemFromEntity.shallowEquals(clientItem1));
+		
+		//Verify new item was noticed
+		//Iterate through the item ids until you find the one that is NOT the one we already knew
+		String updatedItem2UniqueId = null;
+		for (String oneId : updatedList1.getItems().keySet()) {
+			if (!oneId.equals(updatedItem1.getUniqueId())) {
+				updatedItem2UniqueId = oneId;
+				break;
+			}
+		}//foreach oneId
+		
+		ItemInfo updatedItem2 = updatedList1.getItems().get(updatedItem2UniqueId);
+		assertEquals(clientItem2.getCount(), updatedItem2.getCount());
+		assertEquals(clientItem2.getLastUpdate(), updatedItem2.getLastUpdate());
+		assertEquals(clientItem2.getName(), updatedItem2.getName());
+		assertEquals(clientItem2.getStatus(), updatedItem2.getStatus());
+		assertTrue(DataStoreUniqueId.isTemporaryId(clientItem2.getUniqueId()));
+		assertFalse(DataStoreUniqueId.isTemporaryId(updatedItem2.getUniqueId()));
+		assertFalse("Expected " + clientItem2.getUniqueId() + " to be different from " + updatedItem2.getUniqueId(),
+				clientItem2.getUniqueId().equals(updatedItem2.getUniqueId()));
+		itemFromEntity = new ItemInfo(updateEntities.remove(0));
+		assertTrue(itemFromEntity.shallowEquals(updatedItem2));
 		
 		//Verify new category was noticed
 		Iterator<CategoryInfo> catIter = updatedList1.getCategories().iterator();
