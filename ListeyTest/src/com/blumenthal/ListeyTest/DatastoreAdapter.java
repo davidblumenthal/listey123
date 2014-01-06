@@ -1,10 +1,9 @@
 package com.blumenthal.ListeyTest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +43,7 @@ public class DatastoreAdapter {
 	private String fooList1Id = null;
 	private String fooList1Item1Id = null;
 	private long uniqueTime = 10000L;
+	private int tempUniqueId = 1;
 	
 	static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 	
@@ -197,11 +197,18 @@ public class DatastoreAdapter {
 		clientItem1.setName("Foo List 1 Item 1 new name");
 		clientItem1.setLastUpdate(uniqueTime++);
 		
-		
 		//Change category name
-		CategoryInfo clientList1Category1 = clientList1.getCategories().first();
-		clientList1Category1.setName("Foo List 1 Category 1 new name");
-		clientList1Category1.setLastUpdate(uniqueTime++);
+		CategoryInfo clientList1Cat1 = clientList1.getCategories().first();
+		clientList1Cat1.setName("Foo List 1 Category 1 new name");
+		clientList1Cat1.setLastUpdate(uniqueTime++);
+		
+		//Add new category
+		CategoryInfo clientList1Cat2 = new CategoryInfo();
+		clientList1Cat2.setLastUpdate(uniqueTime++);
+		clientList1Cat2.setName("Foo List 1 Category 2");
+		String clientList1Cat2TempId = ":" + tempUniqueId++;
+		clientList1Cat2.setUniqueId(clientList1Cat2TempId);
+		clientList1.getCategories().add(clientList1Cat2);
 		
 		
 		//Test full compare
@@ -215,20 +222,35 @@ public class DatastoreAdapter {
 		//Verify list change was noticed
 		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		assertTrue(updatedList1.shallowEquals(clientList1));
-		ListInfo listFromEntity = new ListInfo(updateEntities.get(0));
+		ListInfo listFromEntity = new ListInfo(updateEntities.remove(0));
 		assertTrue(listFromEntity.shallowEquals(clientList1));
 		
 		//Verify item change was noticed
 		ItemInfo updatedItem1 = updatedList1.getItems().get(fooList1Item1Id);
 		assertTrue(updatedItem1.shallowEquals(clientItem1));
-		ItemInfo itemFromEntity = new ItemInfo(updateEntities.get(1));
+		ItemInfo itemFromEntity = new ItemInfo(updateEntities.remove(0));
 		assertTrue(itemFromEntity.shallowEquals(clientItem1));
 		
+		//Verify new category was noticed
+		Iterator<CategoryInfo> catIter = updatedList1.getCategories().iterator();
+		CategoryInfo updatedCat2 = catIter.next();
+		assertEquals(clientList1Cat2.getName(), updatedCat2.getName());
+		assertEquals(clientList1Cat2.getLastUpdate(), updatedCat2.getLastUpdate());
+		assertEquals(clientList1Cat2.getStatus(), updatedCat2.getStatus());
+		assertTrue(DataStoreUniqueId.isTemporaryId(clientList1Cat2.getUniqueId()));
+		assertFalse(DataStoreUniqueId.isTemporaryId(updatedCat2.getUniqueId()));
+		assertFalse("Expected " + clientList1Cat2.getUniqueId() + " to be different from " + updatedCat2.getUniqueId(),
+				clientList1Cat2.getUniqueId().equals(updatedCat2.getUniqueId()));
+		CategoryInfo categoryFromEntity = new CategoryInfo(updateEntities.remove(0));
+		assertTrue(categoryFromEntity.shallowEquals(updatedCat2));
+		
 		//Verify category change was noticed
-		CategoryInfo updatedCategory1 = updatedList1.getCategories().first();
-		assertTrue(updatedCategory1.shallowEquals(clientList1Category1));
-		CategoryInfo categoryFromEntity = new CategoryInfo(updateEntities.get(2));
-		assertTrue(categoryFromEntity.shallowEquals(clientList1Category1));
+		CategoryInfo updatedCat1 = catIter.next();
+		assertTrue(updatedCat1.shallowEquals(clientList1Cat1));
+		categoryFromEntity = new CategoryInfo(updateEntities.remove(0));
+		assertTrue(categoryFromEntity.shallowEquals(clientList1Cat1));
+		
+		
 	}//testClientChange
 	
 }//DatastoreAdapter
