@@ -191,30 +191,17 @@ public class DatastoreAdapter {
 		ListInfo clientList1 = clientMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		clientList1.setName("Foo List 1 new name");
 		clientList1.setLastUpdate(uniqueTime++);
-		ListInfo serverList1 = serverMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
-		
-		//test compare
-		List<Entity> updateEntities = new ArrayList<Entity>();
-		List<Entity> deleteEntities = new ArrayList<Entity>();
-		Key fooKey = KeyFactory.createKey(ListeyDataOneUser.KIND, FOO_EMAIL);
-		TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, fooKey, serverList1, clientList1, updateEntities, deleteEntities);
-		assertEquals(0, deleteEntities.size());
-		assertEquals(1, updateEntities.size());
-		assertNotNull(updatedObj);
-		assertTrue(updatedObj.shallowEquals(clientList1));
-		ListInfo listFromEntity = new ListInfo(updateEntities.get(0));
-		assertTrue(listFromEntity.shallowEquals(clientList1));
 		
 		//Test full compare
-		updateEntities.clear();
-		deleteEntities.clear();
+		List<Entity> updateEntities = new ArrayList<Entity>();
+		List<Entity> deleteEntities = new ArrayList<Entity>();
 		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteEntities);
 		assertNotNull(updatedMultiUser);
 		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		assertEquals(0, deleteEntities.size());
 		assertEquals(1, updateEntities.size());
 		assertTrue(updatedList1.shallowEquals(clientList1));
-		listFromEntity = new ListInfo(updateEntities.get(0));
+		ListInfo listFromEntity = new ListInfo(updateEntities.get(0));
 		assertTrue(listFromEntity.shallowEquals(clientList1));
 		
 		//Change item name and test	
