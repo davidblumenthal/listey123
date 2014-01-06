@@ -56,7 +56,7 @@ public class DataStoreUniqueId {
 	 * @param id A unique id string to check.
 	 * @return Whether id is a temporary id (starts with colon).
 	 */
-	boolean isTemporaryId(String id) {
+	public static boolean isTemporaryId(String id) {
 		return (id.charAt(0) == ':');
 	}//isTemporaryId
 	
