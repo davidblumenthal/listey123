@@ -28,6 +28,9 @@ public class ListeyDataOneUserJsonAdapter implements JsonDeserializer<ListeyData
 		ListeyDataOneUser userInfo = new ListeyDataOneUser();
 
 		JsonObject userJson = json.getAsJsonObject();
+		if (userJson.has(ListeyDataOneUser.USER_EMAIL)) {
+			userInfo.setUniqueId(userJson.get(ListeyDataOneUser.USER_EMAIL).getAsString());
+		}
 		if (userJson.has(ListeyDataOneUser.LISTS)){
 			JsonObject listsJson = userJson.get(ListeyDataOneUser.LISTS).getAsJsonObject();
 			for ( Map.Entry<String,JsonElement> listEntry : listsJson.entrySet()){
@@ -47,6 +50,9 @@ public class ListeyDataOneUserJsonAdapter implements JsonDeserializer<ListeyData
 	public JsonElement serialize(ListeyDataOneUser oneUser, Type arg1,
 			JsonSerializationContext context) {
 		JsonObject rv = new JsonObject();
+		if (doAllFields){
+			rv.addProperty(ListeyDataOneUser.USER_EMAIL, oneUser.getUniqueId());
+		}
 		if (!oneUser.lists.isEmpty()){
 			JsonElement listsJson = context.serialize(oneUser.lists);
 			rv.add(ListeyDataOneUser.LISTS, listsJson);
