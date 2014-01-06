@@ -45,6 +45,7 @@ import com.google.appengine.api.datastore.Query;
 public class ListeyDataOneUser extends TimeStampedNode {
 	public static final String KIND = "user";//kind in the datastore
 	public static final String LISTS = "lists";
+	public static final String USER_EMAIL = "userEmail";
 	
 	private String userEmail;
 	public Map<String, ListInfo> lists = new HashMap<String, ListInfo>();
