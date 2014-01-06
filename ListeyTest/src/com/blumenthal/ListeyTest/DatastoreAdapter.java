@@ -187,15 +187,22 @@ public class DatastoreAdapter {
 		DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
 		
 		//*******************************************
-		//Change list name and lastUpdate
+		//Change list name
 		ListInfo clientList1 = clientMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		clientList1.setName("Foo List 1 new name");
 		clientList1.setLastUpdate(uniqueTime++);
 		
-		//Change item name and lastUpdate
+		//Change item name
 		ItemInfo clientItem1 = clientList1.getItems().get(fooList1Item1Id);
 		clientItem1.setName("Foo List 1 Item 1 new name");
 		clientItem1.setLastUpdate(uniqueTime++);
+		
+		
+		//Change category name
+		CategoryInfo clientList1Category1 = clientList1.getCategories().first();
+		clientList1Category1.setName("Foo List 1 Category 1 new name");
+		clientList1Category1.setLastUpdate(uniqueTime++);
+		
 		
 		//Test full compare
 		List<Entity> updateEntities = new ArrayList<Entity>();
@@ -217,7 +224,11 @@ public class DatastoreAdapter {
 		ItemInfo itemFromEntity = new ItemInfo(updateEntities.get(1));
 		assertTrue(itemFromEntity.shallowEquals(clientItem1));
 		
-		
+		//Verify category change was noticed
+		CategoryInfo updatedCategory1 = updatedList1.getCategories().first();
+		assertTrue(updatedCategory1.shallowEquals(clientList1Category1));
+		CategoryInfo categoryFromEntity = new CategoryInfo(updateEntities.get(2));
+		assertTrue(categoryFromEntity.shallowEquals(clientList1Category1));
 	}//testClientChange
 	
 }//DatastoreAdapter
