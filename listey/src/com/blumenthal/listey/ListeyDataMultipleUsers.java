@@ -10,6 +10,7 @@ package com.blumenthal.listey;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,7 +105,9 @@ public class ListeyDataMultipleUsers {
 
 		//iterate only through the server set, because if a user only exists on the client and not on the server
 		//that means they shouldn't have privs
-		Set<String> userEmails = serverUserMap.keySet();
+		Set<String> uneditableSet = serverUserMap.keySet();
+		//Need to make a new copy if I want to add to it.
+		Set<String> userEmails = new HashSet<String>(uneditableSet);
 		//Add this user email even if nothing set up on server
 		userEmails.add(serverObj.getThisUserEmail());
 
