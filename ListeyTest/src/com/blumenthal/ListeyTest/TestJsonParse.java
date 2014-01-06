@@ -125,8 +125,6 @@ public class TestJsonParse {
 	public static final String USER1_JSON =
 			"{\"userData\":{" +
 				"\"" + USER1_EMAIL + "\":{" +
-				    "\"userEmail\":\"" + USER1_EMAIL + "\"," +  //this isn't actually required, but it'll get mirrored back unless I make
-				                                                //a custom deserializer
 					"\"lists\":{" +
 						"\"1:1\":{" +
 							"\"lastUpdate\":1234567890"+
