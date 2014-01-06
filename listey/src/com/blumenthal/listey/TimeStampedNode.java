@@ -111,7 +111,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 		Gson gson = ListeyDataMultipleUsers.getGson(true);
 		String json = gson.toJson(this);
 		TimeStampedNode copy = gson.fromJson(json, this.getClass());
-getLog().warning("makeCopy: " + json);
+getLog().warning(getClass() + "::makeCopy: " + json);
 		return copy;
 	}//makeCopy
 	
