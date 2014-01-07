@@ -237,13 +237,34 @@ public class DatastoreAdapter {
 		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteEntities);
 		assertNotNull(updatedMultiUser);
 		assertEquals(0, deleteEntities.size());
-		assertEquals(2, updateEntities.size());
+		assertEquals(7, updateEntities.size());
 		
 		//Verify list change was noticed
 		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
 		assertTrue(updatedList1.shallowEquals(clientList1));
 		ListInfo listFromEntity = new ListInfo(updateEntities.remove(0));
 		assertTrue(listFromEntity.shallowEquals(clientList1));
+		
+		//Verify new item was noticed
+		//Iterate through the item ids until you find the one that is NOT the one we already knew
+		String updatedItem2UniqueId = null;
+		for (String oneId : updatedList1.getItems().keySet()) {
+			if (!oneId.equals(clientItem1.getUniqueId())) {
+				updatedItem2UniqueId = oneId;
+				break;
+			}
+		}//foreach oneId
+		ItemInfo updatedItem2 = updatedList1.getItems().get(updatedItem2UniqueId);
+		assertEquals(clientItem2.getCount(), updatedItem2.getCount());
+		assertEquals(clientItem2.getLastUpdate(), updatedItem2.getLastUpdate());
+		assertEquals(clientItem2.getName(), updatedItem2.getName());
+		assertEquals(clientItem2.getStatus(), updatedItem2.getStatus());
+		assertFalse("Expected " + clientItem2.getUniqueId() + " to be different from " + updatedItem2.getUniqueId(),
+				clientItem2.getUniqueId().equals(updatedItem2.getUniqueId()));
+		assertTrue(DataStoreUniqueId.isTemporaryId(clientItem2.getUniqueId()));
+		assertFalse(DataStoreUniqueId.isTemporaryId(updatedItem2.getUniqueId()));
+		ItemInfo itemFromEntity = new ItemInfo(updateEntities.remove(0));
+		assertTrue(itemFromEntity.shallowEquals(updatedItem2));
 		
 		//Verify new list was noticed
 		//Iterate through the list ids until you find the one that is NOT the one we already knew
@@ -268,30 +289,8 @@ public class DatastoreAdapter {
 		//Verify item change was noticed
 		ItemInfo updatedItem1 = updatedList1.getItems().get(fooList1Item1Id);
 		assertTrue(updatedItem1.shallowEquals(clientItem1));
-		ItemInfo itemFromEntity = new ItemInfo(updateEntities.remove(0));
-		assertTrue(itemFromEntity.shallowEquals(clientItem1));
-		
-		//Verify new item was noticed
-		//Iterate through the item ids until you find the one that is NOT the one we already knew
-		String updatedItem2UniqueId = null;
-		for (String oneId : updatedList1.getItems().keySet()) {
-			if (!oneId.equals(updatedItem1.getUniqueId())) {
-				updatedItem2UniqueId = oneId;
-				break;
-			}
-		}//foreach oneId
-		ItemInfo updatedItem2 = updatedList1.getItems().get(updatedItem2UniqueId);
-		assertEquals(clientItem2.getCount(), updatedItem2.getCount());
-		assertEquals(clientItem2.getLastUpdate(), updatedItem2.getLastUpdate());
-		assertEquals(clientItem2.getName(), updatedItem2.getName());
-		assertEquals(clientItem2.getStatus(), updatedItem2.getStatus());
-		assertTrue(DataStoreUniqueId.isTemporaryId(clientItem2.getUniqueId()));
-		assertFalse(DataStoreUniqueId.isTemporaryId(updatedItem2.getUniqueId()));
-		assertFalse("Expected " + clientItem2.getUniqueId() + " to be different from " + updatedItem2.getUniqueId(),
-				clientItem2.getUniqueId().equals(updatedItem2.getUniqueId()));
 		itemFromEntity = new ItemInfo(updateEntities.remove(0));
-		assertTrue(itemFromEntity.shallowEquals(updatedItem2));
-		
+		assertTrue(itemFromEntity.shallowEquals(clientItem1));
 
 		//Verify new ItemCategoryInfo was noticed
 		ItemCategoryInfo updatedItem2CatInfo = updatedItem2.getCategories().values().iterator().next();
@@ -320,5 +319,133 @@ public class DatastoreAdapter {
 		
 		
 	}//testClientChange
+
 	
+	@Test
+	public void testServerChange() {
+		ListeyDataMultipleUsers[] users = createAndReloadUser();
+		ListeyDataMultipleUsers clientMultiUser = users[0];
+		ListeyDataMultipleUsers serverMultiUser = users[1];
+		
+		//Now change the client and test compareAndUpdate
+		DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
+		
+		//*******************************************
+		//Change list name
+		ListInfo serverList1 = serverMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
+		serverList1.setName("Foo List 1 new name");
+		serverList1.setLastUpdate(uniqueTime++);
+		
+		//Add new list
+		ListInfo serverList2 = new ListInfo();
+		serverList2.setLastUpdate(uniqueTime++);
+		serverList2.setName("Foo List 2");
+		serverList2.setUniqueId(uniqueIdCreator.getUniqueId());
+		serverMultiUser.userData.get(FOO_EMAIL).lists.put(serverList2.getUniqueId(), serverList2);
+		
+		//Change category name
+		CategoryInfo serverList1Cat1 = serverList1.getCategories().first();
+		serverList1Cat1.setName("Foo List 1 Category 1 new name");
+		serverList1Cat1.setLastUpdate(uniqueTime++);
+		
+		//Add new category
+		CategoryInfo serverList1Cat2 = new CategoryInfo();
+		serverList1Cat2.setLastUpdate(uniqueTime++);
+		serverList1Cat2.setName("Foo List 1 Category 2");
+		serverList1Cat2.setUniqueId(uniqueIdCreator.getUniqueId());
+		serverList1.getCategories().add(serverList1Cat2);
+		
+		//Change item name
+		ItemInfo serverItem1 = serverList1.getItems().get(fooList1Item1Id);
+		serverItem1.setName("Foo List 1 Item 1 new name");
+		serverItem1.setLastUpdate(uniqueTime++);
+		
+		//Add new item
+		ItemInfo serverItem2 = new ItemInfo();
+		serverItem2.setUniqueId(uniqueIdCreator.getUniqueId());
+		serverItem2.setCount(2L);
+		serverItem2.setLastUpdate(uniqueTime++);
+		serverItem2.setName("Foo List 1 Item 2");
+		serverList1.getItems().put(serverItem2.getUniqueId(), serverItem2);
+		
+		//Add new ItemCategoryInfo
+		ItemCategoryInfo serverList1Item2Cat2 = new ItemCategoryInfo();
+		serverList1Item2Cat2.setLastUpdate(uniqueTime++);
+		serverList1Item2Cat2.setUniqueId(serverList1Cat2.getUniqueId());
+		serverItem2.getCategories().put(serverList1Item2Cat2.getUniqueId(), serverList1Item2Cat2);
+		
+		//************************************************************************
+		//Test full compare
+		List<Entity> updateEntities = new ArrayList<Entity>();
+		List<Entity> deleteEntities = new ArrayList<Entity>();
+		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteEntities);
+		assertNotNull(updatedMultiUser);
+		assertEquals(0, deleteEntities.size());
+		//All changes were on the server, so it shouldn't think any entities need updating
+		assertEquals(0, updateEntities.size());
+		
+		//Verify list change was noticed
+		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
+		assertTrue(updatedList1.shallowEquals(serverList1));
+		
+		//Verify new list was noticed
+		//Iterate through the list ids until you find the one that is NOT the one we already knew
+		String updatedList2UniqueId = null;
+		for (String oneId : updatedMultiUser.userData.get(FOO_EMAIL).lists.keySet()) {
+			if (!oneId.equals(updatedList1.getUniqueId())) {
+				updatedList2UniqueId = oneId;
+				break;
+			}
+		}//foreach oneId
+		ListInfo updatedList2 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(updatedList2UniqueId);
+		assertEquals(serverList2.getLastUpdate(), updatedList2.getLastUpdate());
+		assertEquals(serverList2.getName(), updatedList2.getName());
+		assertEquals(serverList2.getStatus(), updatedList2.getStatus());
+		assertFalse(DataStoreUniqueId.isTemporaryId(serverItem2.getUniqueId()));
+		assertFalse(DataStoreUniqueId.isTemporaryId(updatedList2.getUniqueId()));
+		assertEquals(serverList2.getUniqueId(), updatedList2.getUniqueId());
+
+		//Verify item change was noticed
+		ItemInfo updatedItem1 = updatedList1.getItems().get(fooList1Item1Id);
+		assertTrue(updatedItem1.shallowEquals(serverItem1));
+		
+		//Verify new item was noticed
+		//Iterate through the item ids until you find the one that is NOT the one we already knew
+		String updatedItem2UniqueId = null;
+		for (String oneId : updatedList1.getItems().keySet()) {
+			if (!oneId.equals(updatedItem1.getUniqueId())) {
+				updatedItem2UniqueId = oneId;
+				break;
+			}
+		}//foreach oneId
+		ItemInfo updatedItem2 = updatedList1.getItems().get(updatedItem2UniqueId);
+		assertEquals(serverItem2.getCount(), updatedItem2.getCount());
+		assertEquals(serverItem2.getLastUpdate(), updatedItem2.getLastUpdate());
+		assertEquals(serverItem2.getName(), updatedItem2.getName());
+		assertEquals(serverItem2.getStatus(), updatedItem2.getStatus());
+		assertFalse(DataStoreUniqueId.isTemporaryId(serverItem2.getUniqueId()));
+		assertFalse(DataStoreUniqueId.isTemporaryId(updatedItem2.getUniqueId()));
+		assertEquals(serverItem2.getUniqueId(), updatedItem2.getUniqueId());		
+
+		//Verify new ItemCategoryInfo was noticed
+		ItemCategoryInfo updatedItem2CatInfo = updatedItem2.getCategories().values().iterator().next();
+		assertEquals(serverList1Item2Cat2.getLastUpdate(), updatedItem2CatInfo.getLastUpdate());
+		assertEquals(serverList1Item2Cat2.getUniqueId(), updatedItem2CatInfo.getUniqueId());
+		
+		
+		//Verify new category was noticed
+		Iterator<CategoryInfo> catIter = updatedList1.getCategories().iterator();
+		CategoryInfo updatedCat2 = catIter.next();
+		assertEquals(serverList1Cat2.getName(), updatedCat2.getName());
+		assertEquals(serverList1Cat2.getLastUpdate(), updatedCat2.getLastUpdate());
+		assertEquals(serverList1Cat2.getStatus(), updatedCat2.getStatus());
+		assertFalse(DataStoreUniqueId.isTemporaryId(serverList1Cat2.getUniqueId()));
+		assertFalse(DataStoreUniqueId.isTemporaryId(updatedCat2.getUniqueId()));
+		assertEquals(serverList1Cat2.getUniqueId(), updatedCat2.getUniqueId());
+		
+		//Verify category change was noticed
+		CategoryInfo updatedCat1 = catIter.next();
+		assertTrue(updatedCat1.shallowEquals(serverList1Cat1));
+	}//testServerChange
+
 }//DatastoreAdapter
