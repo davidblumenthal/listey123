@@ -111,7 +111,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 		Gson gson = ListeyDataMultipleUsers.getGson(true);
 		String json = gson.toJson(this);
 		TimeStampedNode copy = gson.fromJson(json, this.getClass());
-getLog().warning(getClass() + "::makeCopy: " + json);
+getLog().finest(getClass() + "::makeCopy: " + json);
 		return copy;
 	}//makeCopy
 	
@@ -212,11 +212,21 @@ getLog().warning(getClass() + "::makeCopy: " + json);
 		
 		else {//both nodes already exist
 			//use the most recent top-level object, or the client version if they're the same
-			TimeStampedNode newer = serverObj.getLastUpdate() > clientObj.getLastUpdate() ? serverObj : clientObj;
-			rv = newer.makeCopy();
-			//If the top-level object changed then push it on the update list
-			Entity thisEntity = rv.toEntity(uniqueIdCreator, parent);
-			if (!clientObj.shallowEquals(serverObj) && thisEntity != null) updateEntities.add(thisEntity);
+			TimeStampedNode newer;
+			if (serverObj.getLastUpdate() > clientObj.getLastUpdate()) {
+				newer = serverObj;
+				rv = newer.makeCopy();
+			}
+			else {
+				newer = clientObj;
+				rv = newer.makeCopy();
+				if (!clientObj.shallowEquals(serverObj)) {
+					//If the top-level object changed on the client then push it on the update list
+					Entity thisEntity = rv.toEntity(uniqueIdCreator, parent);
+					if (thisEntity != null) updateEntities.add(thisEntity);
+				}
+			}//client is newer
+			
 			Key thisEntityKey = rv.getEntityKey(parent);
 
 			//Now compare and update each sub-level object
@@ -290,14 +300,14 @@ getLog().warning(getClass() + "::makeCopy: " + json);
 						}
 						
 						//Same object, so compare and update if needed
-						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntity.getKey(), serverToCompare, clientToCompare, updateEntities, deleteEntities);
+						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverToCompare, clientToCompare, updateEntities, deleteEntities);
 						if (updatedObj != null) subIterEntriesToAdd.add(updatedObj);
 					}//for each subObj
 				}//for each subIter
 				rv.addSubIterEntries(subIterAddLists);
 			}//if any subiters exist
 		}//neither list is null
-		
+
 		return rv;
 	}//compareAndUpdate
 
