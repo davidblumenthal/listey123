@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.print.attribute.standard.MediaSize.Other;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
@@ -350,4 +352,24 @@ public class ListInfo extends TimeStampedNode{
 		List<CategoryInfo> catInfos = (List<CategoryInfo>) subIterEntriesToAdd.get(0);
 		categories.addAll(catInfos);
 	}//addSubIterEntries
+	
+	
+
+
+	/* (non-Javadoc)
+	 * @see com.blumenthal.listey.TimeStampedNode#addSubMapEntries(java.util.List)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void addSubMapEntries(List<List<? extends TimeStampedNode>> subMapEntriesToAdd) {
+		List<ItemInfo> itemInfos = (List<ItemInfo>) subMapEntriesToAdd.get(0);
+		for (ItemInfo itemInfo : itemInfos) {
+			items.put(itemInfo.getUniqueId(), itemInfo);
+		}
+		
+		List<OtherUserPrivOnList> otherUserPrivInfos = (List<OtherUserPrivOnList>) subMapEntriesToAdd.get(1);
+		for (OtherUserPrivOnList privInfo : otherUserPrivInfos) {
+			otherUserPrivs.put(privInfo.getUniqueId(), privInfo);
+		}
+	}//addSubMapEntries
 }//ListInfo

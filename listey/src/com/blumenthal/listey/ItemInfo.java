@@ -23,7 +23,7 @@ public class ItemInfo extends TimeStampedNode {
 	private String name;
 	private String uniqueId;
 	private Long count = 1L;
-	private Status status;
+	private Status status = TimeStampedNode.Status.ACTIVE;
 	private Map<String, ItemCategoryInfo> categories = new HashMap<String, ItemCategoryInfo>();
 	private Long lastUpdate;
 	
@@ -34,7 +34,7 @@ public class ItemInfo extends TimeStampedNode {
 	public ItemInfo(Entity entity) {
 		if (!entity.getKind().equals(KIND)){
 			//check the entity type and throw if not what we're expecting
-			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
+			throw new IllegalStateException("The constructor was called with an entity of the wrong kind. (" + entity.getKind() + ").");
 		}//if unexpected kind
 		
 		setLastUpdate((Long) entity.getProperty(LAST_UPDATE));
