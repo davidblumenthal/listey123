@@ -67,6 +67,17 @@ public class CategoryInfo extends TimeStampedNode {
 	}//shallowEquals
 	
 	
+	@Override
+	public TimeStampedNode makeShallowCopy() {
+		CategoryInfo newObj = new CategoryInfo();
+		newObj.setUniqueId(getUniqueId());
+		newObj.setName(getName());
+		newObj.setStatus(getStatus());
+		newObj.setLastUpdate(getLastUpdate());
+		return newObj;
+	}
+	
+	
 	/**
 	 * @param other
 	 * @return Returns true if this object is essentially the same

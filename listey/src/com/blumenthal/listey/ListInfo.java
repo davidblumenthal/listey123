@@ -265,6 +265,13 @@ public class ListInfo extends TimeStampedNode{
 	}//shallowEquals
 	
 	
+	
+	@Override
+	public TimeStampedNode makeShallowCopy() {
+		ListInfo newObj = new ListInfo(getStatus(), getUniqueId(), getName(), getLastUpdate());
+		return newObj;
+	}
+	
 	/**
 	 * @param other
 	 * @return Returns true if this object is essentially the same

@@ -295,6 +295,13 @@ public class ListeyDataOneUser extends TimeStampedNode {
 	}//shallowEquals
 	
 	
+	@Override
+	public TimeStampedNode makeShallowCopy() {
+		ListeyDataOneUser newObj = new ListeyDataOneUser();
+		newObj.setUniqueId(getUniqueId());
+		return newObj;
+	}
+	
 
 	/* (non-Javadoc)
 	 * @see com.blumenthal.listey.TimeStampedNode#subMaps()

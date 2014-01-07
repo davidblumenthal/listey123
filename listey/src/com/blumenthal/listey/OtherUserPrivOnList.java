@@ -73,6 +73,16 @@ public class OtherUserPrivOnList extends TimeStampedNode{
 	}//shallowEquals
 	
 	
+	@Override
+	public TimeStampedNode makeShallowCopy() {
+		OtherUserPrivOnList newObj = new OtherUserPrivOnList();
+		newObj.priv = priv;
+		newObj.userId = userId;
+		newObj.lastUpdate = lastUpdate;
+		return newObj;
+	}
+	
+	
 	
 	/**
 	 * @param other
