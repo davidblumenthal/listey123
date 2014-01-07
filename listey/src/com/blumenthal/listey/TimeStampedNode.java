@@ -111,10 +111,11 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 		Gson gson = ListeyDataMultipleUsers.getGson(true);
 		String json = gson.toJson(this);
 		TimeStampedNode copy = gson.fromJson(json, this.getClass());
-getLog().finest(getClass() + "::makeCopy: " + json);
 		return copy;
 	}//makeCopy
 	
+	
+	public abstract TimeStampedNode makeShallowCopy();
 	
 	/** 
 	 * 
@@ -215,11 +216,11 @@ getLog().finest(getClass() + "::makeCopy: " + json);
 			TimeStampedNode newer;
 			if (serverObj.getLastUpdate() > clientObj.getLastUpdate()) {
 				newer = serverObj;
-				rv = newer.makeCopy();
+				rv = newer.makeShallowCopy();
 			}
 			else {
 				newer = clientObj;
-				rv = newer.makeCopy();
+				rv = newer.makeShallowCopy();
 				if (!clientObj.shallowEquals(serverObj)) {
 					//If the top-level object changed on the client then push it on the update list
 					Entity thisEntity = rv.toEntity(uniqueIdCreator, parent);
