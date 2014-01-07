@@ -19,7 +19,7 @@ import com.google.appengine.api.datastore.Transaction;
  *
  */
 public class DataStoreUniqueId {
-	public static final int numShards = 20;
+	public static int numShards = 20;
 	
 	private Map<String, String> tempToPermanentId = new HashMap<String,String>();
 	
