@@ -13,7 +13,7 @@ public class ItemCategoryInfo extends TimeStampedNode {
 	public static final String UNIQUE_ID = "uniqueId";
 	
 	private String uniqueId;
-	private Status status;
+	private Status status = TimeStampedNode.Status.ACTIVE;
 	private Long lastUpdate;
 	
 	/** Default constructor */
@@ -22,7 +22,7 @@ public class ItemCategoryInfo extends TimeStampedNode {
 	public ItemCategoryInfo(Entity entity) {
 		if (!entity.getKind().equals(KIND)){
 			//check the entity type and throw if not what we're expecting
-			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
+			throw new IllegalStateException("The constructor was called with an entity of the wrong kind. (" + entity.getKind() + "): " + entity);
 		}//if unexpected kind
 		setLastUpdate((Long) entity.getProperty(LAST_UPDATE));
 		setUniqueId((String) entity.getKey().getName());
