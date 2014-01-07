@@ -15,7 +15,7 @@ public class CategoryInfo extends TimeStampedNode {
 	private String name;
 	private String uniqueId;
 	private Long lastUpdate;
-	private Status status;
+	private Status status = TimeStampedNode.Status.ACTIVE;
 	
 	/** Default constructor */
 	public CategoryInfo(){}
@@ -23,7 +23,7 @@ public class CategoryInfo extends TimeStampedNode {
 	public CategoryInfo(Entity entity) {
 		if (!entity.getKind().equals(KIND)){
 			//check the entity type and throw if not what we're expecting
-			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
+			throw new IllegalStateException("The constructor was called with an entity of the wrong kind (" + entity.getKind() + "): " + entity);
 		}//if unexpected kind
 		setLastUpdate((Long) entity.getProperty("lastUpdate"));
 		setName((String) entity.getProperty(NAME));
@@ -39,6 +39,8 @@ public class CategoryInfo extends TimeStampedNode {
 	 */
 	@Override
 	public Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent) {
+		//Before converting this to an entity, change the id to a permanent if it's not already
+		setUniqueId(uniqueIdCreator.ensurePermanentId(getUniqueId()));
 		Entity entity = new Entity(getEntityKey(parent));
 		entity.setProperty(STATUS, getStatus().toString());
 		entity.setProperty(NAME, getName());
