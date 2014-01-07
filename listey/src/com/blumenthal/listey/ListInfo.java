@@ -15,7 +15,6 @@ import java.util.TreeSet;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.gson.Gson;
 
 public class ListInfo extends TimeStampedNode{
 	public static final String KIND = "list";//kind in the datastore
@@ -28,7 +27,7 @@ public class ListInfo extends TimeStampedNode{
 	public static final String OTHER_USER_PRIVS = "otherUserPrivs";
 	public static final String UNIQUE_ID = "uniqueId";
 	
-	private Status status;
+	private Status status = TimeStampedNode.Status.ACTIVE;
 	
 	private String uniqueId;
 	private String name;
@@ -72,7 +71,7 @@ public class ListInfo extends TimeStampedNode{
 	public ListInfo(Entity entity) {
 		if (!entity.getKind().equals(KIND)){
 			//check the entity type and throw if not what we're expecting
-			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
+			throw new IllegalStateException("The constructor was called with an entity of the wrong kind (" + entity.getKind() + "): " + entity);
 		}//if unexpected kind
 		setName((String) entity.getProperty(NAME));
 		setUniqueId((String) entity.getKey().getName());

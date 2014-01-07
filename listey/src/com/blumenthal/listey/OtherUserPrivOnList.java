@@ -30,7 +30,7 @@ public class OtherUserPrivOnList extends TimeStampedNode{
 	public OtherUserPrivOnList(Entity entity) {
 		if (!entity.getKind().equals(KIND)){
 			//check the entity type and throw if not what we're expecting
-			throw new IllegalStateException("The constructor was called with an entity of the wrong kind.");
+			throw new IllegalStateException("The constructor was called with an entity of the wrong kind. (" + entity.getKind() + "): " + entity);
 		}//if unexpected kind
 		userId = (String) entity.getProperty(USER_ID);
 		lastUpdate = (Long) entity.getProperty(LAST_UPDATE);
