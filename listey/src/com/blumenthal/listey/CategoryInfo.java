@@ -91,21 +91,6 @@ public class CategoryInfo extends TimeStampedNode {
 	
 	
 
-	/* (non-Javadoc)
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(TimeStampedNode o) {
-		int rv = 0;
-		if (CategoryInfo.class.isInstance(o)) {
-			rv = getName().compareTo(((CategoryInfo) o).getName());
-		}
-		if (rv == 0) rv = getUniqueId().compareTo(o.getUniqueId());
-		return rv;
-	}//compareTo
-	
-	
-
 	/**
 	 * @return the name
 	 */
