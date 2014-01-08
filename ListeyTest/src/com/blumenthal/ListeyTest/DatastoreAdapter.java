@@ -1,9 +1,11 @@
 package com.blumenthal.ListeyTest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +65,7 @@ public class DatastoreAdapter {
     
     public ListeyDataMultipleUsers createAndSaveUser() {
 		DataStoreUniqueId uniqCreator = new DataStoreUniqueId();
-		uniqCreator.numShards=1;
+		DataStoreUniqueId.numShards=1;
 		
 		//Create and flesh out a multi-user data structure
 		ListeyDataMultipleUsers multiUser = new ListeyDataMultipleUsers();
@@ -186,7 +188,6 @@ public class DatastoreAdapter {
 		
 		//Now change the client and test compareAndUpdate
 		DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
-		uniqueIdCreator.numShards = 1;
 		
 		//*******************************************
 		//Change list name
@@ -345,7 +346,6 @@ public class DatastoreAdapter {
 		
 		//Now change the client and test compareAndUpdate
 		DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
-		uniqueIdCreator.numShards = 1;
 		
 		//*******************************************
 		//Change list name
@@ -397,72 +397,15 @@ public class DatastoreAdapter {
 		List<Entity> deleteEntities = new ArrayList<Entity>();
 		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteEntities);
 		assertNotNull(updatedMultiUser);
+		
+		//Since all changes were on the server, the updated version should match the server version
+		String updatedJson = updatedMultiUser.toJson();
+		String serverJson = serverMultiUser.toJson();
+		assertEquals(serverJson, updatedJson);
+		
 		assertEquals(0, deleteEntities.size());
 		//All changes were on the server, so it shouldn't think any entities need updating
 		assertEquals(0, updateEntities.size());
-		
-		//Verify list change was noticed
-		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
-		assertTrue(updatedList1.shallowEquals(serverList1));
-		
-		//Verify new list was noticed
-		//Iterate through the list ids until you find the one that is NOT the one we already knew
-		String updatedList2UniqueId = null;
-		for (String oneId : updatedMultiUser.userData.get(FOO_EMAIL).lists.keySet()) {
-			if (!oneId.equals(updatedList1.getUniqueId())) {
-				updatedList2UniqueId = oneId;
-				break;
-			}
-		}//foreach oneId
-		ListInfo updatedList2 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(updatedList2UniqueId);
-		assertEquals(serverList2.getLastUpdate(), updatedList2.getLastUpdate());
-		assertEquals(serverList2.getName(), updatedList2.getName());
-		assertEquals(serverList2.getStatus(), updatedList2.getStatus());
-		assertFalse(DataStoreUniqueId.isTemporaryId(serverItem2.getUniqueId()));
-		assertFalse(DataStoreUniqueId.isTemporaryId(updatedList2.getUniqueId()));
-		assertEquals(serverList2.getUniqueId(), updatedList2.getUniqueId());
-
-		//Verify item change was noticed
-		ItemInfo updatedItem1 = updatedList1.getItems().get(fooList1Item1Id);
-		assertTrue(updatedItem1.shallowEquals(serverItem1));
-		
-		//Verify new item was noticed
-		//Iterate through the item ids until you find the one that is NOT the one we already knew
-		String updatedItem2UniqueId = null;
-		for (String oneId : updatedList1.getItems().keySet()) {
-			if (!oneId.equals(updatedItem1.getUniqueId())) {
-				updatedItem2UniqueId = oneId;
-				break;
-			}
-		}//foreach oneId
-		ItemInfo updatedItem2 = updatedList1.getItems().get(updatedItem2UniqueId);
-		assertEquals(serverItem2.getCount(), updatedItem2.getCount());
-		assertEquals(serverItem2.getLastUpdate(), updatedItem2.getLastUpdate());
-		assertEquals(serverItem2.getName(), updatedItem2.getName());
-		assertEquals(serverItem2.getStatus(), updatedItem2.getStatus());
-		assertFalse(DataStoreUniqueId.isTemporaryId(serverItem2.getUniqueId()));
-		assertFalse(DataStoreUniqueId.isTemporaryId(updatedItem2.getUniqueId()));
-		assertEquals(serverItem2.getUniqueId(), updatedItem2.getUniqueId());		
-
-		//Verify new ItemCategoryInfo was noticed
-		ItemCategoryInfo updatedItem2CatInfo = updatedItem2.getCategories().values().iterator().next();
-		assertEquals(serverList1Item2Cat2.getLastUpdate(), updatedItem2CatInfo.getLastUpdate());
-		assertEquals(serverList1Item2Cat2.getUniqueId(), updatedItem2CatInfo.getUniqueId());
-		
-		
-		//Verify new category was noticed
-		Iterator<CategoryInfo> catIter = updatedList1.getCategories().iterator();
-		CategoryInfo updatedCat2 = catIter.next();
-		assertEquals(serverList1Cat2.getName(), updatedCat2.getName());
-		assertEquals(serverList1Cat2.getLastUpdate(), updatedCat2.getLastUpdate());
-		assertEquals(serverList1Cat2.getStatus(), updatedCat2.getStatus());
-		assertFalse(DataStoreUniqueId.isTemporaryId(serverList1Cat2.getUniqueId()));
-		assertFalse(DataStoreUniqueId.isTemporaryId(updatedCat2.getUniqueId()));
-		assertEquals(serverList1Cat2.getUniqueId(), updatedCat2.getUniqueId());
-		
-		//Verify category change was noticed
-		CategoryInfo updatedCat1 = catIter.next();
-		assertTrue(updatedCat1.shallowEquals(serverList1Cat1));
 	}//testServerChange
 
 }//DatastoreAdapter
