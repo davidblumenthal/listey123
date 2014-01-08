@@ -191,7 +191,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 	
 
 	public static TimeStampedNode compareAndUpdate(DataStoreUniqueId uniqueIdCreator, Key parent, TimeStampedNode serverObj, TimeStampedNode clientObj,
-			List<Entity> updateEntities, List<Entity> deleteEntities) {
+			List<Entity> updateEntities, List<Key> deleteKeys) {
 		TimeStampedNode rv = null;
 		
 		//New from the client
@@ -252,7 +252,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 						TimeStampedNode clientSubObj = clientSubMap.get(fullSetList.getUniqueId());
 						TimeStampedNode serverSubObj = serverSubMap.get(fullSetList.getUniqueId());
 
-						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverSubObj, clientSubObj, updateEntities, deleteEntities);
+						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverSubObj, clientSubObj, updateEntities, deleteKeys);
 						if (updatedObj != null) subMapEntriesToAdd.add(updatedObj);
 					}//for each subObj
 				}//for each submap
@@ -301,7 +301,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 						}
 						
 						//Same object, so compare and update if needed
-						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverToCompare, clientToCompare, updateEntities, deleteEntities);
+						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverToCompare, clientToCompare, updateEntities, deleteKeys);
 						if (updatedObj != null) subIterEntriesToAdd.add(updatedObj);
 					}//for each subObj
 				}//for each subIter

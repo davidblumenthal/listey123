@@ -236,10 +236,10 @@ public class DatastoreAdapter {
 		//************************************************************************
 		//Test full compare
 		List<Entity> updateEntities = new ArrayList<Entity>();
-		List<Entity> deleteEntities = new ArrayList<Entity>();
-		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteEntities);
+		List<Key> deleteKeys = new ArrayList<Key>();
+		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteKeys);
 		assertNotNull(updatedMultiUser);
-		assertEquals(0, deleteEntities.size());
+		assertEquals(0, deleteKeys.size());
 		assertEquals(7, updateEntities.size());
 		
 		//Verify list change was noticed
@@ -394,8 +394,8 @@ public class DatastoreAdapter {
 		//************************************************************************
 		//Test full compare
 		List<Entity> updateEntities = new ArrayList<Entity>();
-		List<Entity> deleteEntities = new ArrayList<Entity>();
-		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteEntities);
+		List<Key> deleteKeys = new ArrayList<Key>();
+		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteKeys);
 		assertNotNull(updatedMultiUser);
 		
 		//Since all changes were on the server, the updated version should match the server version
@@ -403,7 +403,7 @@ public class DatastoreAdapter {
 		String serverJson = serverMultiUser.toJson();
 		assertEquals(serverJson, updatedJson);
 		
-		assertEquals(0, deleteEntities.size());
+		assertEquals(0, deleteKeys.size());
 		//All changes were on the server, so it shouldn't think any entities need updating
 		assertEquals(0, updateEntities.size());
 	}//testServerChange

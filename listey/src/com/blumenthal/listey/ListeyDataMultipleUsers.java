@@ -97,7 +97,7 @@ public class ListeyDataMultipleUsers {
 	
 	
 	public static ListeyDataMultipleUsers compareAndUpdate(DataStoreUniqueId uniqueIdCreator, ListeyDataMultipleUsers serverObj, ListeyDataMultipleUsers clientObj,
-			List<Entity> updateEntities, List<Entity> deleteEntities) {
+			List<Entity> updateEntities, List<Key> deleteKeys) {
 		ListeyDataMultipleUsers rv = new ListeyDataMultipleUsers();
 		
 		Map<String, ListeyDataOneUser> clientUserMap = clientObj.userData;
@@ -115,7 +115,7 @@ public class ListeyDataMultipleUsers {
 			ListeyDataOneUser clientSubObj = clientUserMap.get(userEmail);
 			ListeyDataOneUser serverSubObj = serverUserMap.get(userEmail);
 
-			ListeyDataOneUser updatedObj = (ListeyDataOneUser) ListeyDataOneUser.compareAndUpdate(uniqueIdCreator, null, serverSubObj, clientSubObj, updateEntities, deleteEntities);
+			ListeyDataOneUser updatedObj = (ListeyDataOneUser) ListeyDataOneUser.compareAndUpdate(uniqueIdCreator, null, serverSubObj, clientSubObj, updateEntities, deleteKeys);
 			rv.userData.put(updatedObj.getUniqueId(), updatedObj);
 		}//for each subObj
 		return rv;
