@@ -1,5 +1,7 @@
 package com.blumenthal.listey;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -49,49 +51,43 @@ public class ListeyServlet extends HttpServlet {
 		UserService userService = UserServiceFactory.getUserService();
         User user = userService.getCurrentUser();
 
-    	String passedSerializedHash = req.getParameter("content");
+    	String jsonString = req.getParameter("content");
     	Long passedLastUpdateTS = null;
     	if (req.getParameter("lastUpdate") != null && req.getParameter("lastUpdate").length() > 0) {
     		passedLastUpdateTS = Long.parseLong(req.getParameter("lastUpdate"));
     	}
-        if (passedSerializedHash == null || passedSerializedHash.length() == 0) {
+        if (jsonString == null || jsonString.length() == 0) {
         	log.info("doPost: Nothing passed in content, using default");
-        	passedSerializedHash = "{}";
+        	jsonString = "{}";
         }
         if (user != null) {
-	        // We have one entity group per user
-        	Key userKey = KeyFactory.createKey("user", user.getEmail());
         	log.info("doPost: User=" + user.getEmail());
-        	String currentSerializedHash = "{}";
-        	Long currentLastUpdateTS = null;
+
+        	//Load the current data from datastore
         	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         	ListeyDataMultipleUsers currentData = new ListeyDataMultipleUsers(datastore, user.getEmail());
 
         	//Parse the passed data
-    		ListeyDataMultipleUsers passedData = ListeyDataMultipleUsers.fromJson(user.getEmail(), passedSerializedHash);
+    		ListeyDataMultipleUsers passedData = ListeyDataMultipleUsers.fromJson(user.getEmail(), jsonString);
     		
     		//Compare the stored and the passed data.
-        	//If the passed data element is newer than the current data element, replace
-        	//the current data
+    		DataStoreUniqueId uniqueIdCreator = new DataStoreUniqueId();
+    		List<Entity> updateEntities = new ArrayList<Entity>();
+    		List<Key> deleteKeys = new ArrayList<Key>();
+    		ListeyDataMultipleUsers updatedData = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, currentData, passedData, updateEntities, deleteKeys);
     		
-        	if (passedLastUpdateTS != null
-        			&& (currentLastUpdateTS == null || currentLastUpdateTS < passedLastUpdateTS)) {
-        		Entity userData = new Entity(userKey);
-        		userData.setProperty("content", new Text(passedSerializedHash));
-        		userData.setProperty("lastUpdate", passedLastUpdateTS.toString());
-        		log.info("doPost: updating datastore.  lastUpdateTS=" + passedLastUpdateTS + ", serializedHash=" + passedSerializedHash);
-        		datastore.put(userData);
-        	}//if should replace
-        	else {
-        		passedSerializedHash = currentSerializedHash;
-        	}
+    		log.info("doPost: updating " + updateEntities.size() + " entities, deleting " + deleteKeys.size() + " entities");
+    		datastore.put(updateEntities);
+    		datastore.delete(deleteKeys);
+    		
+    		jsonString = updatedData.toJson();
         }//if user
         else {
         	resp.setStatus(403);//unauthorized
         	log.info("doPost: no user defined");
         }
         resp.setContentType("text/plain");
-        resp.getWriter().print(passedSerializedHash);
+        resp.getWriter().print(jsonString);
         
 	}//doPost
 	
@@ -103,18 +99,13 @@ public class ListeyServlet extends HttpServlet {
         User user = userService.getCurrentUser();
 
 		resp.setContentType("text/plain");
-		Text listJSON = new Text("{}");
+		String listJSON = "{}";
         if (user == null) {
         	resp.setStatus(403);//unauthorized
         } else {
-        	Key userKey = KeyFactory.createKey("user", user.getEmail());
         	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        	try {
-        		Entity userData = datastore.get(userKey);
-        		listJSON = (Text) userData.getProperty("content");
-        	} catch (EntityNotFoundException e) {
-        	    //No data exists yet for this user, use default
-        	}
+        	ListeyDataMultipleUsers currentData = new ListeyDataMultipleUsers(datastore, user.getEmail());
+        	listJSON = currentData.toJson();
         }
         resp.getWriter().print(listJSON);
 	}
