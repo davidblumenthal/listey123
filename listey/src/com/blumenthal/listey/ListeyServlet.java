@@ -11,10 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -52,10 +49,6 @@ public class ListeyServlet extends HttpServlet {
         User user = userService.getCurrentUser();
 
     	String jsonString = req.getParameter("content");
-    	Long passedLastUpdateTS = null;
-    	if (req.getParameter("lastUpdate") != null && req.getParameter("lastUpdate").length() > 0) {
-    		passedLastUpdateTS = Long.parseLong(req.getParameter("lastUpdate"));
-    	}
         if (jsonString == null || jsonString.length() == 0) {
         	log.info("doPost: Nothing passed in content, using default");
         	jsonString = "{}";
