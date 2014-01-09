@@ -418,6 +418,11 @@ public class DatastoreAdapter {
 		serverList1.setName("Foo List 1 new name");
 		serverList1.setLastUpdate(uniqueTime++);
 		
+		//Delete list
+		ListInfo serverListToDelete = serverMultiUser.userData.get(FOO_EMAIL).lists.get(fooListToDeleteId);
+		serverListToDelete.setStatus(Status.DELETED);
+		serverListToDelete.setLastUpdate(uniqueTime++);
+		
 		//Add new list
 		ListInfo serverList2 = new ListInfo();
 		serverList2.setLastUpdate(uniqueTime++);
