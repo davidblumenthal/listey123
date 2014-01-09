@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +49,7 @@ public class DatastoreAdapter {
 	private String fooListToDeleteId = null;
 	private String fooList1Item1Id = null;
 	private String fooListToDeleteItem1Id = null;
+	private String fooList1CatToDeleteId = null;
 	private long uniqueTime = 10000L;
 	private int tempUniqueId = 1;
 	
@@ -102,13 +104,13 @@ public class DatastoreAdapter {
 		fooList1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		fooList1.getCategories().add(fooList1Cat1);
 		
-		//TODO fix this
-		//CategoryInfo fooList1CatToDelete = new CategoryInfo();
-		//fooList1CatToDelete.setLastUpdate(uniqueTime++);
-		//fooList1CatToDelete.setName("Foo List 1 Category to delete");
-		//fooList1CatToDelete.setStatus(TimeStampedNode.Status.ACTIVE);
-		//fooList1CatToDelete.setUniqueId(uniqCreator.getUniqueId());
-		//fooList1.getCategories().add(fooList1CatToDelete);
+		CategoryInfo fooList1CatToDelete = new CategoryInfo();
+		fooList1CatToDelete.setLastUpdate(uniqueTime++);
+		fooList1CatToDelete.setName("Foo List 1 Category to delete");
+		fooList1CatToDelete.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooList1CatToDeleteId = uniqCreator.getUniqueId();
+		fooList1CatToDelete.setUniqueId(fooList1CatToDeleteId);
+		fooList1.getCategories().add(fooList1CatToDelete);
 		
 		ItemInfo fooList1Item1 = new ItemInfo();
 		fooList1Item1Id = uniqCreator.getUniqueId();
@@ -259,9 +261,15 @@ public class DatastoreAdapter {
 		clientMultiUser.userData.get(FOO_EMAIL).lists.put(clientList2.getUniqueId(), clientList2);
 		
 		//Change category name
-		CategoryInfo clientList1Cat1 = clientList1.getCategories().first();
+		Iterator<CategoryInfo> catIter = clientList1.getCategories().iterator();
+		CategoryInfo clientList1Cat1 = catIter.next();
 		clientList1Cat1.setName("Foo List 1 Category 1 new name");
 		clientList1Cat1.setLastUpdate(uniqueTime++);
+		
+		//Delete category
+		CategoryInfo clientList1CatToDelete = catIter.next();
+		clientList1CatToDelete.setStatus(Status.DELETED);
+		clientList1CatToDelete.setLastUpdate(uniqueTime++);
 		
 		//Add new category
 		CategoryInfo clientList1Cat2 = new CategoryInfo();
@@ -296,7 +304,7 @@ public class DatastoreAdapter {
 		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteKeys);
 		assertNotNull(updatedMultiUser);
 		assertEquals(4, deleteKeys.size());
-		assertEquals(8, updateEntities.size());
+		assertEquals(9, updateEntities.size());
 		
 		//Verify list change was noticed
 		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
@@ -343,20 +351,29 @@ public class DatastoreAdapter {
 		assertTrue(itemFromEntity.shallowEquals(clientItem1));
 
 		
-		CategoryInfo updatedCat1=null, updatedCat2=null;
+		CategoryInfo updatedCat1=null, updatedCat2=null, deletedCat=null;
 		for (CategoryInfo oneCat : updatedList1.getCategories()) {
 			if (oneCat.getUniqueId().equals(clientList1Cat1.getUniqueId())){
 				updatedCat1 = oneCat;
 			}
-			else {
+			else if (oneCat.getUniqueId().equals(fooList1CatToDeleteId)){
+				deletedCat = oneCat;
+			} else {
 				updatedCat2 = oneCat;
 			}
 		}
+
 
 		//Verify category change was noticed
 		assertTrue(updatedCat1.shallowEquals(clientList1Cat1));
 		CategoryInfo categoryFromEntity = new CategoryInfo(updateEntities.remove(0));
 		assertTrue(categoryFromEntity.shallowEquals(clientList1Cat1));
+		
+		
+		//Verify category deletion was noticed
+		assertTrue(deletedCat.shallowEquals(clientList1CatToDelete));
+		categoryFromEntity = new CategoryInfo(updateEntities.remove(0));
+		assertTrue(categoryFromEntity.shallowEquals(clientList1CatToDelete));
 		
 		
 		//Verify new category was noticed
@@ -371,14 +388,14 @@ public class DatastoreAdapter {
 		assertTrue(categoryFromEntity.shallowEquals(updatedCat2));
 		
 		//Verify deleted list was noticed
-				ListInfo updatedListToDelete = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooListToDeleteId);
-				assertTrue(updatedListToDelete.shallowEquals(clientListToDelete));
-				listFromEntity = new ListInfo(updateEntities.remove(0));
-				assertTrue(listFromEntity.shallowEquals(clientListToDelete));
-				Key deletedKey = deleteKeys.remove(0);
-				deletedKey.getKind().equals(ItemInfo.KIND);
-				deletedKey = deleteKeys.remove(0);
-				deletedKey.getKind().equals(ItemCategoryInfo.KIND);
+		ListInfo updatedListToDelete = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooListToDeleteId);
+		assertTrue(updatedListToDelete.shallowEquals(clientListToDelete));
+		listFromEntity = new ListInfo(updateEntities.remove(0));
+		assertTrue(listFromEntity.shallowEquals(clientListToDelete));
+		Key deletedKey = deleteKeys.remove(0);
+		deletedKey.getKind().equals(ItemInfo.KIND);
+		deletedKey = deleteKeys.remove(0);
+		deletedKey.getKind().equals(ItemCategoryInfo.KIND);
 		
 		//Verify new list was noticed
 		//Iterate through the list ids until you find the one that is NOT the one we already knew
