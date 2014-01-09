@@ -22,6 +22,7 @@ import com.blumenthal.listey.ListeyDataMultipleUsers;
 import com.blumenthal.listey.ListeyDataOneUser;
 import com.blumenthal.listey.OtherUserPrivOnList;
 import com.blumenthal.listey.TimeStampedNode;
+import com.blumenthal.listey.TimeStampedNode.Status;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -41,9 +42,12 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 public class DatastoreAdapter {
 	final String FOO_EMAIL = "foo@test.com";
 	final String BAR_EMAIL = "bar@test.com";
+	final String BAZ_EMAIL = "baz@test.com";
 	
 	private String fooList1Id = null;
+	private String fooListToDeleteId = null;
 	private String fooList1Item1Id = null;
+	private String fooListToDeleteItem1Id = null;
 	private long uniqueTime = 10000L;
 	private int tempUniqueId = 1;
 	
@@ -84,12 +88,27 @@ public class DatastoreAdapter {
 		barPrivOnFoo1.priv = OtherUserPrivOnList.OtherUserPriv.FULL;
 		fooList1.getOtherUserPrivs().put(BAR_EMAIL, barPrivOnFoo1);
 		
+		//TODO - why isn't this working?
+		//OtherUserPrivOnList bazPrivOnFoo1 = new OtherUserPrivOnList();
+		//barPrivOnFoo1.userId = BAZ_EMAIL;
+		//barPrivOnFoo1.lastUpdate = uniqueTime++;
+		//barPrivOnFoo1.priv = OtherUserPrivOnList.OtherUserPriv.FULL;
+		//fooList1.getOtherUserPrivs().put(BAZ_EMAIL, bazPrivOnFoo1);
+		
 		CategoryInfo fooList1Cat1 = new CategoryInfo();
 		fooList1Cat1.setLastUpdate(uniqueTime++);
 		fooList1Cat1.setName("Foo List 1 Category 1");
 		fooList1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
 		fooList1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		fooList1.getCategories().add(fooList1Cat1);
+		
+		//TODO fix this
+		//CategoryInfo fooList1CatToDelete = new CategoryInfo();
+		//fooList1CatToDelete.setLastUpdate(uniqueTime++);
+		//fooList1CatToDelete.setName("Foo List 1 Category to delete");
+		//fooList1CatToDelete.setStatus(TimeStampedNode.Status.ACTIVE);
+		//fooList1CatToDelete.setUniqueId(uniqCreator.getUniqueId());
+		//fooList1.getCategories().add(fooList1CatToDelete);
 		
 		ItemInfo fooList1Item1 = new ItemInfo();
 		fooList1Item1Id = uniqCreator.getUniqueId();
@@ -104,6 +123,38 @@ public class DatastoreAdapter {
 		fooList1Item1.getCategories().put(fooList1Item1Cat1.getUniqueId(), fooList1Item1Cat1);
 		fooList1Item1Cat1.setLastUpdate(uniqueTime++);
 		fooList1Item1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
+		
+		//Create Foo listToDelete
+		fooListToDeleteId = uniqCreator.getUniqueId();
+		ListInfo fooListToDelete = new ListInfo(TimeStampedNode.Status.ACTIVE, fooListToDeleteId, "Foo List 2", uniqueTime++);
+		fooUser.lists.put(fooListToDelete.getUniqueId(), fooListToDelete);
+		
+		OtherUserPrivOnList barPrivOnFoo2 = new OtherUserPrivOnList();
+		barPrivOnFoo2.userId = BAR_EMAIL;
+		barPrivOnFoo2.lastUpdate = uniqueTime++;
+		barPrivOnFoo2.priv = OtherUserPrivOnList.OtherUserPriv.FULL;
+		fooListToDelete.getOtherUserPrivs().put(BAR_EMAIL, barPrivOnFoo2);
+		
+		CategoryInfo fooListToDeleteCat1 = new CategoryInfo();
+		fooListToDeleteCat1.setLastUpdate(uniqueTime++);
+		fooListToDeleteCat1.setName("Foo List 2 Category 1");
+		fooListToDeleteCat1.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooListToDeleteCat1.setUniqueId(uniqCreator.getUniqueId());
+		fooListToDelete.getCategories().add(fooListToDeleteCat1);
+		
+		ItemInfo fooListToDeleteItem1 = new ItemInfo();
+		fooListToDeleteItem1Id = uniqCreator.getUniqueId();
+		fooListToDeleteItem1.setUniqueId(fooListToDeleteItem1Id);
+		fooListToDelete.getItems().put(fooListToDeleteItem1.getUniqueId(), fooListToDeleteItem1);
+		fooListToDeleteItem1.setLastUpdate(uniqueTime++);
+		fooListToDeleteItem1.setName("Foo List 2 Item 1");
+		fooListToDeleteItem1.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooListToDeleteItem1.setCount(2L);
+		ItemCategoryInfo fooListToDeleteItem1Cat1 = new ItemCategoryInfo();
+		fooListToDeleteItem1Cat1.setUniqueId(uniqCreator.getUniqueId());
+		fooListToDeleteItem1.getCategories().put(fooListToDeleteItem1Cat1.getUniqueId(), fooListToDeleteItem1Cat1);
+		fooListToDeleteItem1Cat1.setLastUpdate(uniqueTime++);
+		fooListToDeleteItem1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
 		
 		//Add list for bar user
 		//Create Bar list1
@@ -195,6 +246,11 @@ public class DatastoreAdapter {
 		clientList1.setName("Foo List 1 new name");
 		clientList1.setLastUpdate(uniqueTime++);
 		
+		//Delete list
+		ListInfo clientListToDelete = clientMultiUser.userData.get(FOO_EMAIL).lists.get(fooListToDeleteId);
+		clientListToDelete.setStatus(Status.DELETED);
+		clientListToDelete.setLastUpdate(uniqueTime++);
+		
 		//Add new list
 		ListInfo clientList2 = new ListInfo();
 		clientList2.setLastUpdate(uniqueTime++);
@@ -239,8 +295,8 @@ public class DatastoreAdapter {
 		List<Key> deleteKeys = new ArrayList<Key>();
 		ListeyDataMultipleUsers updatedMultiUser = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, serverMultiUser, clientMultiUser, updateEntities, deleteKeys);
 		assertNotNull(updatedMultiUser);
-		assertEquals(0, deleteKeys.size());
-		assertEquals(7, updateEntities.size());
+		assertEquals(4, deleteKeys.size());
+		assertEquals(8, updateEntities.size());
 		
 		//Verify list change was noticed
 		ListInfo updatedList1 = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
@@ -314,6 +370,15 @@ public class DatastoreAdapter {
 		categoryFromEntity = new CategoryInfo(updateEntities.remove(0));
 		assertTrue(categoryFromEntity.shallowEquals(updatedCat2));
 		
+		//Verify deleted list was noticed
+				ListInfo updatedListToDelete = updatedMultiUser.userData.get(FOO_EMAIL).lists.get(fooListToDeleteId);
+				assertTrue(updatedListToDelete.shallowEquals(clientListToDelete));
+				listFromEntity = new ListInfo(updateEntities.remove(0));
+				assertTrue(listFromEntity.shallowEquals(clientListToDelete));
+				Key deletedKey = deleteKeys.remove(0);
+				deletedKey.getKind().equals(ItemInfo.KIND);
+				deletedKey = deleteKeys.remove(0);
+				deletedKey.getKind().equals(ItemCategoryInfo.KIND);
 		
 		//Verify new list was noticed
 		//Iterate through the list ids until you find the one that is NOT the one we already knew
@@ -334,7 +399,7 @@ public class DatastoreAdapter {
 				clientList2.getUniqueId().equals(updatedList2.getUniqueId()));
 		listFromEntity = new ListInfo(updateEntities.remove(0));
 		assertTrue(listFromEntity.shallowEquals(updatedList2));
-		
+
 	}//testClientChange
 
 	
