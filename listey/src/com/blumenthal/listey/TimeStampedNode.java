@@ -30,6 +30,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 	public static enum Status {
 		ACTIVE,
 		COMPLETED,
+		HIDDEN,
 		DELETED
 	}
 	
@@ -222,9 +223,21 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 				newer = clientObj;
 				rv = newer.makeShallowCopy();
 				if (!clientObj.shallowEquals(serverObj)) {
+					Entity thisEntity;
+					if (rv.getStatus().equals(Status.DELETED)) {
+						List<Entity> thisAndChildEntities = newer.toEntities(uniqueIdCreator, parent);
+						thisEntity = thisAndChildEntities.remove(0);
+						updateEntities.add(thisEntity);
+						for (Entity toDelete : thisAndChildEntities) {
+							deleteKeys.add(toDelete.getKey());
+						}
+						return rv;
+					}
 					//If the top-level object changed on the client then push it on the update list
-					Entity thisEntity = rv.toEntity(uniqueIdCreator, parent);
+					thisEntity = rv.toEntity(uniqueIdCreator, parent);
 					if (thisEntity != null) updateEntities.add(thisEntity);
+					
+					
 				}
 			}//client is newer
 			
