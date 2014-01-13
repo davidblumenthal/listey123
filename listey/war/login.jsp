@@ -20,7 +20,7 @@
     String jsSnippet="";
     String site;
     if (user != null) {
-      Cookie cookie = new Cookie("isLoggedIn","1");
+      Cookie cookie = new Cookie("isLoggedIn",user.getEmail());
       cookie.setMaxAge(60*60*4);//4 hours
       response.addCookie(cookie);
       response.sendRedirect("index.html");//XXX need fully scoped somehow for phonegap?

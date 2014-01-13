@@ -68,6 +68,7 @@ public class ListeyServlet extends HttpServlet {
     		List<Entity> updateEntities = new ArrayList<Entity>();
     		List<Key> deleteKeys = new ArrayList<Key>();
     		ListeyDataMultipleUsers updatedData = ListeyDataMultipleUsers.compareAndUpdate(uniqueIdCreator, currentData, passedData, updateEntities, deleteKeys);
+    		log.info("doPost: passedData = " + jsonString + ", currentData=" + currentData.toJson() + ", updatedData = " + updatedData.toJson());
     		
     		log.info("doPost: updating " + updateEntities.size() + " entities, deleting " + deleteKeys.size() + " entities");
     		datastore.put(updateEntities);

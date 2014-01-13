@@ -33,7 +33,7 @@ function displayItems (listName) {
     }
 
     //Note, this assumes listName is a valid list
-    var data = get_data(),
+    var data = getData(),
         selectedCategories = getSelectedCategories(listName),
         items = filterSelectedCategories(getItems(listName), selectedCategories),
         crossedOffItems = filterSelectedCategories(getItems(listName, CROSSED_OFF_ITEMS), selectedCategories),

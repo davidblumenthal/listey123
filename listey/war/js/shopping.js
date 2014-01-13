@@ -25,19 +25,38 @@
   }//top-level
 */
 
+var USER_DATA = 'userData';
+var LAST_UPDATE = 'lastUpdate';
+var NAME = 'name';
+var STATUS = 'status';
 var LISTS = 'lists';
 var ITEMS = 'items';
 var CROSSED_OFF_ITEMS = 'crossedOffItems';
 var CATEGORIES = 'categories';
+var SELECTED_CATEGORIES = 'selectedCategories';
+var OTHER_USER_PRIVS = 'otherUserPrivs';
+var COUNT = 'count';
+
+//Possible privs to grant to other users
+var FULL_PRIV = 'FULL';
+var VIEW_PRIV = 'VIEW';
+
+//Possible node statuses
+var ACTIVE_STATUS = 'ACTIVE';
+var COMPLETED_STATUS = 'COMPLETED';
+var HIDDEN_STATUS = 'HIDDEN';
+var DELETED_STATUS = 'DELETED';
+
 //var LISTEY_HOME = "http://1.blumenthal-listey.appspot.com/";
 //var LISTEY_HOME = "http://localhost:8888/";
 var LISTEY_HOME = "";//use a relative link for now, until I'm ready to deploy on phonegap
 
 var LOCALSTORAGE_LISTS_KEY = 'lists';
+var LOCALSTORAGE_CURRENT_USER = 'current_user';
 
 var gSelectedList, gData={};
 
-
+//Parse the cookies for the site for the given cookie name (key)
 //http://stackoverflow.com/questions/5639346/shortest-function-for-reading-a-cookie-in-javascript
 function read_cookie(key)
 {
@@ -45,22 +64,27 @@ function read_cookie(key)
     return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? (result[1]) : null;
 }
 
-function sortHashesByName (a, b) {
-    a = a["name"].toUpperCase();
-    b = b["name"].toUpperCase();
+//compare object a and b by NAME property
+function compareHashesByName (a, b) {
+    a = a[NAME].toUpperCase();
+    b = b[NAME].toUpperCase();
     return ((a < b) ? -1 : (a > b) ? +1 : 0);
-}//sortItemsByName
+}//compareHashesByName
 
 
+//Trim off leading and trailing spaces and return the trimmed string
 function trim (str) {
     return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 }
 
+
+//Returns the milliseconds since 1970 UTC as a long integer
 function now(){
     return new Date().getTime();
 }
 
 
+//Returns a list of the proper keys of the passed object (using hasOwnProperty)
 function keys(obj)
 {
     var keys = [];
@@ -74,9 +98,11 @@ function keys(obj)
     }
 
     return keys;
-}
+}//keys
 
 
+//HTML-Escape the passed string, so the browser will display
+//the characters exactly like originally passed
 function escapeHTML( string )
 {
     var pre = document.createElement('pre');
@@ -86,43 +112,101 @@ function escapeHTML( string )
 }
 
 
-function save_data(data, field) {
-    if (field === undefined) {
-        field = LOCALSTORAGE_LISTS_KEY;
+//Read the window location, parse the url and return the url vars
+//as an object
+function getUrlVars() {
+    var vars = {}, keyval;
+    var keyvals = window.location.href.slice(window.location.href.indexOf('?') + 1).split(/[&#]/);
+    for(var i = 0; i < keyvals.length; i++)
+    {
+        keyval = keyvals[i].split('=');
+        vars[decodeURIComponent(keyval[0])] = decodeURIComponent(keyval[1]);
     }
+    return vars;
+}//getUrlVars
+
+
+//Get an temporary unique id.  The server thinks anything
+//that starts with a colon is a temporary, server-side-generated
+//unique ID.  It will replace that in its response with the server-side
+//permanent unique ID.
+function getUniqueId() {
+    var lastUniqueId = localStorage.getItem('lastUniqueId');
+    //This evaluates to 1 when undefined
+    lastUniqueId++;
+    localStorage.setItem('lastUniqueId', lastUniqueId);
+    return ":" + lastUniqueId;
+}//getUniqueId
+
+
+//Return the current user email, if logged in
+function getCurrentUser() {
+	return loggedInAs();
+}//getCurrentUser
+
+
+
+//Return the key to use for saving information to localstorage.
+function getDataStorageField() {
+	var user = getCurrentUser();
+	//Can't save anything if we can't even figure out who the user is
+	if (user === undefined) {
+		return undef;
+	}
+    return LOCALSTORAGE_LISTS_KEY + ':' + user;
+}//getDataField
+
+
+
+//Save the updated data to local storage, and try to sync to the server unless dontSync is passed
+//data can be passed, but defaults to gData[field] if undefined
+function saveData(data, dontSync) {
+	var storageField = getDataStorageField();
+	if (storageField === undefined) {
+		return;
+	}
     if (data === undefined) {
-        data = gData[field];
+        data = gData[LOCALSTORAGE_LISTS_KEY];
     }
     else {
-        gData[field] = data;
+        gData[LOCALSTORAGE_LISTS_KEY] = data;
     }
-    data["lastUpdate"] = now();
-    localStorage.setItem(field, JSON.stringify(data));
-    syncData();
-}//save_data
+    localStorage.setItem(storageField, JSON.stringify(data));
+    if (!dontSync) {
+    	syncData();
+    }
+}//saveData
 
 
-function isLoggedIn() {
+function loggedInAs() {
 	return read_cookie("isLoggedIn");
 }
 
 
-function get_data(field) {
-    if (field === undefined) {
-        field = LOCALSTORAGE_LISTS_KEY;
-    }
-
-    if (gData[field] === undefined) {
-        var data_str = localStorage.getItem(field);
-        //console.log("get_data: field = " + field + ", data_str = " + data_str);
-        if (data_str == undefined) {
-            data_str = "{}";
+//Loads the data structure from gData in memory, or from
+//localStorage if gData isn't initialized yet.
+//Returns undef if we don't know the user yet
+function getData() {
+    if (gData[LOCALSTORAGE_LISTS_KEY] === undefined) {
+    	var storageField = getDataStorageField();
+    	if (storageField === undefined) {
+    		return undef;
+    	}
+    	
+        var dataStr = localStorage.getItem(storageField);
+        //console.log("getData: field = " + LOCALSTORAGE_LISTS_KEY + ", data_str = " + data_str);
+        if (dataStr == undefined) {
+        	var blank = {};
+        	blank[USER_DATA] = {};
+        	blank[USER_DATA][getCurrentUser()] = {};
+        	dataStr = JSON.stringify(blank);
         }
-        gData[field] = JSON.parse(data_str);
+        gData[LOCALSTORAGE_LISTS_KEY] = JSON.parse(dataStr);
         syncData();
     }
-    return gData[field];
-}
+    return gData[LOCALSTORAGE_LISTS_KEY];
+}//getData
+
 
 
 function handleNotLoggedIn(){
@@ -142,27 +226,26 @@ function handleNotLoggedIn(){
  */ 
 function syncData() {
 console.log("syncData - top");
-	var sentData = get_data();
+	var sentData = getData();
 	var sentLastUpdateDate = sentData["lastUpdate"];
-	var params = {"content" : JSON.stringify(sentData),
-			      "lastUpdate" : sentLastUpdateDate};
+	var params = {"content" : JSON.stringify(sentData)};
 	$.ajax({
 		type: "POST",
 		url: LISTEY_HOME + "ajax",
 		data: params,
 		success: function(returnedData){
+			//XXX - Need to rework this to compare client and server and
+			//only refresh if change pushed from server and affects current screen.
 			console.log("syncData call returned: " + returnedData);
-			var returnedDataHash = JSON.parse(returnedData);
-			if ((!sentLastUpdateDate && returnedDataHash["lastUpdate"]) 
-					|| returnedDataHash["lastUpdate"] > sentLastUpdateDate) {
-				console.log("saving data");
-				save_data(returnedDataHash);
-				window.alert("Pulled an update from the server");
+			if (returnedData !== JSON.stringify(sentData)) {
+console.log("Different! returnedData='"+returnedData+"', sentData='"+JSON.stringify(sentData)+"'");
+				var returnedDataHash = JSON.parse(returnedData);
+				console.log("Data changed, saving updated data");
+				saveData(returnedDataHash, true);//true param means don't try to sync again
+		
+				//XXX NEED A WAY TO REFRESH CURRENT SCREEN IF CHANGED
 				//just refresh everything.  Note, this could be nicer!
-				window.location = "index.html";
-			}
-			else {
-				console.log("Client version is newer than server, not updating");
+				//window.location = "index.html";
 			}
 		},
 		statusCode: {
@@ -174,66 +257,120 @@ console.log("syncData - top");
 }//syncData
 
 
+//Return a list of user ids whose lists we can access, including current user
+function getUsers() {
+	var data = getData();
+	return (keys(data[USER_DATA]));
+}//getUsers
 
+
+
+//Get the lists object for user
+function getLists(user) {
+	var data = getData();
+	var userData = data[USER_DATA];
+	if (!(user in userData)) {
+		userData[user] = {};
+	}
+    if (!(LISTS in userData[user])) {
+    	userData[user][LISTS] = {};
+    }
+    return userData[user][LISTS];
+}//getLists
+
+
+
+//Create a new, active list named newName
+//Returns true if the new list was created, or false if a list with
+//that name already existed.
+//Since you can only add lists for your own user, there is no need
+//to specify a user here
 function addList(newName) {
     var didAdd = false;
 
-    var data = get_data();
-    if (!(LISTS in data)) {
-    	data[LISTS] = {};
+    var user = getCurrentUser();
+    var lists = getLists(user);
+    for (var k in lists){
+        if (lists.hasOwnProperty(k) && lists[k].name === newName) {
+        	console.log("configureList: " + newName + " already exists, not adding again");
+        	return false;//didn't add
+        }
     }
-    var lists = data[LISTS];
-    if (!(newName in lists)) {
-        console.log("configureList: Saving new list " + newName);
-        lists[newName] = {lastUpdate: now()
-                            };
-        save_data();
-        didAdd = true;
-    }
-    else {
-        console.log("configureList: " + newName + " already exists, not adding again");
-    }
-    return didAdd;
+    console.log("configureList: Saving new list " + newName);
+    var newList = {};
+    lists[getUniqueId()] = newList;
+    newList[LAST_UPDATE] = now();
+    newList[NAME] = newName;
+    newList[STATUS] = ACTIVE_STATUS;
+
+    saveData();
+    
+    return true;//did add
 }//addList
 
 
-function getList(listName) {
-    var data = get_data(), list;
-    if (!(LISTS in data)) {
-    	data[LISTS] = {};
-    }
-    var lists = data[LISTS];
-    if (!(listName in lists)) {
-        lists[listName] = [];
-    }
-
-    return (lists[listName]);
+//get the list object with id listId
+function getList(user, listId) {
+	var lists = getLists(user);
+    return (lists[listId]);
 }//getList
 
 
-function getListNames() {
-    var data = get_data();
-    var listNames = (LISTS in data) ? keys(data[LISTS]).sort() : [];
-
-    return listNames;
-}//getListNames
-
-
-function getItems(listName, itemsType) {
-    var list = getList(listName);
-    if (itemsType === undefined) {
-        itemsType = ITEMS;
+//get a list of all the lists for the user sorted by name
+function getListOfLists(user) {
+    var lists = getLists(user);
+    var listOfLists = [];
+    for (var k in lists){
+        if (lists.hasOwnProperty(k)) {
+        	//have to make sure the unique id is set
+        	//so caller can get it.
+        	lists[k].uniqueId = k;
+        	listOfLists.push(lists[k]);
+        }
     }
-    if (!(itemsType in list)) {
-        list[itemsType] = [];
+
+    listOfLists.sort(compareHashesByName);
+
+    return listOfLists;
+}//getListOfLists
+
+
+//Return the internal list of all items of all statuses
+function getAllItems(user, listId) {
+	//Filter out ones matching the requested status and sort by name
+    var list = getList(user, listId);
+    if (!(ITEMS in list)) {
+    	list[ITEMS] = [];
     }
-    return (list[itemsType]);
+    return list[ITEMS];
+}//getAllItems
+
+
+
+//Return a list of items of the given status sorted by name, or ACTIVE_STATUS status if undefined
+//This is NOT the internal list, so modifying the list will have no permanent effect
+function getItems(user, listId, status) {
+	var items = getAllItems(user, listId);
+    if (status === undefined) {
+    	status = ACTIVE_STATUS;
+    }
+    var rv = [];
+    for (var i=0; i<items.length; i++) {
+        if (items[i].status === ACTIVE_STATUS) {
+        	rv.push(items[i]);
+        }
+    }
+    
+    rv.sort(compareHashesByName);
+    return (rv);
 }//getItems
 
 
-function getItemIndex(items, itemName) {
+//
+function getItemIndex(user, listId, itemId) {
+	var items = getAllItems(user, listId);
     for (var i = 0; i < items.length; i++) {
-        if (items[i].name === itemName) {
+        if (items[i].uniqueId === itemId) {
             return i;
         }
     }
@@ -242,96 +379,76 @@ function getItemIndex(items, itemName) {
 
 
 /*
-  (itemObj) getItem(listName, itemName, [itemsType])
+  (itemObj) getItem(user, listId, itemId)
 
   itemsType is optional.  If not passed, will look in main
   list and crossed off list.
 */
-function getItem(listName, itemName, itemsType) {
-    var items = getItems(listName, itemsType);
+function getItem(user, listId, itemId) {
+    var items = getAllItems(user, listId);
 
-    var itemIndex = getItemIndex(items, itemName);
+    var itemIndex = getItemIndex(user, listId, itemId);
 
-    if (itemIndex === -1 && itemsType === undefined) {
-        return(getItem(listName, itemName, CROSSED_OFF_ITEMS));
-    }
     return (itemIndex === -1 ? undefined : items[itemIndex]);
 }//getItem
 
 
 
 /*
-  (boolean didAddItem) addOrUpdateItem(listName, item, [origItemName], [listType])
+  () addOrUpdateItem(user, listId, item)
 
-  If origItemName is undef, assumes item["name"]
-
-  If listType is defined, only works with that list.
-  Otherwise, looks up the item by origItemName in main and crossed off lists.
-
-  If found, updates with info in item.  Otherwise adds to listType or main list.
+  If itemId is defined in item, updates that item. Otherwise, creates new item.
 */
-function addOrUpdateItem(listName, item, origItemName, listType) {
-    if (!("name" in item)) {
+function addOrUpdateItem(user, listId, item) {
+    if (!(NAME in item)) {
         console.log("addItem: item parameter doesn't have a name field, skipping");
         return false;
     }
-    if (origItemName === undefined) {
-        origItemName = item["name"];
-    }
-    item["lastUpdate"] = now();
+
+    item[LAST_UPDATE] = now();
 
     //get it in main list or crossed off list.  If not found in either
     //then add to main list
-    var items = getItems(listName, listType);
-    var itemIndex = getItemIndex(items, origItemName);
-    if (itemIndex === -1 && listType === undefined) {
-        var crossedOffItems = getItems(listName, CROSSED_OFF_ITEMS);
-        itemIndex = getItemIndex(crossedOffItems, origItemName);
-        if (itemIndex !== -1) {
-            items = crossedOffItems;
-        }
-    }
-
-    var didAddItem;
-
-    if (itemIndex === -1) {
-        console.log("addItem: Saving new item " + item["name"]);
+    var items = getAllItems(user, listId);
+    if (!(UNIQUE_ID in item)) {
+    	item[UNIQUE_ID] = getUniqueId();
+    	item[STATUS] = ACTIVE_STATUS;
+        console.log("addItem: Saving new item " + item[NAME]);
         items.push(item);
-        items.sort(sortHashesByName);
-        didAddItem = true;
     }//item doesn't exist
     else {
-        console.log("addItem: " + item["name"] + " already exists, updating instead");
+    	var itemIndex = getItemIndex(user, listId, items, itemId);
+        console.log("addItem: " + item[NAME] + " already exists, updating instead");
         items[itemIndex] = item;
-        didAddItem = false;
     }//item already exists
 
-    save_data();
-
-    return didAddItem;
+    saveData();
 }//addOrUpdateItem
 
 
 
-//(addedItem) removeItem(listName, itemName, itemsType)
-function removeItem(listName, itemName, itemsType) {
-    var items = getItems(listName, itemsType);
-    var itemIndex = getItemIndex(items, itemName);
+//(removeItem) removeItem(user, listId, itemId)
+function removeItem(user, listId, itemId) {
+    var itemIndex = getItemIndex(user, listId, itemId);
 
     var removedItem;
     if (itemIndex !== -1) {
-        console.log("removeItem: removing " + itemName);
+        console.log("removeItem: removing " + itemId);
+
+        var items = getAllItems(user, listId);
         var itemsSpliced = items.splice(itemIndex, 1);
         removedItem = itemsSpliced[0];
-        save_data();
+        saveData();
     }//item doesn't exist
 
     return removedItem;
 }//removeItem
 
 
-function addCategory(listName, newName) {
-	var list = getList(listName);
+
+//add a new category with the given name to the list
+function addCategory(user, listId, catName) {
+	var list = getList(user, listId);
 
 	if (list !== undefined)  {
 		if (!(CATEGORIES in list)) {
@@ -350,45 +467,80 @@ function addCategory(listName, newName) {
 
 		if (index === undefined) {
 			console.log("addCategory: Saving new category " + newName);
-			categories.push({lastUpdate: now(),
-				name: newName});
-			categories.sort(sortHashesByName);
+			var newCat = {};
+			newCat[LAST_UPDATE] = now();
+			newCat[NAME] = newName;
+			newCat[STATUS] = ACTIVE_STATUS;
+			newCat[UNIQUE_ID] = getUniqueId();	            
+			categories.push(newCat);
+			categories.sort(compareHashesByName);
 		}//category doesn't exist
 		else {
 			console.log("configureCategory: " + newName + " already exists, not adding again");
 		}//item already exists
 
-		save_data();
+		saveData();
 	}
 	else {
-		console.log("Current list " + listName + " is somehow not defined!");
+		console.log("Current list " + listId + " is somehow not defined!");
 	}
 }//addCategory
 
 
-function getSelectedCategories(listName) {
-    var list = getList(listName);
-    var currentFilterCategories = list["selectedCategories"];
-    return (currentFilterCategories === undefined ? {} : currentFilterCategories);
+
+//Returns the array of categories for the given listId
+function getCategories(user, listId) {
+    var list = getList(user, listId);
+    var allCategories = list[CATEGORIES];
+    var rv = [];
+    if (allCategories !== undefined) {
+    	for (var i=0; i<allCategories.length; i++){
+    		if (allCategories[i].status === ACTIVE_STATUS) {
+    			rv.push(allCategories[i]);
+    		}
+    	}
+    }
+    return (rv);
+}//getCategories
+
+
+
+//Returns a map whose keys are the category ids of the currently selected categories
+function getSelectedCategories(user, listId) {
+    var list = getList(user, listId);
+    var currentFilterCategories = list[SELECTED_CATEGORIES];
+    var rv = {};
+    if (currentFilterCategories !== undefined) {
+    	for (var i=0; i<currentFilterCategories.length; i++) {
+    		rv[currentFilterCategories[i]] = true;
+    	}
+    }
+    return rv;
+}//getSelectedCategories
+
+
+
+//Saves the updated selected categories set.  categoriesMap is a map whose keys are the
+//selected category ids.
+function saveSelectedCategories(user, listId, newCategoriesMap) {
+    var list = getList(user, listId);
+    
+    list[SELECTED_CATEGORIES] = keys(newCategoriesMap);
+    saveData();
 }
 
 
-
-function saveSelectedCategories(listName, categories) {
-    var list = getList(listName);
-    list["selectedCategories"] = categories;
-    save_data();
-}
-
-
+//Reads the listId from the url, puts a list of all possible
+//categories in categoriesDivId, with the categories in selectedCategoriesHash
+//checked
 function displayCategories(categoriesDivId, selectedCategoriesHash) {
     console.log("displayCategories - top\n");
 
-    var listName = getUrlVars()["list"];
+    var user = getUrlVars()[USER];
+    var listId = getUrlVars()["list"];
 
     //Note, this assumes listName is a valid list
-    var categories = getItems(listName, CATEGORIES),
-        crossedOffItems = getItems(listName, CROSSED_OFF_ITEMS),
+    var categories = getCategories(user, listId),
         fieldContainElem, fieldSetElem, inputElem, labelElem;
 
     if (categories.length == 0) {
@@ -403,15 +555,15 @@ function displayCategories(categoriesDivId, selectedCategoriesHash) {
         fieldSetElem.append("<legend>Choose which stores this applies to:</legend>");
 
         $.each(categories, function (index, value) {
-            console.log("   Adding " + value["name"]);
-            var attributes = {"type":"checkbox", class:"custom", "id":"checkbox-"+index, "value":value["name"]};
-            if (selectedCategoriesHash[value["name"]]) {
+            console.log("   Adding " + value[NAME]);
+            var attributes = {"type":"checkbox", class:"custom", "id":"checkbox-"+index, "value":value[UNIQUE_ID]};
+            if (selectedCategoriesHash[value[UNIQUE_ID]]) {
                 attributes["checked"] = "true";
             }
             inputElem = $("<input>", attributes);
             fieldSetElem.append(inputElem);
             labelElem = $("<label>", {"for":"checkbox-"+index});
-            labelElem.text(value["name"]);
+            labelElem.text(value[NAME]);
             fieldSetElem.append(labelElem);
         });//each item
         fieldContainElem.append(fieldSetElem);
@@ -423,15 +575,3 @@ function displayCategories(categoriesDivId, selectedCategoriesHash) {
     }//else not empty
 }//displayCategories
 
-
-
-function getUrlVars() {
-    var vars = {}, keyval;
-    var keyvals = window.location.href.slice(window.location.href.indexOf('?') + 1).split(/[&#]/);
-    for(var i = 0; i < keyvals.length; i++)
-    {
-        keyval = keyvals[i].split('=');
-        vars[decodeURIComponent(keyval[0])] = decodeURIComponent(keyval[1]);
-    }
-    return vars;
-}
