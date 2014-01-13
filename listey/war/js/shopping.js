@@ -36,6 +36,8 @@ var CATEGORIES = 'categories';
 var SELECTED_CATEGORIES = 'selectedCategories';
 var OTHER_USER_PRIVS = 'otherUserPrivs';
 var COUNT = 'count';
+var LIST_ID = 'listId';
+var LIST_NAME = 'listName';
 
 //Possible privs to grant to other users
 var FULL_PRIV = 'FULL';
@@ -310,9 +312,20 @@ function addList(newName) {
 
 
 //get the list object with id listId
-function getList(user, listId) {
+//If no list is found with that id, then looks through all the lists
+//to see if there is one with name matching listName, and returns that
+function getList(user, listId, listName) {
 	var lists = getLists(user);
-    return (lists[listId]);
+	var list = lists[listId];
+	if (list === undefined) {
+		for (var k in lists) {
+			if (lists.hasOwnProperty(k) && lists[k].name === listName) {
+				return lists[k];
+			}
+		}//foreach key
+	}//if !list
+	
+	return (list);
 }//getList
 
 
@@ -336,9 +349,9 @@ function getListOfLists(user) {
 
 
 //Return the internal list of all items of all statuses
-function getAllItems(user, listId) {
+function getAllItems(user, listId, listName) {
 	//Filter out ones matching the requested status and sort by name
-    var list = getList(user, listId);
+    var list = getList(user, listId, listName);
     if (!(ITEMS in list)) {
     	list[ITEMS] = [];
     }
@@ -349,8 +362,8 @@ function getAllItems(user, listId) {
 
 //Return a list of items of the given status sorted by name, or ACTIVE_STATUS status if undefined
 //This is NOT the internal list, so modifying the list will have no permanent effect
-function getItems(user, listId, status) {
-	var items = getAllItems(user, listId);
+function getItems(user, listId, listName, status) {
+	var items = getAllItems(user, listId, listName);
     if (status === undefined) {
     	status = ACTIVE_STATUS;
     }
@@ -367,8 +380,8 @@ function getItems(user, listId, status) {
 
 
 //
-function getItemIndex(user, listId, itemId) {
-	var items = getAllItems(user, listId);
+function getItemIndex(user, listId, listName, itemId) {
+	var items = getAllItems(user, listId, listName);
     for (var i = 0; i < items.length; i++) {
         if (items[i].uniqueId === itemId) {
             return i;
@@ -379,15 +392,15 @@ function getItemIndex(user, listId, itemId) {
 
 
 /*
-  (itemObj) getItem(user, listId, itemId)
+  (itemObj) getItem(user, listId, listName, itemId)
 
   itemsType is optional.  If not passed, will look in main
   list and crossed off list.
 */
-function getItem(user, listId, itemId) {
-    var items = getAllItems(user, listId);
+function getItem(user, listId, listName, itemId) {
+    var items = getAllItems(user, listId, listName);
 
-    var itemIndex = getItemIndex(user, listId, itemId);
+    var itemIndex = getItemIndex(user, listId, listName, itemId);
 
     return (itemIndex === -1 ? undefined : items[itemIndex]);
 }//getItem
@@ -395,11 +408,11 @@ function getItem(user, listId, itemId) {
 
 
 /*
-  () addOrUpdateItem(user, listId, item)
+  () addOrUpdateItem(user, listId, listName, item)
 
   If itemId is defined in item, updates that item. Otherwise, creates new item.
 */
-function addOrUpdateItem(user, listId, item) {
+function addOrUpdateItem(user, listId, listName, item) {
     if (!(NAME in item)) {
         console.log("addItem: item parameter doesn't have a name field, skipping");
         return false;
@@ -409,7 +422,7 @@ function addOrUpdateItem(user, listId, item) {
 
     //get it in main list or crossed off list.  If not found in either
     //then add to main list
-    var items = getAllItems(user, listId);
+    var items = getAllItems(user, listId, listName);
     if (!(UNIQUE_ID in item)) {
     	item[UNIQUE_ID] = getUniqueId();
     	item[STATUS] = ACTIVE_STATUS;
@@ -417,7 +430,7 @@ function addOrUpdateItem(user, listId, item) {
         items.push(item);
     }//item doesn't exist
     else {
-    	var itemIndex = getItemIndex(user, listId, items, itemId);
+    	var itemIndex = getItemIndex(user, listId, listName, items, itemId);
         console.log("addItem: " + item[NAME] + " already exists, updating instead");
         items[itemIndex] = item;
     }//item already exists
@@ -427,15 +440,15 @@ function addOrUpdateItem(user, listId, item) {
 
 
 
-//(removeItem) removeItem(user, listId, itemId)
-function removeItem(user, listId, itemId) {
-    var itemIndex = getItemIndex(user, listId, itemId);
+//(removeItem) removeItem(user, listId, listName, itemId)
+function removeItem(user, listId, listName, itemId) {
+    var itemIndex = getItemIndex(user, listId, listName, itemId);
 
     var removedItem;
     if (itemIndex !== -1) {
         console.log("removeItem: removing " + itemId);
 
-        var items = getAllItems(user, listId);
+        var items = getAllItems(user, listId, listName);
         var itemsSpliced = items.splice(itemIndex, 1);
         removedItem = itemsSpliced[0];
         saveData();
@@ -447,8 +460,8 @@ function removeItem(user, listId, itemId) {
 
 
 //add a new category with the given name to the list
-function addCategory(user, listId, catName) {
-	var list = getList(user, listId);
+function addCategory(user, listId, listName, catName) {
+	var list = getList(user, listId, listName);
 
 	if (list !== undefined)  {
 		if (!(CATEGORIES in list)) {
@@ -482,15 +495,15 @@ function addCategory(user, listId, catName) {
 		saveData();
 	}
 	else {
-		console.log("Current list " + listId + " is somehow not defined!");
+		console.log("Current list " + listId + "(" + listName +") is somehow not defined!");
 	}
 }//addCategory
 
 
 
-//Returns the array of categories for the given listId
-function getCategories(user, listId) {
-    var list = getList(user, listId);
+//Returns the array of categories for the given listId, listName
+function getCategories(user, listId, listName) {
+    var list = getList(user, listId, listName);
     var allCategories = list[CATEGORIES];
     var rv = [];
     if (allCategories !== undefined) {
@@ -506,8 +519,8 @@ function getCategories(user, listId) {
 
 
 //Returns a map whose keys are the category ids of the currently selected categories
-function getSelectedCategories(user, listId) {
-    var list = getList(user, listId);
+function getSelectedCategories(user, listId, listName) {
+    var list = getList(user, listId, listName);
     var currentFilterCategories = list[SELECTED_CATEGORIES];
     var rv = {};
     if (currentFilterCategories !== undefined) {
@@ -522,25 +535,26 @@ function getSelectedCategories(user, listId) {
 
 //Saves the updated selected categories set.  categoriesMap is a map whose keys are the
 //selected category ids.
-function saveSelectedCategories(user, listId, newCategoriesMap) {
-    var list = getList(user, listId);
+function saveSelectedCategories(user, listId, listName, newCategoriesMap) {
+    var list = getList(user, listId, listName);
     
     list[SELECTED_CATEGORIES] = keys(newCategoriesMap);
     saveData();
 }
 
 
-//Reads the listId from the url, puts a list of all possible
+//Reads the listId, listName from the url, puts a list of all possible
 //categories in categoriesDivId, with the categories in selectedCategoriesHash
 //checked
 function displayCategories(categoriesDivId, selectedCategoriesHash) {
     console.log("displayCategories - top\n");
 
     var user = getUrlVars()[USER];
-    var listId = getUrlVars()["list"];
+    var listId = getUrlVars()[LIST_ID];
+    var listName = getUrlVars()[LIST_NAME];
 
     //Note, this assumes listName is a valid list
-    var categories = getCategories(user, listId),
+    var categories = getCategories(user, listId, listName),
         fieldContainElem, fieldSetElem, inputElem, labelElem;
 
     if (categories.length == 0) {
