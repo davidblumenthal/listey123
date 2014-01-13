@@ -26,6 +26,8 @@
 */
 
 var USER_DATA = 'userData';
+var USER = 'user';
+var UNIQUE_ID = 'uniqueId';
 var LAST_UPDATE = 'lastUpdate';
 var NAME = 'name';
 var STATUS = 'status';
@@ -33,6 +35,7 @@ var LISTS = 'lists';
 var ITEMS = 'items';
 var CROSSED_OFF_ITEMS = 'crossedOffItems';
 var CATEGORIES = 'categories';
+var ITEM_CATEGORIES = 'categories';
 var SELECTED_CATEGORIES = 'selectedCategories';
 var OTHER_USER_PRIVS = 'otherUserPrivs';
 var COUNT = 'count';
@@ -54,9 +57,8 @@ var DELETED_STATUS = 'DELETED';
 var LISTEY_HOME = "";//use a relative link for now, until I'm ready to deploy on phonegap
 
 var LOCALSTORAGE_LISTS_KEY = 'lists';
-var LOCALSTORAGE_CURRENT_USER = 'current_user';
 
-var gSelectedList, gData={};
+var gSelectedListId, gSelectedListName, gData={};
 
 //Parse the cookies for the site for the given cookie name (key)
 //http://stackoverflow.com/questions/5639346/shortest-function-for-reading-a-cookie-in-javascript
@@ -362,14 +364,14 @@ function getAllItems(user, listId, listName) {
 
 //Return a list of items of the given status sorted by name, or ACTIVE_STATUS status if undefined
 //This is NOT the internal list, so modifying the list will have no permanent effect
-function getItems(user, listId, listName, status) {
+function getItems(user, listId, listName, wantedStatus) {
 	var items = getAllItems(user, listId, listName);
-    if (status === undefined) {
-    	status = ACTIVE_STATUS;
+    if (wantedStatus === undefined) {
+    	wantedStatus = ACTIVE_STATUS;
     }
     var rv = [];
     for (var i=0; i<items.length; i++) {
-        if (items[i].status === ACTIVE_STATUS) {
+        if (items[i].status === wantedStatus) {
         	rv.push(items[i]);
         }
     }
@@ -379,28 +381,35 @@ function getItems(user, listId, listName, status) {
 }//getItems
 
 
-//
-function getItemIndex(user, listId, listName, itemId) {
+//Finds the index of the item whose itemId is the UNIQUE_ID of an item in the all items list.
+//If none is found but one of the items has the same NAME as itemName, returns that index.
+//Otherwise, returns -1
+function getItemIndex(user, listId, listName, itemId, itemName) {
 	var items = getAllItems(user, listId, listName);
+	var nameIndex = -1;
     for (var i = 0; i < items.length; i++) {
-        if (items[i].uniqueId === itemId) {
+        if (items[i][UNIQUE_ID] === itemId) {
             return i;
         }
+        if (items[i][NAME] === itemName) {
+        	nameIndex = i;
+        }
     }
-    return -1;
+    return nameIndex;
 }//getItemIndex
 
 
 /*
-  (itemObj) getItem(user, listId, listName, itemId)
+  (itemObj) getItem(user, listId, listName, itemId, itemName)
 
-  itemsType is optional.  If not passed, will look in main
-  list and crossed off list.
+Finds the item whose itemId is the UNIQUE_ID of an item in the all items list.
+If none is found but one of the items has the same NAME as itemName, returns that index.
+
 */
-function getItem(user, listId, listName, itemId) {
+function getItem(user, listId, listName, itemId, itemName) {
     var items = getAllItems(user, listId, listName);
 
-    var itemIndex = getItemIndex(user, listId, listName, itemId);
+    var itemIndex = getItemIndex(user, listId, listName, itemId, itemName);
 
     return (itemIndex === -1 ? undefined : items[itemIndex]);
 }//getItem
@@ -420,6 +429,7 @@ function addOrUpdateItem(user, listId, listName, item) {
 
     item[LAST_UPDATE] = now();
 
+    console.log("addOrUpdateItem: item =" + JSON.stringify(item));
     //get it in main list or crossed off list.  If not found in either
     //then add to main list
     var items = getAllItems(user, listId, listName);
@@ -430,7 +440,7 @@ function addOrUpdateItem(user, listId, listName, item) {
         items.push(item);
     }//item doesn't exist
     else {
-    	var itemIndex = getItemIndex(user, listId, listName, items, itemId);
+    	var itemIndex = getItemIndex(user, listId, listName, item[UNIQUE_ID], item[NAME]);
         console.log("addItem: " + item[NAME] + " already exists, updating instead");
         items[itemIndex] = item;
     }//item already exists
@@ -441,8 +451,8 @@ function addOrUpdateItem(user, listId, listName, item) {
 
 
 //(removeItem) removeItem(user, listId, listName, itemId)
-function removeItem(user, listId, listName, itemId) {
-    var itemIndex = getItemIndex(user, listId, listName, itemId);
+function removeItem(user, listId, listName, itemId, itemName) {
+    var itemIndex = getItemIndex(user, listId, listName, itemId, itemName);
 
     var removedItem;
     if (itemIndex !== -1) {

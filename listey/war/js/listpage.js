@@ -26,7 +26,7 @@ function displayLists() {
     			ulElem.append(liElem);
     			itemsList = getItems(user, listId, listName);
     			numItems = keys(itemsList).length;
-    			aElem = $("<a href='items.html?user="+encodeURIComponent(user)+"&" + LIST_ID + "=" + encodeURIComponent(listId) + "&" + LIST_NAME + "=" + encodeURIComponent(listName) + "'>" + escapeHTML(listName) + "<span class='ui-li-count'>" + numItems + "</span></a>");
+    			aElem = $("<a href='items.html?" + USER + "="+encodeURIComponent(user)+"&" + LIST_ID + "=" + encodeURIComponent(listId) + "&" + LIST_NAME + "=" + encodeURIComponent(listName) + "'>" + escapeHTML(listName) + "<span class='ui-li-count'>" + numItems + "</span></a>");
     			liElem.append(aElem);
     			aElem.click(function () {
     				console.log("displayLists: clicked on " + listName + " for user " + user);
