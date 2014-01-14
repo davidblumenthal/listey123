@@ -3,7 +3,10 @@ function configureCategory() {
 
     console.log("configureCategory - top\n");
 
-    var listName = getUrlVars()["list"];
+    var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
+    var listName = urlVars[LIST_NAME];
 
     var elem = $("#catName");
     if (elem.length == 0) {
@@ -18,7 +21,7 @@ function configureCategory() {
     }
 
     console.log("configureCategory: newName = " + newName);
-    addCategory(listName, newName);
+    addCategory(user, listId, listName, newName);
 
     //close the dialog
     $('.ui-dialog').dialog('close');

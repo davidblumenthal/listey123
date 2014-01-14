@@ -456,7 +456,7 @@ function addOrUpdateItem(user, listId, listName, item) {
 
 
 //add a new category with the given name to the list
-function addCategory(user, listId, listName, catName) {
+function addCategory(user, listId, listName, newName) {
 	var list = getList(user, listId, listName);
 
 	if (list !== undefined)  {
