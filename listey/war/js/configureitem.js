@@ -30,6 +30,7 @@ function configureItem() {
     if (gConfigureItemId) {
     	item[UNIQUE_ID] = gConfigureItemId;
     }
+    item[COUNT] = $('#itemCountSpan').text();
     addOrUpdateItem(user, listId, listName, item);
 
     //Sigh, can't pass cgi/location bar params to dialogs, so have to use global
@@ -70,6 +71,29 @@ function deleteItem() {
 $(document).on('click', '#saveAddItem', function() {
     console.log("Clicked on saveAddItem");
     configureItem();
+});
+
+
+$(document).on('click', '#itemIncreaseCount', function() {
+	var span = $('#itemCountSpan');
+	var currCount = span.text();
+	currCount++;
+	span.text(currCount);
+	console.log("Increasing count to " + currCount);
+});
+
+
+
+$(document).on('click', '#itemDecreaseCount', function() {
+	var span = $('#itemCountSpan');
+	var currCount = span.text();
+	if (currCount > 1) {
+		currCount--;
+		span.text(currCount);
+		console.log("Increasing count to " + currCount);
+	} else {
+		console.log("Not decreasing count below 1");
+	}
 });
 
 
