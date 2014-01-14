@@ -433,39 +433,25 @@ function addOrUpdateItem(user, listId, listName, item) {
     //get it in main list or crossed off list.  If not found in either
     //then add to main list
     var items = getAllItems(user, listId, listName);
-    if (!(UNIQUE_ID in item)) {
-    	item[UNIQUE_ID] = getUniqueId();
+    var itemIndex = getItemIndex(user, listId, listName, item[UNIQUE_ID], item[NAME]);
+    if (!(STATUS in item)) {
     	item[STATUS] = ACTIVE_STATUS;
+    }
+    if (itemIndex === -1) {
+    	item[UNIQUE_ID] = getUniqueId();
         console.log("addItem: Saving new item " + item[NAME]);
         items.push(item);
     }//item doesn't exist
     else {
-    	var itemIndex = getItemIndex(user, listId, listName, item[UNIQUE_ID], item[NAME]);
         console.log("addItem: " + item[NAME] + " already exists, updating instead");
+        //In case we matched by name instead of uniqueId, copy the unique id from the
+        //existing
+        item[UNIQUE_ID] = items[itemIndex][UNIQUE_ID];
         items[itemIndex] = item;
     }//item already exists
 
     saveData();
 }//addOrUpdateItem
-
-
-
-//(removeItem) removeItem(user, listId, listName, itemId)
-function removeItem(user, listId, listName, itemId, itemName) {
-    var itemIndex = getItemIndex(user, listId, listName, itemId, itemName);
-
-    var removedItem;
-    if (itemIndex !== -1) {
-        console.log("removeItem: removing " + itemId);
-
-        var items = getAllItems(user, listId, listName);
-        var itemsSpliced = items.splice(itemIndex, 1);
-        removedItem = itemsSpliced[0];
-        saveData();
-    }//item doesn't exist
-
-    return removedItem;
-}//removeItem
 
 
 

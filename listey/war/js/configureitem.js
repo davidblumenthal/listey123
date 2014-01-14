@@ -42,11 +42,43 @@ function configureItem() {
 }
 
 
+function deleteItem() {
+    console.log("deleteItem - top\n");
+
+    var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
+    var listName = urlVars[LIST_NAME];
+
+    var item = getItem(user, listId, listName, gConfigureItemId);
+   	item[STATUS] = DELETED_STATUS;
+   	delete[ITEM_CATEGORIES];
+   	delete item[COUNT];
+
+    addOrUpdateItem(user, listId, listName, item);
+
+    //Sigh, can't pass cgi/location bar params to dialogs, so have to use global
+    //So need to wipe the global when the dialog closes.
+    gConfigureItemId = undefined;
+    gConfigureItemName = undefined;
+
+    //close the dialog
+    $('.ui-dialog').dialog('close');
+}
+
 
 $(document).on('click', '#saveAddItem', function() {
     console.log("Clicked on saveAddItem");
     configureItem();
 });
+
+
+
+$(document).on('click', '#deleteItem', function() {
+    console.log("Clicked on deleteItem");
+    deleteItem();
+});
+
 
 
 $(document).on('pagebeforeshow', '#config-item-dialog', function() {
