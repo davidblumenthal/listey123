@@ -121,6 +121,7 @@ $(document).on('pagebeforeshow', '#config-item-dialog', function() {
     var item = getItem(user, listId, listName, gConfigureItemId, gConfigureItemName);
     var itemCategoriesHash, currCount;
     if (item !== undefined) {
+    	$('#deleteItem').show();
     	currCount = item[COUNT];
         if (currCount===undefined) {
         	currCount = 1;
@@ -129,6 +130,7 @@ $(document).on('pagebeforeshow', '#config-item-dialog', function() {
         console.log("Configuring " + gConfigureItemName);
     }
     else {
+    	$('#deleteItem').hide();
     	currCount = 1;
         console.log("Adding new item");
     }
