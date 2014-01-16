@@ -190,6 +190,13 @@ public class ListInfo extends TimeStampedNode{
 	public void setSelectedCategories(Set<String> selectedCategories) {
 		this.selectedCategories = selectedCategories;
 	}
+	
+	
+	//Copy the selectedCategories array from the client
+	@Override
+	public void copyEphemeralFromClient(TimeStampedNode client){
+		this.setSelectedCategories(((ListInfo)client).getSelectedCategories());
+	}
 
 	/**
 	 * @return the otherUserPrivs

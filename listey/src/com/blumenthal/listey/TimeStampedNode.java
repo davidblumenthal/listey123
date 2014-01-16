@@ -173,6 +173,8 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 	public abstract Entity toEntity(DataStoreUniqueId uniqueIdCreator, Key parent);
 	
 	
+	public void copyEphemeralFromClient(TimeStampedNode client){}
+	
 	
 	/** Default implementation just calls toEntity() and returns that
 	 * 
@@ -322,6 +324,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 			}//if any subiters exist
 		}//neither list is null
 
+		rv.copyEphemeralFromClient(clientObj);
 		return rv;
 	}//compareAndUpdate
 
