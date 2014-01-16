@@ -1,30 +1,24 @@
 ##################################################################
 ####PhoneGap Client Side####
-* Need an icon, cheerful boat slightly on its side puffing 1...2...3...
-* Local storage needs to store data with the email of the person who logged in!  Otherwise, when you switch users you'll pull up the wrong data from localstorage.
-* Add format versioning to client json hash to allow backwards compatibility.  Can be stored separately. 
+* Tweak colors on icon
 * Periodically check the server to pull down updates.  Note that changes need to be pushed for any user that can view the list.
   * https://developers.google.com/appengine/docs/java/channel/?hl=en&csw=1
 
 * Need to add copyright and license info to every file?
 * update intro page with info, link to github, IN PROGRESS, etc
 * Option to share particular lists with other users, in full or read-only mode.
-  * Add JSON parsing/creation on server
   * add to self (X) that are allowing sharing of list Y with user Z
   * add to Y that someone else has shared list X
   * When list is shared, notify of change from server
   * Add shared list to json hash returned
     * pull all lists for other users
     * look what they've shared with requestor
-    * pull out only those lists, add to response
-  * Post of changes needs to split out lists for other users, update those lists in other users.
-  * JSON hash should have a new level with user. 
+    * pull out only those lists, add to response 
   * shared-with list only kept on server, loaded via web request when needed?
   * 
   
 * Add option to store a note with items
 * refactor all my javascript to be in L123 namespace.
-* normalize all the id+name formats
   
 * Add delete options
 * Add rename/delete dialog.
@@ -32,7 +26,6 @@
 * Implement item configuration update
   * Count, custom amount text.  "+" "-" "Custom" instead of More/Less.  +/- greyed out if non-numeric "Custom" entered
 * Finish category maintenance
-* Finish item category save
 * Add auto-suggest of items from standard list + deleted items
 * Add rename of categories
 * Add category items page where you can select a category then check off all items that belong in that store

@@ -38,6 +38,7 @@ var CATEGORIES = 'categories';
 var ITEM_CATEGORIES = 'categories';
 var SELECTED_CATEGORIES = 'selectedCategories';
 var OTHER_USER_PRIVS = 'otherUserPrivs';
+var PRIV = 'priv';
 var COUNT = 'count';
 var LIST_ID = 'listId';
 var LIST_NAME = 'listName';
@@ -549,6 +550,22 @@ function saveSelectedCategories(user, listId, listName, newCategoriesList) {
     saveData();
 }
 
+
+//returns a map of other user_email => {PRIV:<PRIV_LEVEL>, LAST_UPDATE:2345}
+//Assumes user is current user
+function getOtherUserPrivs(listId, listName) {
+	var list = getList(getCurrentUser(), listId, listName);
+	return list[OTHER_USER_PRIVS];
+}
+
+
+//Accepts a map of other user_email => {PRIV:<PRIV_LEVEL>, LAST_UPDATE:2345}
+//Assumes user is current user
+function saveOtherUserPrivs(listId, listName, privMap) {
+	var list = getList(getCurrentUser(), listId, listName);
+	list[OTHER_USER_PRIVS] = privMap;
+	saveData();
+}
 
 //Reads the listId, listName from the url, puts a list of all possible
 //categories in categoriesDivId, with the categories in selectedCategoriesHash
