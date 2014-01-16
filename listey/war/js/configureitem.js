@@ -119,20 +119,21 @@ $(document).on('pagebeforeshow', '#config-item-dialog', function() {
     var listName = urlVars[LIST_NAME];
 
     var item = getItem(user, listId, listName, gConfigureItemId, gConfigureItemName);
-    var itemCategoriesHash;
+    var itemCategoriesHash, currCount;
     if (item !== undefined) {
+    	currCount = item[COUNT];
+        if (currCount===undefined) {
+        	currCount = 1;
+        }
         itemCategoriesHash = item[CATEGORIES];
         console.log("Configuring " + gConfigureItemName);
     }
     else {
+    	currCount = 1;
         console.log("Adding new item");
     }
     if (itemCategoriesHash === undefined) {
     	itemCategoriesHash = {};
-    }
-    var currCount = item[COUNT];
-    if (currCount===undefined) {
-    	currCount = 1;
     }
     $('#itemCountSpan').text(currCount);
     displayCategories(CATEGORIES, itemCategoriesHash);
