@@ -545,9 +545,10 @@ function saveSelectedCategories(user, listId, listName, newCategoriesMap) {
 function displayCategories(categoriesDivId, selectedCategoriesHash) {
     console.log("displayCategories - top\n");
 
-    var user = getUrlVars()[USER];
-    var listId = getUrlVars()[LIST_ID];
-    var listName = getUrlVars()[LIST_NAME];
+    var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
+    var listName = urlVars[LIST_NAME];
 
     //Note, this assumes listName is a valid list
     var categories = getCategories(user, listId, listName),
@@ -566,8 +567,8 @@ function displayCategories(categoriesDivId, selectedCategoriesHash) {
 
         $.each(categories, function (index, value) {
             console.log("   Adding " + value[NAME]);
-            var attributes = {"type":"checkbox", class:"custom", "id":"checkbox-"+index, "value":value[UNIQUE_ID]};
-            if (selectedCategoriesHash[value[UNIQUE_ID]]) {
+            var attributes = {"type":"checkbox", class:"category", "id":"checkbox-"+index, "value":value[UNIQUE_ID]};
+            if (selectedCategoriesHash[value[UNIQUE_ID]] && selectedCategoriesHash[value[UNIQUE_ID]].status === ACTIVE_STATUS) {
                 attributes["checked"] = "true";
             }
             inputElem = $("<input>", attributes);

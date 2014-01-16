@@ -7,6 +7,9 @@ function configureItem() {
     var urlVars = getUrlVars();
     var user = urlVars[USER];
     var listId = urlVars[LIST_ID];
+    var listName = urlVars[LIST_NAME];    var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
     var listName = urlVars[LIST_NAME];
 
     var elem = $("#itemName");
@@ -21,8 +24,12 @@ function configureItem() {
         return false;
     }
     var categories = {};
-    $("#categories :checked").each(function() {
-        categories[$(this).val()] = true;
+    $(".category").each(function() {
+    	var catVal = {};
+    	catVal[LAST_UPDATE] = now();
+    	catVal[STATUS] = $(this).is(':checked') ? ACTIVE_STATUS : DELETED_STATUS;
+ console.log("catloop: catVal="+JSON.stringify(catVal)+", element="+$(this));
+        categories[$(this).val()] = catVal;
     });
 
     var item = {name: newName};
@@ -112,7 +119,7 @@ $(document).on('pagebeforeshow', '#config-item-dialog', function() {
     var listName = urlVars[LIST_NAME];
 
     var item = getItem(user, listId, listName, gConfigureItemId, gConfigureItemName);
-    var itemCategoriesHash = {};
+    var itemCategoriesHash;
     if (item !== undefined) {
         itemCategoriesHash = item[CATEGORIES];
         console.log("Configuring " + gConfigureItemName);
@@ -120,7 +127,14 @@ $(document).on('pagebeforeshow', '#config-item-dialog', function() {
     else {
         console.log("Adding new item");
     }
-
+    if (itemCategoriesHash === undefined) {
+    	itemCategoriesHash = {};
+    }
+    var currCount = item[COUNT];
+    if (currCount===undefined) {
+    	currCount = 1;
+    }
+    $('#itemCountSpan').text(currCount);
     displayCategories(CATEGORIES, itemCategoriesHash);
 
     if (gConfigureItemName !== undefined) {

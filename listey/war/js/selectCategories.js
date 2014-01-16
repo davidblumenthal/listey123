@@ -1,12 +1,16 @@
 function selectCategories() {
     console.log("selectCategories - top\n");
 
-    var listName = getUrlVars()["list"];
+    var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
+    var listName = urlVars[LIST_NAME];
+    
     var categories = [];
     $("#selectCategoriesDiv :checked").each(function() {
         categories.push($(this).val());
     });
-    saveSelectedCategories(listName, categories);
+    saveSelectedCategories(user, listId, listName, categories);
 
     //close the dialog
     $('.ui-dialog').dialog('close');
@@ -21,8 +25,12 @@ $(document).on('click', '#saveSelectCategories', function() {
 
 
 $(document).on('pagebeforeshow', '#select-categories-dialog', function() {
-    var listName = getUrlVars()["list"];
-    var selectedCategoriesList = getSelectedCategories(listName);
+	var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
+    var listName = urlVars[LIST_NAME];
+    
+    var selectedCategoriesList = getSelectedCategories(user, listId, listName);
     var selectedCategoriesHash = {};
     $.each(selectedCategoriesList, function(index, value){
         selectedCategoriesHash[value] = true;

@@ -113,7 +113,8 @@ function displayItems (user, listId, listName) {
 				console.log("   Adding crossed off " + item[NAME]);
 				liElem = $("<li>");
 				ulElem.append(liElem);
-				if (COUNT in item) {
+				if (COUNT in item
+						&& item[COUNT] != 1) {
 					itemCountSpan = "<span class='ui-li-count'>" + item[COUNT] + "</span>";
 				}
 				else {
