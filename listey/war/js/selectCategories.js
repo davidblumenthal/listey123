@@ -30,12 +30,8 @@ $(document).on('pagebeforeshow', '#select-categories-dialog', function() {
     var listId = urlVars[LIST_ID];
     var listName = urlVars[LIST_NAME];
     
-    var selectedCategoriesList = getSelectedCategories(user, listId, listName);
-    var selectedCategoriesHash = {};
-    $.each(selectedCategoriesList, function(index, value){
-        selectedCategoriesHash[value] = true;
-    });
-    displayCategories("selectCategoriesDiv", selectedCategoriesHash);
+    var selectedCategoriesMap = getSelectedCategoriesAsMap(user, listId, listName);
+    displayCategories("selectCategoriesDiv", selectedCategoriesMap);
 });
 
 $(document).on('submit', '#select-categories-dialog-form', function(eventObject) {

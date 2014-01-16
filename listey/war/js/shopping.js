@@ -515,7 +515,7 @@ function getCategories(user, listId, listName) {
 
 
 //Returns a map whose keys are the category ids of the currently selected categories
-function getSelectedCategories(user, listId, listName) {
+function getSelectedCategoriesAsMap(user, listId, listName) {
     var list = getList(user, listId, listName);
     var currentFilterCategories = list[SELECTED_CATEGORIES];
     var rv = {};
@@ -525,16 +525,27 @@ function getSelectedCategories(user, listId, listName) {
     	}
     }
     return rv;
-}//getSelectedCategories
+}//getSelectedCategoriesAsMap
+
+
+//Returns a list of the category ids of the currently selected categories
+function getSelectedCategoriesAsList(user, listId, listName) {
+    var list = getList(user, listId, listName);
+    var rv = list[SELECTED_CATEGORIES];
+    if (rv === undefined) {
+    	rv = [];
+    }
+    return (rv);
+}//getSelectedCategoriesAsList
 
 
 
 //Saves the updated selected categories set.  categoriesMap is a map whose keys are the
 //selected category ids.
-function saveSelectedCategories(user, listId, listName, newCategoriesMap) {
+function saveSelectedCategories(user, listId, listName, newCategoriesList) {
     var list = getList(user, listId, listName);
     
-    list[SELECTED_CATEGORIES] = keys(newCategoriesMap);
+    list[SELECTED_CATEGORIES] = newCategoriesList;
     saveData();
 }
 

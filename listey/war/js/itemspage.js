@@ -1,24 +1,26 @@
 /*
 (string list filteredCategories) filterSelectgedCategories(items, string list selectedCategoriesList)
 
-Return items that have a category that is in the selectedCategories list
+Return items that have a category that is in the selectedCategoriesList map
 
 If selectedCategoriesList is empty, return everything.
 
  */
-function filterSelectedCategories(items, selectedCategories) {
-	console.log("filterSelectedCategories: selectedCategories = " + JSON.stringify(selectedCategories));
-	if ($.isEmptyObject(selectedCategories)) {
+function filterSelectedCategories(items, selectedCategoriesList) {
+	console.log("filterSelectedCategories: selectedCategories = " + JSON.stringify(selectedCategoriesList));
+	if (selectedCategoriesList.length === 0) {
 		return items;
 	}
 
 	return ($.grep(items, function(item){
 		itemCategories = item[CATEGORIES];
-		for (var i=0; i < selectedCategories.length; i++) {
-			if (itemCategories[selectedCategories[i]]){
-				return true;
-			}
-		}//for
+		if (itemCategories !== undefined) {
+			for (var i=0; i < selectedCategoriesList.length; i++) {
+				if (itemCategories[selectedCategoriesList[i]] && itemCategories[selectedCategoriesList[i][STATUS] == ACTIVE_STATUS]){
+					return true;
+				}
+			}//for
+		}
 		return false;
 	}));
 }//filterSelectedCategories
@@ -36,9 +38,9 @@ function displayItems (user, listId, listName) {
 
 	//Note, this assumes listName is a valid list
 	var data = getData(),
-	selectedCategories = getSelectedCategories(user, listId, listName),
-	items = filterSelectedCategories(getItems(user, listId, listName, ACTIVE_STATUS), selectedCategories),
-	crossedOffItems = filterSelectedCategories(getItems(user, listId, listName, COMPLETED_STATUS), selectedCategories),
+	selectedCategoriesList = getSelectedCategoriesAsList(user, listId, listName),
+	items = filterSelectedCategories(getItems(user, listId, listName, ACTIVE_STATUS), selectedCategoriesList),
+	crossedOffItems = filterSelectedCategories(getItems(user, listId, listName, COMPLETED_STATUS), selectedCategoriesList),
 	ulElem,
 	liElem,
 	aElem,
