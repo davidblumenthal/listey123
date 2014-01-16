@@ -553,6 +553,8 @@ function saveSelectedCategories(user, listId, listName, newCategoriesList) {
 //Reads the listId, listName from the url, puts a list of all possible
 //categories in categoriesDivId, with the categories in selectedCategoriesHash
 //checked
+//Note selectedCategoriesHash value can either be a boolean, or an object whose
+//status needs to be ACTIVE_STATUS
 function displayCategories(categoriesDivId, selectedCategoriesHash) {
     console.log("displayCategories - top\n");
 
@@ -579,7 +581,8 @@ function displayCategories(categoriesDivId, selectedCategoriesHash) {
         $.each(categories, function (index, value) {
             console.log("   Adding " + value[NAME]);
             var attributes = {"type":"checkbox", class:"category", "id":"checkbox-"+index, "value":value[UNIQUE_ID]};
-            if (selectedCategoriesHash[value[UNIQUE_ID]] && selectedCategoriesHash[value[UNIQUE_ID]].status === ACTIVE_STATUS) {
+            var hashVal = selectedCategoriesHash[value[UNIQUE_ID]];
+            if (hashVal && (hashVal === true || hashVal.status === ACTIVE_STATUS)) {
                 attributes["checked"] = "true";
             }
             inputElem = $("<input>", attributes);

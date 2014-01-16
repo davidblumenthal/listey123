@@ -16,7 +16,8 @@ function filterSelectedCategories(items, selectedCategoriesList) {
 		itemCategories = item[CATEGORIES];
 		if (itemCategories !== undefined) {
 			for (var i=0; i < selectedCategoriesList.length; i++) {
-				if (itemCategories[selectedCategoriesList[i]] && itemCategories[selectedCategoriesList[i][STATUS] == ACTIVE_STATUS]){
+				var selectedCat = selectedCategoriesList[i];
+				if (itemCategories[selectedCat] && itemCategories[selectedCat][STATUS] === ACTIVE_STATUS){
 					return true;
 				}
 			}//for
