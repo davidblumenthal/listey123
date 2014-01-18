@@ -3,6 +3,8 @@
  */
 package com.blumenthal.listey;
 
+import static com.blumenthal.listey.JsonFieldNameConstants.*;
+
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,15 +40,15 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 		ListInfo listInfo = new ListInfo();
 
 		JsonObject topMap = json.getAsJsonObject();
-		listInfo.setLastUpdate(topMap.get(ListInfo.LAST_UPDATE).getAsLong());
-		listInfo.setName(topMap.get(ListInfo.NAME).getAsString());
-		listInfo.setStatus(TimeStampedNode.Status.valueOf(topMap.get(ListInfo.STATUS).getAsString()));
-		if (topMap.has(ListInfo.UNIQUE_ID)){
-			listInfo.setUniqueId(topMap.get(ListInfo.UNIQUE_ID).getAsString());
+		listInfo.setLastUpdate(topMap.get(LAST_UPDATE).getAsLong());
+		listInfo.setName(topMap.get(NAME).getAsString());
+		listInfo.setStatus(TimeStampedNode.Status.valueOf(topMap.get(STATUS).getAsString()));
+		if (topMap.has(UNIQUE_ID)){
+			listInfo.setUniqueId(topMap.get(UNIQUE_ID).getAsString());
 		}
 
-		if (topMap.has(ListInfo.ITEMS)) {
-			JsonArray itemsJson = topMap.get(ListInfo.ITEMS).getAsJsonArray();
+		if (topMap.has(ITEMS)) {
+			JsonArray itemsJson = topMap.get(ITEMS).getAsJsonArray();
 			for (JsonElement itemJsonElement : itemsJson) {
 				ItemInfo item = context.deserialize(itemJsonElement, ItemInfo.class);
 
@@ -55,8 +57,8 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			}//for itemsJson
 		}//if has items
 
-		if (topMap.has(ListInfo.CATEGORIES)) {
-			JsonArray categoriesJson = topMap.get(ListInfo.CATEGORIES).getAsJsonArray();
+		if (topMap.has(CATEGORIES)) {
+			JsonArray categoriesJson = topMap.get(CATEGORIES).getAsJsonArray();
 			//Hack needed to make it deserialize to an ArrayList correctly.
 			//http://stackoverflow.com/questions/5554217/google-gson-deserialize-listclass-object-generic-type
 			Type listType = new TypeToken<TreeSet<CategoryInfo>>() {
@@ -64,15 +66,15 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			listInfo.setCategories((TreeSet<CategoryInfo>)context.deserialize(categoriesJson, listType));
 		}//if has categories
 		
-		if (topMap.has(ListInfo.SELECTED_CATEGORIES)) {
-			JsonArray selCatJson = topMap.get(ListInfo.SELECTED_CATEGORIES).getAsJsonArray();
+		if (topMap.has(SELECTED_CATEGORIES)) {
+			JsonArray selCatJson = topMap.get(SELECTED_CATEGORIES).getAsJsonArray();
 			Type listType = new TypeToken<HashSet<String>>() {
             }.getType();
 			listInfo.setSelectedCategories((HashSet<String>) context.deserialize(selCatJson, listType));
 		}//if has selectedCategories
 		
-		if (topMap.has(ListInfo.OTHER_USER_PRIVS)) {
-			JsonObject privsJson = topMap.get(ListInfo.OTHER_USER_PRIVS).getAsJsonObject();
+		if (topMap.has(OTHER_USER_PRIVS)) {
+			JsonObject privsJson = topMap.get(OTHER_USER_PRIVS).getAsJsonObject();
 			for ( Map.Entry<String,JsonElement> privEntry : privsJson.entrySet()){
 				OtherUserPrivOnList privInfo = context.deserialize(privEntry.getValue(), OtherUserPrivOnList.class);
 				privInfo.userId = privEntry.getKey();
@@ -80,6 +82,8 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			}//for categoriesJson
 		}//if has selectedCategories
 
+		//Note, always ignore changedOnServer when parsing.
+		
 		return listInfo;
 	}//deserialize
 
@@ -91,11 +95,14 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 	public JsonElement serialize(ListInfo listInfo, Type type,
 			JsonSerializationContext context) {
 		JsonObject rv = new JsonObject();
-		rv.addProperty(ListInfo.LAST_UPDATE, listInfo.getLastUpdate());
-		rv.addProperty(ListInfo.NAME, listInfo.getName());
-		rv.addProperty(ListInfo.STATUS, listInfo.getStatus().toString());
+		rv.addProperty(LAST_UPDATE, listInfo.getLastUpdate());
+		rv.addProperty(NAME, listInfo.getName());
+		rv.addProperty(STATUS, listInfo.getStatus().toString());
+		if (listInfo.getChangedOnServer()) {
+			rv.addProperty(CHANGED_ON_SERVER, listInfo.getChangedOnServer());
+		}
 		if (doAllFields) {
-			rv.addProperty(ListInfo.UNIQUE_ID, listInfo.getUniqueId());
+			rv.addProperty(UNIQUE_ID, listInfo.getUniqueId());
 		}
 		
 		if (!listInfo.getItems().isEmpty()){
@@ -103,28 +110,36 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			for (Entry<String, ItemInfo> entry : listInfo.getItems().entrySet()) {
 				ItemInfo item = entry.getValue();
 				JsonObject itemJson = context.serialize(item).getAsJsonObject();
-				itemJson.addProperty(ItemInfo.UNIQUE_ID, item.getUniqueId());
+				itemJson.addProperty(UNIQUE_ID, item.getUniqueId());
 				itemsJson.add(itemJson);
 			}//for each entry
-			rv.add(ListInfo.ITEMS, itemsJson);
+			rv.add(ITEMS, itemsJson);
 		}//if items
 		
 		if (!listInfo.getCategories().isEmpty()) {
 			JsonElement categoriesJson = context.serialize(listInfo.getCategories());
-			rv.add(ListInfo.CATEGORIES, categoriesJson);			
+			rv.add(CATEGORIES, categoriesJson);			
 		}
 		
 		if (!listInfo.getSelectedCategories().isEmpty()) {
 			JsonElement selectedCategoriesJson = context.serialize(listInfo.getSelectedCategories());
-			rv.add(ListInfo.SELECTED_CATEGORIES, selectedCategoriesJson);			
+			rv.add(SELECTED_CATEGORIES, selectedCategoriesJson);			
 		}
 		
 		if (!listInfo.getOtherUserPrivs().isEmpty()) {
 			JsonElement otherUserPrivsJson = context.serialize(listInfo.getOtherUserPrivs());
 			for (Map.Entry<String, JsonElement> privEntry : otherUserPrivsJson.getAsJsonObject().entrySet()) {
-				privEntry.getValue().getAsJsonObject().remove(OtherUserPrivOnList.USER_ID);
-			}
-			rv.add(ListInfo.OTHER_USER_PRIVS, otherUserPrivsJson);			
+				JsonObject jsonObj = privEntry.getValue().getAsJsonObject();
+				
+				//since userId is in the key, no point in also outputting it in the value
+				jsonObj.remove(USER_ID);
+				
+				//No point in wasting space outputting a false value
+				if (!jsonObj.get(CHANGED_ON_SERVER).getAsBoolean()) {
+					jsonObj.remove(CHANGED_ON_SERVER);
+				}
+			}//for
+			rv.add(OTHER_USER_PRIVS, otherUserPrivsJson);			
 		}
 		
 		return rv;

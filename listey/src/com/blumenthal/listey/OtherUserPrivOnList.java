@@ -6,6 +6,7 @@
  */
 package com.blumenthal.listey;
 
+import static com.blumenthal.listey.JsonFieldNameConstants.*;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
@@ -14,11 +15,6 @@ public class OtherUserPrivOnList extends TimeStampedNode{
 		FULL,
 		VIEW_ONLY
 	}
-	
-	public static final String KIND = "otherUserPrivOnList";//kind in the datastore
-	public static final String LAST_UPDATE = "lastUpdate";
-	public static final String PRIV = "priv";
-	public static final String USER_ID = "userId";
 	
 	public OtherUserPriv priv;
 	public Long lastUpdate;

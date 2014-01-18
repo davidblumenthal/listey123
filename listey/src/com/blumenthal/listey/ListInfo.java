@@ -3,6 +3,7 @@
  */
 package com.blumenthal.listey;
 
+import static com.blumenthal.listey.JsonFieldNameConstants.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,16 +18,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 public class ListInfo extends TimeStampedNode{
-	public static final String KIND = "list";//kind in the datastore
-	public static final String NAME = "name";//name in the datastore
-	public static final String LAST_UPDATE = "lastUpdate";//lastUpdate in the datastore
-	public static final String STATUS = "status";//status in the datastore
-	public static final String ITEMS = "items";
-	public static final String CATEGORIES = "categories";
-	public static final String SELECTED_CATEGORIES = "selectedCategories";
-	public static final String OTHER_USER_PRIVS = "otherUserPrivs";
-	public static final String UNIQUE_ID = "uniqueId";
-	
 	private Status status = TimeStampedNode.Status.ACTIVE;
 	
 	private String uniqueId;

@@ -3,6 +3,7 @@
  */
 package com.blumenthal.listey;
 
+import static com.blumenthal.listey.JsonFieldNameConstants.*;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -28,17 +29,19 @@ public class ListeyDataOneUserJsonAdapter implements JsonDeserializer<ListeyData
 		ListeyDataOneUser userInfo = new ListeyDataOneUser();
 
 		JsonObject userJson = json.getAsJsonObject();
-		if (userJson.has(ListeyDataOneUser.USER_EMAIL)) {
-			userInfo.setUniqueId(userJson.get(ListeyDataOneUser.USER_EMAIL).getAsString());
+		if (userJson.has(USER_EMAIL)) {
+			userInfo.setUniqueId(userJson.get(USER_EMAIL).getAsString());
 		}
-		if (userJson.has(ListeyDataOneUser.LISTS)){
-			JsonObject listsJson = userJson.get(ListeyDataOneUser.LISTS).getAsJsonObject();
+		if (userJson.has(LISTS)){
+			JsonObject listsJson = userJson.get(LISTS).getAsJsonObject();
 			for ( Map.Entry<String,JsonElement> listEntry : listsJson.entrySet()){
 				ListInfo listInfo = context.deserialize(listEntry.getValue(), ListInfo.class);
 				listInfo.setUniqueId(listEntry.getKey());
 				userInfo.lists.put(listEntry.getKey(), listInfo);
 			}//for categoriesJson
 		}//if USER_DATA
+		
+		//Note, always ignore changedOnServer when parsing.
 		
 		return userInfo;
 	}//deserialize
@@ -50,12 +53,15 @@ public class ListeyDataOneUserJsonAdapter implements JsonDeserializer<ListeyData
 	public JsonElement serialize(ListeyDataOneUser oneUser, Type arg1,
 			JsonSerializationContext context) {
 		JsonObject rv = new JsonObject();
+		if (oneUser.getChangedOnServer()) {
+			rv.addProperty(CHANGED_ON_SERVER, oneUser.getChangedOnServer());
+		}
 		if (doAllFields){
-			rv.addProperty(ListeyDataOneUser.USER_EMAIL, oneUser.getUniqueId());
+			rv.addProperty(USER_EMAIL, oneUser.getUniqueId());
 		}
 		if (!oneUser.lists.isEmpty()){
 			JsonElement listsJson = context.serialize(oneUser.lists);
-			rv.add(ListeyDataOneUser.LISTS, listsJson);
+			rv.add(LISTS, listsJson);
 		}//if categories
 		return rv;
 	}

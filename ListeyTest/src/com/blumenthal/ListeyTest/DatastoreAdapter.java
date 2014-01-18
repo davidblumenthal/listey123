@@ -1,5 +1,7 @@
 package com.blumenthal.ListeyTest;
 
+import static com.blumenthal.listey.JsonFieldNameConstants.*;
+import static com.blumenthal.listey.TimeStampedNode.Status.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -23,7 +25,6 @@ import com.blumenthal.listey.ListeyDataMultipleUsers;
 import com.blumenthal.listey.ListeyDataOneUser;
 import com.blumenthal.listey.OtherUserPrivOnList;
 import com.blumenthal.listey.TimeStampedNode;
-import com.blumenthal.listey.TimeStampedNode.Status;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -81,7 +82,7 @@ public class DatastoreAdapter {
 		
 		//Create Foo list1
 		fooList1Id = uniqCreator.getUniqueId();
-		ListInfo fooList1 = new ListInfo(TimeStampedNode.Status.ACTIVE, fooList1Id, "Foo List 1", uniqueTime++);
+		ListInfo fooList1 = new ListInfo(ACTIVE, fooList1Id, "Foo List 1", uniqueTime++);
 		fooUser.lists.put(fooList1.getUniqueId(), fooList1);
 		
 		OtherUserPrivOnList barPrivOnFoo1 = new OtherUserPrivOnList();
@@ -107,7 +108,7 @@ public class DatastoreAdapter {
 		CategoryInfo fooList1CatToDelete = new CategoryInfo();
 		fooList1CatToDelete.setLastUpdate(uniqueTime++);
 		fooList1CatToDelete.setName("Foo List 1 Category to delete");
-		fooList1CatToDelete.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooList1CatToDelete.setStatus(ACTIVE);
 		fooList1CatToDeleteId = uniqCreator.getUniqueId();
 		fooList1CatToDelete.setUniqueId(fooList1CatToDeleteId);
 		fooList1.getCategories().add(fooList1CatToDelete);
@@ -118,17 +119,17 @@ public class DatastoreAdapter {
 		fooList1.getItems().put(fooList1Item1.getUniqueId(), fooList1Item1);
 		fooList1Item1.setLastUpdate(uniqueTime++);
 		fooList1Item1.setName("Foo List 1 Item 1");
-		fooList1Item1.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooList1Item1.setStatus(ACTIVE);
 		fooList1Item1.setCount(2L);
 		ItemCategoryInfo fooList1Item1Cat1 = new ItemCategoryInfo();
 		fooList1Item1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		fooList1Item1.getCategories().put(fooList1Item1Cat1.getUniqueId(), fooList1Item1Cat1);
 		fooList1Item1Cat1.setLastUpdate(uniqueTime++);
-		fooList1Item1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooList1Item1Cat1.setStatus(ACTIVE);
 		
 		//Create Foo listToDelete
 		fooListToDeleteId = uniqCreator.getUniqueId();
-		ListInfo fooListToDelete = new ListInfo(TimeStampedNode.Status.ACTIVE, fooListToDeleteId, "Foo List 2", uniqueTime++);
+		ListInfo fooListToDelete = new ListInfo(ACTIVE, fooListToDeleteId, "Foo List 2", uniqueTime++);
 		fooUser.lists.put(fooListToDelete.getUniqueId(), fooListToDelete);
 		
 		OtherUserPrivOnList barPrivOnFoo2 = new OtherUserPrivOnList();
@@ -140,7 +141,7 @@ public class DatastoreAdapter {
 		CategoryInfo fooListToDeleteCat1 = new CategoryInfo();
 		fooListToDeleteCat1.setLastUpdate(uniqueTime++);
 		fooListToDeleteCat1.setName("Foo List 2 Category 1");
-		fooListToDeleteCat1.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooListToDeleteCat1.setStatus(ACTIVE);
 		fooListToDeleteCat1.setUniqueId(uniqCreator.getUniqueId());
 		fooListToDelete.getCategories().add(fooListToDeleteCat1);
 		
@@ -150,20 +151,20 @@ public class DatastoreAdapter {
 		fooListToDelete.getItems().put(fooListToDeleteItem1.getUniqueId(), fooListToDeleteItem1);
 		fooListToDeleteItem1.setLastUpdate(uniqueTime++);
 		fooListToDeleteItem1.setName("Foo List 2 Item 1");
-		fooListToDeleteItem1.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooListToDeleteItem1.setStatus(ACTIVE);
 		fooListToDeleteItem1.setCount(2L);
 		ItemCategoryInfo fooListToDeleteItem1Cat1 = new ItemCategoryInfo();
 		fooListToDeleteItem1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		fooListToDeleteItem1.getCategories().put(fooListToDeleteItem1Cat1.getUniqueId(), fooListToDeleteItem1Cat1);
 		fooListToDeleteItem1Cat1.setLastUpdate(uniqueTime++);
-		fooListToDeleteItem1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
+		fooListToDeleteItem1Cat1.setStatus(ACTIVE);
 		
 		//Add list for bar user
 		//Create Bar list1
 		ListeyDataOneUser barUser = new ListeyDataOneUser();
 		multiUser.userData.put(BAR_EMAIL, barUser);
 		barUser.setUniqueId(BAR_EMAIL);
-		ListInfo barList1 = new ListInfo(TimeStampedNode.Status.ACTIVE, uniqCreator.getUniqueId(), "Bar List 1", uniqueTime++);
+		ListInfo barList1 = new ListInfo(ACTIVE, uniqCreator.getUniqueId(), "Bar List 1", uniqueTime++);
 		barUser.lists.put(barList1.getUniqueId(), barList1);
 				
 		OtherUserPrivOnList fooPrivOnBar1 = new OtherUserPrivOnList();
@@ -175,7 +176,7 @@ public class DatastoreAdapter {
 		CategoryInfo barList1Cat1 = new CategoryInfo();
 		barList1Cat1.setLastUpdate(uniqueTime++);
 		barList1Cat1.setName("Bar List 1 Category 1");
-		barList1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
+		barList1Cat1.setStatus(ACTIVE);
 		barList1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		barList1.getCategories().add(barList1Cat1);
 
@@ -184,18 +185,18 @@ public class DatastoreAdapter {
 		barList1.getItems().put(barList1Item1.getUniqueId(), barList1Item1);
 		barList1Item1.setLastUpdate(uniqueTime++);
 		barList1Item1.setName("Bar List 1 Item 1");
-		barList1Item1.setStatus(TimeStampedNode.Status.ACTIVE);
+		barList1Item1.setStatus(ACTIVE);
 		barList1Item1.setCount(2L);
 		ItemCategoryInfo barList1Item1Cat1 = new ItemCategoryInfo();
 		barList1Item1Cat1.setUniqueId(uniqCreator.getUniqueId());
 		barList1Item1.getCategories().put(barList1Item1Cat1.getUniqueId(), barList1Item1Cat1);
 		barList1Item1Cat1.setLastUpdate(uniqueTime++);
-		barList1Item1Cat1.setStatus(TimeStampedNode.Status.ACTIVE);
+		barList1Item1Cat1.setStatus(ACTIVE);
 		
 		//Convert multiUser to entities and write all the entities to the datastore at once
 		List<Entity> entities = multiUser.toEntities(uniqCreator);
 		//Also convert bar's list to entities, since foo has privs on bar's list
-		Key barKey = KeyFactory.createKey(ListeyDataOneUser.KIND, BAR_EMAIL);
+		Key barKey = KeyFactory.createKey(KIND, BAR_EMAIL);
 		entities.addAll(barList1.toEntities(uniqCreator, barKey));
 		datastore.put(entities);
 		
@@ -250,7 +251,7 @@ public class DatastoreAdapter {
 		
 		//Delete list
 		ListInfo clientListToDelete = clientMultiUser.userData.get(FOO_EMAIL).lists.get(fooListToDeleteId);
-		clientListToDelete.setStatus(Status.DELETED);
+		clientListToDelete.setStatus(DELETED);
 		clientListToDelete.setLastUpdate(uniqueTime++);
 		
 		//Add new list
@@ -268,7 +269,7 @@ public class DatastoreAdapter {
 		
 		//Delete category
 		CategoryInfo clientList1CatToDelete = catIter.next();
-		clientList1CatToDelete.setStatus(Status.DELETED);
+		clientList1CatToDelete.setStatus(DELETED);
 		clientList1CatToDelete.setLastUpdate(uniqueTime++);
 		
 		//Add new category
@@ -393,9 +394,9 @@ public class DatastoreAdapter {
 		listFromEntity = new ListInfo(updateEntities.remove(0));
 		assertTrue(listFromEntity.shallowEquals(clientListToDelete));
 		Key deletedKey = deleteKeys.remove(0);
-		deletedKey.getKind().equals(ItemInfo.KIND);
+		deletedKey.getKind().equals(KIND);
 		deletedKey = deleteKeys.remove(0);
-		deletedKey.getKind().equals(ItemCategoryInfo.KIND);
+		deletedKey.getKind().equals(KIND);
 		
 		//Verify new list was noticed
 		//Iterate through the list ids until you find the one that is NOT the one we already knew
@@ -437,7 +438,7 @@ public class DatastoreAdapter {
 		
 		//Delete list
 		ListInfo serverListToDelete = serverMultiUser.userData.get(FOO_EMAIL).lists.get(fooListToDeleteId);
-		serverListToDelete.setStatus(Status.DELETED);
+		serverListToDelete.setStatus(DELETED);
 		serverListToDelete.setLastUpdate(uniqueTime++);
 		
 		//Add new list

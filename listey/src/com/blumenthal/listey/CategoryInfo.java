@@ -3,15 +3,11 @@
  */
 package com.blumenthal.listey;
 
+import static com.blumenthal.listey.JsonFieldNameConstants.*;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 public class CategoryInfo extends TimeStampedNode {
-	public static final String KIND = "category";//kind in the datastore
-	public static final String STATUS = "status";
-	public static final String NAME = "name";
-	public static final String LAST_UPDATE = "lastUpdate";
-	
 	private String name;
 	private String uniqueId;
 	private Long lastUpdate;
