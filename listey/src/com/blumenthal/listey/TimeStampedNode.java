@@ -288,7 +288,10 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 						TimeStampedNode serverSubObj = serverSubMap.get(fullSetList.getUniqueId());
 
 						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverSubObj, clientSubObj, updateEntities, deleteKeys);
-						if (updatedObj != null) subMapEntriesToAdd.add(updatedObj);
+						if (updatedObj != null) {
+							if (updatedObj.getChangedOnServer()) rv.setChangedOnServer(true);
+							subMapEntriesToAdd.add(updatedObj);
+						}
 					}//for each subObj
 				}//for each submap
 				rv.addSubMapEntries(subMapAddLists);
@@ -337,7 +340,10 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 						
 						//Same object, so compare and update if needed
 						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverToCompare, clientToCompare, updateEntities, deleteKeys);
-						if (updatedObj != null) subIterEntriesToAdd.add(updatedObj);
+						if (updatedObj != null) {
+							if (updatedObj.getChangedOnServer()) rv.setChangedOnServer(true);
+							subIterEntriesToAdd.add(updatedObj);
+						}
 					}//for each subObj
 				}//for each subIter
 				rv.addSubIterEntries(subIterAddLists);
