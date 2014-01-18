@@ -242,18 +242,43 @@ console.log("syncData - top");
 		url: LISTEY_HOME + "ajax",
 		data: params,
 		success: function(returnedData){
-			//XXX - Need to rework this to compare client and server and
 			//only refresh if change pushed from server and affects current screen.
 			console.log("syncData call returned: " + returnedData);
 			if (returnedData !== JSON.stringify(sentData)) {
-console.log("Different! returnedData='"+returnedData+"', sentData='"+JSON.stringify(sentData)+"'");
 				var returnedDataHash = JSON.parse(returnedData);
 				console.log("Data changed, saving updated data");
 				saveData(returnedDataHash, true);//true param means don't try to sync again
 		
-				//XXX NEED A WAY TO REFRESH CURRENT SCREEN IF CHANGED
-				//just refresh everything.  Note, this could be nicer!
-				//window.location = "index.html";
+			    var urlVars = getUrlVars();
+			    var listId = urlVars[LIST_ID];
+			    
+				if (listId !== undefined) {
+					var user = urlVars[USER];
+					var listName = urlVars[LIST_NAME];
+					var list = getList(user, listId, listName);
+					if (list === undefined) {
+						//uh-oh, list was deleted out from under us on the server, just refresh everything
+						console.log("The list the user was viewing was deleted on the server, refreshing");
+						$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
+					}//list not found
+					else if (list[CHANGED_ON_SERVER]) {
+						//reload the list page.
+						console.log("The list the user was viewing was changed on the server, refreshing");
+						$.mobile.pageContainer.pagecontainer("change", "#items-page");
+					}//list found
+				} else {
+					//If no list selected, we're at the main screen
+					//Check if anything changed for any user
+					//If so, just refresh
+					var users = getUsers();
+					for (var i=0; i<users.length; i++) {
+						var oneUserData = getUserData(user);
+						if (oneUserData[CHANGED_ON_SERVER]) {
+							console.log("Data for " + user + " was changed on the server, refreshing");
+							$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
+						}
+					}
+				}//else no list selected
 			}
 		},
 		statusCode: {
@@ -265,6 +290,7 @@ console.log("Different! returnedData='"+returnedData+"', sentData='"+JSON.string
 }//syncData
 
 
+
 //Return a list of user ids whose lists we can access, including current user
 function getUsers() {
 	var data = getData();
@@ -273,17 +299,25 @@ function getUsers() {
 
 
 
-//Get the lists object for user
-function getLists(user) {
+//Get userData
+function getUserData(user) {
 	var data = getData();
 	var userData = data[USER_DATA];
 	if (!(user in userData)) {
 		userData[user] = {};
 	}
-    if (!(LISTS in userData[user])) {
-    	userData[user][LISTS] = {};
+	return userData[user];
+}//getUserData
+
+
+
+//Get the lists object for user
+function getLists(user) {
+	var oneUserData = getUserData(user);
+    if (!(LISTS in oneUserData)) {
+    	oneUserData[LISTS] = {};
     }
-    return userData[user][LISTS];
+    return oneUserData[LISTS];
 }//getLists
 
 

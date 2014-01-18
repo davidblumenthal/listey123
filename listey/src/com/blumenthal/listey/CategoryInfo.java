@@ -8,6 +8,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 public class CategoryInfo extends TimeStampedNode {
+	public static final String KIND = "category";//kind in the datastore
+	
 	private String name;
 	private String uniqueId;
 	private Long lastUpdate;

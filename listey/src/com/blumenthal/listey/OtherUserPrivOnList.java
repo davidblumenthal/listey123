@@ -11,6 +11,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 public class OtherUserPrivOnList extends TimeStampedNode{
+	public static final String KIND = "otherUserPrivOnList";//kind in the datastore
+	
 	public static enum OtherUserPriv {
 		FULL,
 		VIEW_ONLY

@@ -3,7 +3,6 @@
  */
 package com.blumenthal.listey;
 
-import static com.blumenthal.listey.JsonFieldNameConstants.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +43,7 @@ import com.google.appengine.api.datastore.Query;
 
 
 public class ListeyDataOneUser extends TimeStampedNode {
-
+	public static final String KIND = "user";//kind in the datastore
 	
 	private String userEmail;
 	public Map<String, ListInfo> lists = new HashMap<String, ListInfo>();
@@ -108,7 +107,7 @@ public class ListeyDataOneUser extends TimeStampedNode {
 		//Nothing interesting actually is stored in the parent entity, so just skip 'user' kind
 
 		//Load all the list kinds
-		List<Entity> entityList = entitiesByKind.get(KIND);
+		List<Entity> entityList = entitiesByKind.get(ListInfo.KIND);
 		if (entityList != null) {
 			for (Entity e : entityList) {
 				ListInfo listInfo = new ListInfo(e);
@@ -117,7 +116,7 @@ public class ListeyDataOneUser extends TimeStampedNode {
 		}//if any lists defined
 
 		//Load all categories for this list
-		entityList = entitiesByKind.get(KIND);
+		entityList = entitiesByKind.get(CategoryInfo.KIND);
 		if (entityList != null) {
 			for (Entity e : entityList) {
 				CategoryInfo catInfo = new CategoryInfo(e);
@@ -130,7 +129,7 @@ public class ListeyDataOneUser extends TimeStampedNode {
 		}//if any categories defined
 
 		//Load all items for this list
-		entityList = entitiesByKind.get(KIND);
+		entityList = entitiesByKind.get(ItemInfo.KIND);
 		if (entityList != null) {
 			for (Entity e : entityList) {
 				ItemInfo itemInfo = new ItemInfo(e);
@@ -143,7 +142,7 @@ public class ListeyDataOneUser extends TimeStampedNode {
 		}//if any items defined
 
 		//Load all item categories for this list
-		entityList = entitiesByKind.get(KIND);
+		entityList = entitiesByKind.get(ItemCategoryInfo.KIND);
 		if (entityList != null) {
 			for (Entity e : entityList) {
 				ItemCategoryInfo itemCategoryInfo = new ItemCategoryInfo(e);
@@ -167,7 +166,7 @@ public class ListeyDataOneUser extends TimeStampedNode {
 		//because listUniqueId is only passed when we're pulling in a different users list,
 		//and we don't want to show the other users that different user has granted privs to
 		if (listUniqueId == null) {
-			entityList = entitiesByKind.get(KIND);
+			entityList = entitiesByKind.get(OtherUserPrivOnList.KIND);
 			if (entityList != null) {
 				for (Entity e : entityList) {
 					OtherUserPrivOnList priv = new OtherUserPrivOnList(e);

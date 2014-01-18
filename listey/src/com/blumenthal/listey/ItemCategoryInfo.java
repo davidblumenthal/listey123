@@ -8,6 +8,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 public class ItemCategoryInfo extends TimeStampedNode {
+	public static final String KIND = "itemCategory";//kind in the datastore
+	
 	private String uniqueId;
 	private Status status = TimeStampedNode.Status.ACTIVE;
 	private Long lastUpdate;

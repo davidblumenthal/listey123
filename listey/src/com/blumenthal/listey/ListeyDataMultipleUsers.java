@@ -62,7 +62,7 @@ public class ListeyDataMultipleUsers {
     	userData.put(userEmail, currentUserData);
     	
     	//Load other user's lists that this user should be able to access
-		Query q =  new Query(KIND)
+		Query q =  new Query(OtherUserPrivOnList.KIND)
 			.setFilter(new FilterPredicate(USER_ID,
                 Query.FilterOperator.EQUAL,
                 userEmail));

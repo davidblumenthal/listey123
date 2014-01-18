@@ -18,6 +18,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 public class ListInfo extends TimeStampedNode{
+	public static final String KIND = "list";//kind in the datastore
+	
 	private Status status = TimeStampedNode.Status.ACTIVE;
 	
 	private String uniqueId;

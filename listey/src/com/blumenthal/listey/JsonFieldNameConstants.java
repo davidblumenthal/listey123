@@ -14,7 +14,6 @@ public class JsonFieldNameConstants {
 	public static final String CHANGED_ON_SERVER = "changedOnServer";
 	public static final String COUNT = "count";
 	public static final String ITEMS = "items";
-	public static final String KIND = "category";//kind in the datastore
 	public static final String LAST_UPDATE = "lastUpdate";
 	public static final String LISTS = "lists";
 	public static final String NAME = "name";
