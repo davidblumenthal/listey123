@@ -219,6 +219,8 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 		if (serverObj == null) {
 			if (clientObj.getStatus().equals(Status.ACTIVE)) {
 				rv = clientObj.makeCopy();
+				//If it's new from the client, then we're creating a new unique id for it, so flag it as new from the server
+				rv.setChangedOnServer(true);
 				updateEntities.addAll(rv.toEntities(uniqueIdCreator, parent));
 			}//new list
 			else {
