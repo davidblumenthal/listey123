@@ -34,6 +34,24 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 		DELETED
 	}
 	
+	private boolean changedOnServer;
+	
+	/** 
+	 * @return true if a change was pushed from the server and the client should refresh
+	 */
+	public boolean getChangedOnServer() {
+		return changedOnServer;
+	}
+	
+	/**
+	 * If we notice that the server has an update for a node that should
+	 * be pushed to the client, set this to true for that node.
+	 * @param newValue
+	 */
+	public void setChangedOnServer (boolean newValue) {
+		changedOnServer=newValue;
+	}
+	
 	/**
 	 * @return the lastUpdate
 	 */
