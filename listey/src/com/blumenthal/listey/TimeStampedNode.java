@@ -229,6 +229,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 		//New from the server
 		else if (clientObj == null) {
 			rv = serverObj.makeCopy();
+			rv.setChangedOnServer(true);
 			//no need to update any entities on the server, just the client
 		}//clientList == null
 		
@@ -238,6 +239,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 			if (serverObj.getLastUpdate() > clientObj.getLastUpdate()) {
 				newer = serverObj;
 				rv = newer.makeShallowCopy();
+				rv.setChangedOnServer(true);
 			}
 			else {
 				newer = clientObj;
@@ -346,6 +348,8 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 		return rv;
 	}//compareAndUpdate
 
+	
+	
 	/**
 	 * @return the log
 	 */
