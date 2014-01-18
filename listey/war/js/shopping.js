@@ -11,13 +11,15 @@
     		                 "categories" : {"<CATEGORY1>" : {status:"XXX", lastUpdate:"342324134"}, ...},
     		                 "count" : <NUMBER>,
                              "lastUpdate": "1234567890",
+                             "changedOnServer": true,
                             },
                             ...
                            ],
                      "crossedOffItems" : [... SEE "items" above]
                      "lastUpdate": "1234567890",
                      "categories": [{name="<CATEGORY_NAME>", "lastUpdate"=123456789}, ...],
-                     "selectedCategories" : ["<CATEGORY1>", ...]
+                     "selectedCategories" : ["<CATEGORY1>", ...],
+                     "changedOnServer" : true,
                  }//<listName>
             },
             '<OTHER_USER_EMAIL>' : {... see "self" above}
@@ -42,6 +44,7 @@ var PRIV = 'priv';
 var COUNT = 'count';
 var LIST_ID = 'listId';
 var LIST_NAME = 'listName';
+var CHANGED_ON_SERVER = 'changedOnServer';
 
 //Possible privs to grant to other users
 var FULL_PRIV = 'FULL';
