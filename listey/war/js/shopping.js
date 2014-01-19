@@ -217,6 +217,11 @@ function getData() {
 
 
 
+//Given user, listId and listName, return a url parameter string to pass those along
+function makeListUrlParams(user, listId, listName) {
+	return(USER + '=' + encodeURIComponent(user) + '&' + LIST_ID + '=' + encodeURIComponent(listId) + '&' + LIST_NAME + '=' + encodeURIComponent(listName));
+}
+
 function handleNotLoggedIn(){
 	console.log("The user is not logged in, redirect to the login page");
 	window.location = LISTEY_HOME + "login.jsp";
@@ -260,13 +265,26 @@ console.log("syncData - top");
 						//uh-oh, list was deleted out from under us on the server, just refresh everything
 						console.log("The list the user was viewing was deleted on the server, refreshing");
 						//$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
-						$.mobile.changePage( "#choose-list-page" );
+						$.mobile.changePage( "index.html", {
+						      allowSamePageTransition : true,
+						      transition              : 'none',
+						      showLoadMsg             : false,
+						      reloadPage              : false
+						    });
 					}//list not found
 					else if (list[CHANGED_ON_SERVER]) {
 						//reload the list page.
 						console.log("The list the user was viewing was changed on the server, refreshing");
-						//$.mobile.pageContainer.pagecontainer("change", "#items-page");
-						$.mobile.changePage( "#items-page" );
+						//$.mobile.pageContainer.pagecontainer("change", "items.html");
+						//$.mobile.changePage("items.html" , {
+						//      allowSamePageTransition : true,
+						//      transition              : 'none',
+						//      showLoadMsg             : false,
+						//      reloadPage              : false,
+						//      dataUrl                 : "items.html?" + makeListUrlParams(user, listId, listName)
+						//    });
+						//Had all sorts of problems trying to use changePage() to reload the page, but this seems to work
+						$("#items-page").trigger("pagebeforeshow");
 					}//list found
 				} else {
 					//If no list selected, we're at the main screen
@@ -280,7 +298,12 @@ console.log("syncData - top");
 						if (oneUserData[CHANGED_ON_SERVER]) {
 							console.log("Data for " + user + " was changed on the server, refreshing");
 							//$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
-							$.mobile.changePage( "#choose-list-page" );
+							$.mobile.changePage( "index.html", {
+							      allowSamePageTransition : true,
+							      transition              : 'none',
+							      showLoadMsg             : false,
+							      reloadPage              : false
+							    });
 							break;
 						}
 						else{
