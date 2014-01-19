@@ -69,6 +69,8 @@
     * With full edit privs
   * Add ability to share an link to a list that doesn't require login
     * As view-only
+  * If an id is on the client side and not on the server side then replace it with a new unique id, even
+    if it looks like a permanant ID.  Otherwise, one user could mess with someone else's lists.
   * Google ads
 
 ################################################################
