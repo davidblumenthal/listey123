@@ -2,7 +2,10 @@
 function configureList() {
     console.log("configureList - top\n");
 
-    var origListName = $("#origListName").val();
+    var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
+    var origListName = urlVars[LIST_NAME];
 
     var elem = $("#listName");
     if (elem === undefined) {
@@ -21,9 +24,10 @@ function configureList() {
             console.log("configureListName: name didn't change");
         }
         else {//name changed
-            //XXX
-            alert("Renaming lists (from " + origListName + " to " + newName + ") is not currently implemented");
-            return;
+        	var list = getList(user, listId, origListName);
+        	list[LAST_UPDATE] = now();
+        	list[NAME] = newName;
+        	saveData();
         }
     }//if renaming
 
@@ -61,7 +65,10 @@ $(document).on('submit', '#config-list-dialog-form', function(eventObject) {
 });
 
 $(document).on('pagebeforeshow', '#configure-list-dialog', function() {
-    var listName = getUrlVars()["list"];
+    var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
+    var listName = urlVars[LIST_NAME];
 
     console.log("configure-list-dialog pagebeforeshow: listName=" + listName);
 
@@ -74,8 +81,8 @@ $(document).on('pagebeforeshow', '#configure-list-dialog', function() {
         $("#origListName").val(listName);
         $("#listName").val(listName);
         $("#deleteListButton").show();
-        //Add list parameter to configureList link
-        $('#deleteListButton').attr("href", 'deleteListConfirm.html?list=' + encodeURIComponent(listName));
+        //Add list parameter to delete link
+        $('#deleteListButton').attr("href", 'deleteListConfirm.html?' + makeListUrlParams(user, listId, listName));
     }
 });
 
