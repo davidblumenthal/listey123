@@ -4,23 +4,21 @@
 * Periodically check the server to pull down updates.  Note that changes need to be pushed for any user that can view the list.
   * https://developers.google.com/appengine/docs/java/channel/?hl=en&csw=1
 
+* Figure out why beforepageload won't trigger on index.html when it's not loaded first.
 * Need to add copyright and license info to every file?
 * update intro page with info, link to github, IN PROGRESS, etc
-* Option to share particular lists with other users, in full or read-only mode.
-  * add to self (X) that are allowing sharing of list Y with user Z
-  * add to Y that someone else has shared list X
+* Option to share particular lists with other users,
+  * Add support for read-only mode.
+  * Maybe don't display shared lists until user accepts them?  Allow user to hide/unaccept other shared list so it doesn't clutter their screen
   * When list is shared, notify of change from server
-  * Add shared list to json hash returned
-    * pull all lists for other users
-    * look what they've shared with requestor
-    * pull out only those lists, add to response 
-  * shared-with list only kept on server, loaded via web request when needed?
-  * 
+  
   
 * Add option to store a note with items
 * refactor all my javascript to be in L123 namespace.
   
 * Add delete options
+* Add default list of items for auto-suggest
+* Add auto-suggest from hidden options.
 * Add rename/delete dialog.
 * Add uncheck-all option (ask if should uncheck for just the selected stores or all stores)
 * Implement item configuration update
@@ -66,7 +64,6 @@
   * Add ability to export list
   * Add ability to share/revoke share of list
     * As view-only
-    * With full edit privs
   * Add ability to share an link to a list that doesn't require login
     * As view-only
   * If an id is on the client side and not on the server side then replace it with a new unique id, even
