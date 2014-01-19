@@ -390,15 +390,19 @@ function getList(user, listId, listName) {
 }//getList
 
 
-//get a list of all the lists for the user sorted by name
+//get a list of all the active lists for the user sorted by name
 function getListOfLists(user) {
     var lists = getLists(user);
     var listOfLists = [];
     for (var k in lists){
         if (lists.hasOwnProperty(k)) {
+        	//Skip deleted lists
+        	if (lists[k][STATUS] === DELETED_STATUS) {
+        		continue;
+        	}
         	//have to make sure the unique id is set
         	//so caller can get it.
-        	lists[k].uniqueId = k;
+        	lists[k][UNIQUE_ID] = k;
         	listOfLists.push(lists[k]);
         }
     }
