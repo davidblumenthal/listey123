@@ -46,7 +46,9 @@ function displayLists() {
     }
 }//displayLists
 
-$('#choose-list-page').bind('pageinit', function(event) {
+
+
+$('#choose-list-page,#items-page').on('pageinit', function(event) {
 	var userEmail = loggedInAs();
 	if (!userEmail) {
 		handleNotLoggedIn();
@@ -57,7 +59,7 @@ $('#choose-list-page').bind('pageinit', function(event) {
 });
 
 
-$('#choose-list-page').bind('pagebeforeshow', function() {
+$('#choose-list-page').on('pagebeforeshow', function() {
 	console.log("Showing list page");
 	displayLists();
 });
