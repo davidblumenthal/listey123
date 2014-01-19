@@ -8,18 +8,30 @@ function displayLists() {
         numItems,
         users = getUsers();
     
+    //Move current user to the front of users list
+    var currUserIndex = users.indexOf(getCurrentUser());
+    //remove current user from the list
+    users.splice(currUserIndex, 1);
+    users.sort();
+    users.unshift(getCurrentUser());
+    
     for (var i=0; i<users.length; i++) {
     	var user = users[i];
     	listOfLists = getListOfLists(user);
     	if (users.length === 1
-    			&& listOfLists.length == 0
-    				&& user === getCurrentUser()) {
+    			&& listOfLists.length == 0) {
     		$("#lists").html("Click 'Add A List' to create a list");
     	}
     	else {
-    		//XXX ADD USERNAME HEADER IF HAVE ACCESS TO OTHER USER
-    		ulElem = $("<ul>", {"data-role":"listview", "data-count-theme":"c", "data-inset":"true"});
+    		if (ulElem === undefined) {
+    			ulElem = $("<ul>", {"data-role":"listview", "data-count-theme":"c", "data-inset":"true"});
+    		}
 
+    		if (user != getCurrentUser()) {
+    			//Add a separator list item for this user
+    			liElem = $("<li>" + escapeHTML(user) + "'s lists</li>", {"data-role":"list-divider"});
+    			ulElem.append(liElem);
+    		}
     		$.each(listOfLists, function (index, list) {
     			var listName = list.name, listId = list.uniqueId;
     			liElem = $("<li>");
