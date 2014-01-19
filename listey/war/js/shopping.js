@@ -275,14 +275,7 @@ console.log("syncData - top");
 					else if (list[CHANGED_ON_SERVER]) {
 						//reload the list page.
 						console.log("The list the user was viewing was changed on the server, refreshing");
-						//$.mobile.pageContainer.pagecontainer("change", "items.html");
-						//$.mobile.changePage("items.html" , {
-						//      allowSamePageTransition : true,
-						//      transition              : 'none',
-						//      showLoadMsg             : false,
-						//      reloadPage              : false,
-						//      dataUrl                 : "items.html?" + makeListUrlParams(user, listId, listName)
-						//    });
+
 						//Had all sorts of problems trying to use changePage() to reload the page, but this seems to work
 						$("#items-page").trigger("pagebeforeshow");
 					}//list found
@@ -297,13 +290,9 @@ console.log("syncData - top");
 						var oneUserData = getUserData(user);
 						if (oneUserData[CHANGED_ON_SERVER]) {
 							console.log("Data for " + user + " was changed on the server, refreshing");
-							//$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
-							$.mobile.changePage( "index.html", {
-							      allowSamePageTransition : true,
-							      transition              : 'none',
-							      showLoadMsg             : false,
-							      reloadPage              : false
-							    });
+
+							//Had all sorts of problems trying to use changePage() to reload the page, but this seems to work
+							$("#choose-list-page").trigger("pagebeforeshow");
 							break;
 						}
 						else{
