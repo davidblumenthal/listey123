@@ -220,8 +220,11 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 			if (clientObj.getStatus().equals(Status.ACTIVE)) {
 				rv = clientObj.makeCopy();
 				//If it's new from the client, then we're creating a new unique id for it, so flag it as new from the server
+				//Note, all sub-objects under this are also new, but it's hard to flag them and not as new and not
+				//worth the effort.
 				rv.setChangedOnServer(true);
 				updateEntities.addAll(rv.toEntities(uniqueIdCreator, parent));
+				getLog().info("Adding entities for new " + rv.getKind() + " from client " + rv.getUniqueId());
 			}//new list
 			else {
 				//deleted on client, don't add to server, nothing to do
@@ -252,16 +255,19 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 						List<Entity> thisAndChildEntities = newer.toEntities(uniqueIdCreator, parent);
 						thisEntity = thisAndChildEntities.remove(0);
 						updateEntities.add(thisEntity);
+						getLog().info("Adding top entity to update for " + newer.getKind() + " " + newer.getUniqueId() + " deleted on client");
 						for (Entity toDelete : thisAndChildEntities) {
+							getLog().info("  Adding child entity to delete");
 							deleteKeys.add(toDelete.getKey());
 						}
 						return rv;
 					}
 					//If the top-level object changed on the client then push it on the update list
 					thisEntity = rv.toEntity(uniqueIdCreator, parent);
-					if (thisEntity != null) updateEntities.add(thisEntity);
-					
-					
+					if (thisEntity != null) {
+						updateEntities.add(thisEntity);
+						getLog().info("Adding top entity to update for " + rv.getKind() + " " + rv.getUniqueId() + " updated on client");
+					}
 				}
 			}//client is newer
 			
@@ -352,7 +358,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 			}//if any subiters exist
 		}//neither list is null
 
-		rv.copyEphemeralFromClient(clientObj);
+		if (clientObj != null) rv.copyEphemeralFromClient(clientObj);
 		return rv;
 	}//compareAndUpdate
 
