@@ -64,6 +64,10 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 			Type listType = new TypeToken<TreeSet<CategoryInfo>>() {
             }.getType();
 			listInfo.setCategories((TreeSet<CategoryInfo>)context.deserialize(categoriesJson, listType));
+			//We never want to say it's changed when reading it in.
+			for (CategoryInfo cat : listInfo.getCategories()) {
+				cat.setChangedOnServer(false);
+			}
 		}//if has categories
 		
 		if (topMap.has(SELECTED_CATEGORIES)) {
@@ -118,6 +122,14 @@ public class ListInfoJsonAdapter implements JsonDeserializer<ListInfo>, JsonSeri
 		
 		if (!listInfo.getCategories().isEmpty()) {
 			JsonElement categoriesJson = context.serialize(listInfo.getCategories());
+			for (JsonElement catEntry : categoriesJson.getAsJsonArray()) {
+				JsonObject jsonObj = catEntry.getAsJsonObject();
+				
+				//No point in wasting space outputting a false value
+				if (!jsonObj.get(CHANGED_ON_SERVER).getAsBoolean()) {
+					jsonObj.remove(CHANGED_ON_SERVER);
+				}
+			}
 			rv.add(CATEGORIES, categoriesJson);			
 		}
 		
