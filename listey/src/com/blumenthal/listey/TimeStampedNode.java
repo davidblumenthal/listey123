@@ -62,6 +62,14 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 	 */
 	public abstract String getUniqueId();
 	
+
+	/**
+	 * @return the name field, if supported.  Otherwise null.
+	 */
+	public String getName(){
+		return null;
+	}
+	
 	
 	/**
 	 * @return the status
@@ -217,7 +225,11 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 		
 		//New from the client
 		if (serverObj == null) {
-			if (clientObj.getStatus().equals(Status.ACTIVE)) {
+			if (!clientObj.getStatus().equals(Status.DELETED)) {
+				//Before we add it, let's look and see if there's something with the same
+				//name already on the server.  If so, let's update that instead.
+				//XXX
+				
 				rv = clientObj.makeCopy();
 				//If it's new from the client, then we're creating a new unique id for it, so flag it as new from the server
 				//Note, all sub-objects under this are also new, but it's hard to flag them and not as new and not
@@ -358,7 +370,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 			}//if any subiters exist
 		}//neither list is null
 
-		if (clientObj != null) rv.copyEphemeralFromClient(clientObj);
+		if (clientObj != null && rv != null) rv.copyEphemeralFromClient(clientObj);
 		return rv;
 	}//compareAndUpdate
 
