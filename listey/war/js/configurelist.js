@@ -40,13 +40,44 @@ function configureList() {
 
     //close the dialog
     $('.ui-dialog').dialog('close');
-}
+}//configureList
+
+
+
+function deleteList() {
+    var urlVars = getUrlVars();
+    var user = urlVars[USER];
+    var listId = urlVars[LIST_ID];
+    var origListName = urlVars[LIST_NAME];
+    if (user === getCurrentUser()) {
+    	var list = getList(user, listId, origListName);
+    	list[LAST_UPDATE] = now();
+    	list[STATUS] = DELETED_STATUS;
+    	saveData();
+    	//close the dialog
+        $('.ui-dialog').dialog('close');
+    } else {
+    	alert("Hiding other user's lists isn't currently supported");
+    }
+}//deleteList
+
 
 
 $(document).on('click', '#saveConfigureList', function() {
     console.log("Clicked on saveConfigureList");
     configureList();
 });
+
+
+$(document).on('click', '#deleteListButton', function() {
+	console.log("Clicked on deleteListButton");
+	if (confirm("Are you sure you want to delete the list?")) {
+		deleteList();
+		return false;
+	} else {
+		return false;
+	}
+});//clicked delete
 
 
 var shareListButtonClicked = false;
@@ -71,7 +102,10 @@ $(document).on('pagebeforeshow', '#configure-list-dialog', function() {
     var listName = urlVars[LIST_NAME];
 
     console.log("configure-list-dialog pagebeforeshow: listName=" + listName);
-
+    
+    //Set the button text to "Hide" if it's not your list
+    $('#deleteListButton').text((user === getCurrentUser()) ? "Delete" : "Hide");
+    
     if (listName === undefined) {
         $("#deleteListButton").hide();
         $("#origListName").val("");
