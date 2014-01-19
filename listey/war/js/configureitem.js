@@ -1,4 +1,3 @@
-var gConfigureItemName;//Can't pass parameters to dialog boxes, have to pass in global vars
 var gConfigureItemId;
 
 function configureItem() {
@@ -50,8 +49,8 @@ function configureItem() {
 }
 
 
-function deleteItem() {
-    console.log("deleteItem - top\n");
+function hideItem() {
+    console.log("hideItem - top\n");
 
     var urlVars = getUrlVars();
     var user = urlVars[USER];
@@ -59,7 +58,7 @@ function deleteItem() {
     var listName = urlVars[LIST_NAME];
 
     var item = getItem(user, listId, listName, gConfigureItemId);
-   	item[STATUS] = DELETED_STATUS;
+   	item[STATUS] = HIDDEN_STATUS;
    	delete[ITEM_CATEGORIES];
    	delete item[COUNT];
 
@@ -105,9 +104,9 @@ $(document).on('click', '#itemDecreaseCount', function() {
 
 
 
-$(document).on('click', '#deleteItem', function() {
-    console.log("Clicked on deleteItem");
-    deleteItem();
+$(document).on('click', '#hideItem', function() {
+    console.log("Clicked on hideItem");
+    hideItem();
 });
 
 
@@ -121,7 +120,7 @@ $(document).on('pagebeforeshow', '#config-item-dialog', function() {
     var item = getItem(user, listId, listName, gConfigureItemId, gConfigureItemName);
     var itemCategoriesHash, currCount;
     if (item !== undefined) {
-    	$('#deleteItem').show();
+    	$('#hideItem').show();
     	currCount = item[COUNT];
         if (currCount===undefined) {
         	currCount = 1;
@@ -130,7 +129,7 @@ $(document).on('pagebeforeshow', '#config-item-dialog', function() {
         console.log("Configuring " + gConfigureItemName);
     }
     else {
-    	$('#deleteItem').hide();
+    	$('#hideItem').hide();
     	currCount = 1;
         console.log("Adding new item");
     }
