@@ -92,6 +92,7 @@ public class CategoryInfo extends TimeStampedNode {
 	/**
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}

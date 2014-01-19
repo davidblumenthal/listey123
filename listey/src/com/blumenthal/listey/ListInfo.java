@@ -116,6 +116,7 @@ public class ListInfo extends TimeStampedNode{
 	/**
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
