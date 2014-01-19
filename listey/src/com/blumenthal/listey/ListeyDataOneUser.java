@@ -84,7 +84,7 @@ public class ListeyDataOneUser extends TimeStampedNode {
 		//Find all entities for the user, or the user's list if listUniqueId is passed.
 		Key filterKey = getEntityKey(userEmail);
 		if (listUniqueId != null) {
-			filterKey = KeyFactory.createKey(filterKey, KIND, listUniqueId);
+			filterKey = KeyFactory.createKey(filterKey, ListInfo.KIND, listUniqueId);
 		}
 		
 		//Get all entities for this user in one big list
