@@ -156,13 +156,17 @@ function displayItems (user, listId, listName) {
 
 
 $(document).on('pagebeforeshow', '#items-page', function() {
+	gConfigureItemName=null;//Just to be sure, force these to null
+	gConfigureItemId = null;
 	var urlVars = getUrlVars();
 	var user = urlVars[USER]
 	var listId = urlVars[LIST_ID];
 	var listName = urlVars[LIST_NAME];
 	$('#itemsPageTitle').text(listName);
 	displayItems(user, listId, listName);
-	var urlParams = USER + '=' + encodeURIComponent(user) + '&' + LIST_ID + '=' + encodeURIComponent(listId) + '&' + LIST_NAME + '=' + encodeURIComponent(listName);
+	var urlParams = makeListUrlParams(user, listId, listName);
+	
+	console.log("ItemsPage::pagebeforeshow - user=" + user + ", listId=" + listId + ", listName=" + listName);
 
 	//Add list parameter to addItemLink url
 	$('#addItemLink').attr("href", 'configureItem.html?' + urlParams)
