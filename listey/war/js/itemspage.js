@@ -162,6 +162,11 @@ $(document).on('pagebeforeshow', '#items-page', function() {
 	var user = urlVars[USER]
 	var listId = urlVars[LIST_ID];
 	var listName = urlVars[LIST_NAME];
+	
+	//In case we just changed the list name, load the list and reload the listname
+	var list=getList(user, listId, listName);
+	listName = list[NAME];
+	
 	$('#itemsPageTitle').text(listName);
 	displayItems(user, listId, listName);
 	var urlParams = makeListUrlParams(user, listId, listName);
