@@ -1,7 +1,7 @@
 package com.blumenthal.ListeyTest;
 
-import static com.blumenthal.listey.JsonFieldNameConstants.*;
-import static com.blumenthal.listey.TimeStampedNode.Status.*;
+import static com.blumenthal.listey.TimeStampedNode.Status.ACTIVE;
+import static com.blumenthal.listey.TimeStampedNode.Status.DELETED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -196,7 +196,7 @@ public class DatastoreAdapter {
 		//Convert multiUser to entities and write all the entities to the datastore at once
 		List<Entity> entities = multiUser.toEntities(uniqCreator);
 		//Also convert bar's list to entities, since foo has privs on bar's list
-		Key barKey = KeyFactory.createKey(KIND, BAR_EMAIL);
+		Key barKey = KeyFactory.createKey(ListeyDataOneUser.KIND, BAR_EMAIL);
 		entities.addAll(barList1.toEntities(uniqCreator, barKey));
 		datastore.put(entities);
 		
@@ -394,9 +394,9 @@ public class DatastoreAdapter {
 		listFromEntity = new ListInfo(updateEntities.remove(0));
 		assertTrue(listFromEntity.shallowEquals(clientListToDelete));
 		Key deletedKey = deleteKeys.remove(0);
-		deletedKey.getKind().equals(KIND);
+		deletedKey.getKind().equals(ItemInfo.KIND);
 		deletedKey = deleteKeys.remove(0);
-		deletedKey.getKind().equals(KIND);
+		deletedKey.getKind().equals(ItemCategoryInfo.KIND);
 		
 		//Verify new list was noticed
 		//Iterate through the list ids until you find the one that is NOT the one we already knew
@@ -432,18 +432,23 @@ public class DatastoreAdapter {
 		
 		//*******************************************
 		//Change list name
-		ListInfo serverList1 = serverMultiUser.userData.get(FOO_EMAIL).lists.get(fooList1Id);
+		ListeyDataOneUser fooUser = serverMultiUser.userData.get(FOO_EMAIL);
+		fooUser.setChangedOnServer(true);
+		ListInfo serverList1 = fooUser.lists.get(fooList1Id);
 		serverList1.setName("Foo List 1 new name");
 		serverList1.setLastUpdate(uniqueTime++);
+		serverList1.setChangedOnServer(true);
 		
 		//Delete list
 		ListInfo serverListToDelete = serverMultiUser.userData.get(FOO_EMAIL).lists.get(fooListToDeleteId);
 		serverListToDelete.setStatus(DELETED);
 		serverListToDelete.setLastUpdate(uniqueTime++);
+		serverListToDelete.setChangedOnServer(true);
 		
 		//Add new list
 		ListInfo serverList2 = new ListInfo();
 		serverList2.setLastUpdate(uniqueTime++);
+		serverList2.setChangedOnServer(true);
 		serverList2.setName("Foo List 2");
 		serverList2.setUniqueId(uniqueIdCreator.getUniqueId());
 		serverMultiUser.userData.get(FOO_EMAIL).lists.put(serverList2.getUniqueId(), serverList2);
@@ -452,10 +457,12 @@ public class DatastoreAdapter {
 		CategoryInfo serverList1Cat1 = serverList1.getCategories().first();
 		serverList1Cat1.setName("Foo List 1 Category 1 new name");
 		serverList1Cat1.setLastUpdate(uniqueTime++);
+		serverList1Cat1.setChangedOnServer(true);
 		
 		//Add new category
 		CategoryInfo serverList1Cat2 = new CategoryInfo();
 		serverList1Cat2.setLastUpdate(uniqueTime++);
+		serverList1Cat2.setChangedOnServer(true);
 		serverList1Cat2.setName("Foo List 1 Category 2");
 		serverList1Cat2.setUniqueId(uniqueIdCreator.getUniqueId());
 		serverList1.getCategories().add(serverList1Cat2);
@@ -464,18 +471,22 @@ public class DatastoreAdapter {
 		ItemInfo serverItem1 = serverList1.getItems().get(fooList1Item1Id);
 		serverItem1.setName("Foo List 1 Item 1 new name");
 		serverItem1.setLastUpdate(uniqueTime++);
+		serverItem1.setChangedOnServer(true);
 		
 		//Add new item
 		ItemInfo serverItem2 = new ItemInfo();
 		serverItem2.setUniqueId(uniqueIdCreator.getUniqueId());
 		serverItem2.setCount(2L);
 		serverItem2.setLastUpdate(uniqueTime++);
+		serverItem2.setChangedOnServer(true);
 		serverItem2.setName("Foo List 1 Item 2");
 		serverList1.getItems().put(serverItem2.getUniqueId(), serverItem2);
 		
 		//Add new ItemCategoryInfo
 		ItemCategoryInfo serverList1Item2Cat2 = new ItemCategoryInfo();
 		serverList1Item2Cat2.setLastUpdate(uniqueTime++);
+		//Note, sub-items of new things don't get flagged as new from the server, because it's difficult and not needed
+		//serverList1Item2Cat2.setChangedOnServer(true);
 		serverList1Item2Cat2.setUniqueId(serverList1Cat2.getUniqueId());
 		serverItem2.getCategories().put(serverList1Item2Cat2.getUniqueId(), serverList1Item2Cat2);
 		
