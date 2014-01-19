@@ -259,23 +259,32 @@ console.log("syncData - top");
 					if (list === undefined) {
 						//uh-oh, list was deleted out from under us on the server, just refresh everything
 						console.log("The list the user was viewing was deleted on the server, refreshing");
-						$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
+						//$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
+						$.mobile.changePage( "#choose-list-page" );
 					}//list not found
 					else if (list[CHANGED_ON_SERVER]) {
 						//reload the list page.
 						console.log("The list the user was viewing was changed on the server, refreshing");
-						$.mobile.pageContainer.pagecontainer("change", "#items-page");
+						//$.mobile.pageContainer.pagecontainer("change", "#items-page");
+						$.mobile.changePage( "#items-page" );
 					}//list found
 				} else {
 					//If no list selected, we're at the main screen
 					//Check if anything changed for any user
 					//If so, just refresh
+					console.log("At main screen, checking if anything changed and we need to reload");
 					var users = getUsers();
 					for (var i=0; i<users.length; i++) {
+						var user = users[i];
 						var oneUserData = getUserData(user);
 						if (oneUserData[CHANGED_ON_SERVER]) {
 							console.log("Data for " + user + " was changed on the server, refreshing");
-							$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
+							//$.mobile.pageContainer.pagecontainer("change", "#choose-list-page");
+							$.mobile.changePage( "#choose-list-page" );
+							break;
+						}
+						else{
+							console.log("Data for " + user + " was not changed, not refreshing");
 						}
 					}
 				}//else no list selected
