@@ -572,6 +572,7 @@ function getCategories(user, listId, listName) {
     		}
     	}
     }
+    rv.sort(compareHashesByName);
     return (rv);
 }//getCategories
 
