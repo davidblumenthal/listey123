@@ -182,6 +182,51 @@ $(document).on('pagebeforeshow', '#items-page', function() {
 		return true;
 	});
 
+	//If zero or 1 category is selected, then display a select box.
+	//If you long-press on the select box, open the multi-select dialog.
+	//If multiple selected, list in button.
+	var selectedCategoriesMap = getSelectedCategoriesAsMap(user, listId, listName);
+	var categories = getCategories(user, listId, listName);
+	var numSelected = keys(selectedCategoriesMap).length;
+	if (categories.length) {
+		var selectedCatDesc = undefined;
+		if (numSelected > 1) {
+			var selectedCategoriesNamesList = [];
+			for (var i=0; i<categories.length; i++) {
+				if (selectedCategoriesMap[categories[i][UNIQUE_ID]]) {
+					selectedCategoriesNamesList.push(categories[i][NAME]);
+				}
+			}
+			var firstSelectedCategories = selectedCategoriesNamesList.slice(0, 2);
+			var otherSelectedCategories = selectedCategoriesNamesList.slice(2);
+			var selectedCatDesc = firstSelectedCategories.join(', ');
+			if (otherSelectedCategories.length>0) {
+				selectedCatDesc += " + " + otherSelectedCategories.length;
+			}
+		}//if more than one thing selected
+		var selectCatSelectBoxOptions =
+			"<select id='selectCatSelectBox' data-inline='true' data-icon='grid'>\n" +
+			"<option value=''" + (numSelected ? '>Clear Selection' : ' selected>Choose Stores') + "</option>\n";
+		var shouldSelect;
+		if (selectedCatDesc !== undefined) {
+			selectCatSelectBoxOptions += "<option value='multiple_selected' selected>" + escapeHTML(selectedCatDesc) + "</option>\n";
+			shouldSelect = {};
+		}
+		else {
+			shouldSelect = selectedCategoriesMap;
+		}
+		selectCatSelectBoxOptions += "<option value='multiple'>Choose multiple...</option>\n";
+		for (var i=0; i<categories.length; i++) {
+			selectCatSelectBoxOptions += "<option value='" + categories[i][UNIQUE_ID] + "'" + (shouldSelect[categories[i][UNIQUE_ID]] ? "selected" : "") + ">" + escapeHTML(categories[i][NAME]) + "</option>\n";
+		}
+		selectCatSelectBoxOptions += "</select>\n";
+		$('#selectCatSelectBoxContainer').html(selectCatSelectBoxOptions).trigger('create');
+	}//if any categories
+	else {
+		//If there aren't any categories set up, hide the category select box
+		$('#selectCatSelectBox').hide();
+	}
+	
 	//Add list parameter to selectCategoriesLink url
 	$('#selectCategoriesLink').attr("href", 'selectCategories.html?' + urlParams);
 
@@ -192,3 +237,34 @@ $(document).on('pagebeforeshow', '#items-page', function() {
 	$('#configureList').attr("href", 'configureList.html?' + urlParams);
 });
 
+
+
+$(document).on('change', '#selectCatSelectBox', function() {
+    console.log("selectCatSelectBox changed");
+    var str = "";
+	var urlVars = getUrlVars();
+	var user = urlVars[USER]
+	var listId = urlVars[LIST_ID];
+	var listName = urlVars[LIST_NAME];
+	
+    $( "#selectCatSelectBox option:selected" ).each(function() {
+    	console.log("   selected=" + $( this ).val());
+    	var selectedVal = $(this).val();
+    	if (selectedVal === "multiple") {
+    		console.log("Opening dialog");
+    		$('#selectCategoriesLink').click();
+    		return false;//don't actually allow it to change
+    	}
+    	else if (selectedVal === "") {
+    	    saveSelectedCategories(user, listId, listName, []);
+    	} else {
+    		saveSelectedCategories(user, listId, listName, [selectedVal]);
+    	}
+    });//each
+    
+    //refresh the page, but do it in a timer so this can complete
+    //before we refresh
+    setTimeout(function(){
+    	$("#items-page").trigger("pagebeforeshow");
+    },0);
+});
