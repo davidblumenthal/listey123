@@ -206,7 +206,7 @@ $(document).on('pagebeforeshow', '#items-page', function() {
 		}//if more than one thing selected
 		var selectCatSelectBoxOptions =
 			"<select id='selectCatSelectBox' data-inline='true' data-icon='grid'>\n" +
-			"<option value=''" + (numSelected ? '>Clear Selection' : ' selected>Choose Stores') + "</option>\n";
+			"<option value=''" + (numSelected ? '>Clear Selection' : ' selected>Only Show Items In...') + "</option>\n";
 		var shouldSelect;
 		if (selectedCatDesc !== undefined) {
 			selectCatSelectBoxOptions += "<option value='multiple_selected' selected>" + escapeHTML(selectedCatDesc) + "</option>\n";
