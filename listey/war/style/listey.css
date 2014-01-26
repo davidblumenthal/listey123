@@ -1,0 +1,5 @@
+@CHARSET "ISO-8859-1";
+
+@media screen and (max-width:400px) {
+	.lastUpdateClass {display:none;}
+}

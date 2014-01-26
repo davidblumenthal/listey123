@@ -45,7 +45,8 @@ function displayItems (user, listId, listName) {
 	ulElem,
 	liElem,
 	aElem,
-	itemCountSpan;
+	itemCountSpan,
+	lastUpdateSpan;
 
 	if (items === undefined) {
 		items = [];
@@ -80,8 +81,11 @@ function displayItems (user, listId, listName) {
 
 		$.each(items, function (index, item) {
 			console.log("   Adding " + item[NAME]);
+			
 			liElem = $("<li>");
 			ulElem.append(liElem);
+			
+			lastUpdateSpan="<p class='lastUpdateClass ui-li-aside'>(" + compactDateString(item[LAST_UPDATE]) + ")</p>";
 			if (COUNT in item
 					&& item[COUNT] != 1) {
 				itemCountSpan = "<span class='ui-li-count'>" + item[COUNT] + "</span>";
@@ -89,7 +93,7 @@ function displayItems (user, listId, listName) {
 			else {
 				itemCountSpan = "";
 			}
-			aElem = $("<a href='#'>" + escapeHTML(item[NAME]) + itemCountSpan + "</a>");
+			aElem = $("<a href='#'>" + escapeHTML(item[NAME]) + lastUpdateSpan + itemCountSpan + "</a>");
 			liElem.append(aElem);
 			aElem.click(function () {
 				console.log("Clicked " + item[NAME]);

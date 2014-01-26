@@ -27,7 +27,6 @@ function configureItem() {
     	var catVal = {};
     	catVal[LAST_UPDATE] = now();
     	catVal[STATUS] = $(this).is(':checked') ? ACTIVE_STATUS : DELETED_STATUS;
- console.log("catloop: catVal="+JSON.stringify(catVal)+", element="+$(this));
         categories[$(this).val()] = catVal;
     });
 
@@ -46,7 +45,7 @@ function configureItem() {
 
     //close the dialog
     $('.ui-dialog').dialog('close');
-}
+}//configureItem
 
 
 function hideItem() {
@@ -71,7 +70,7 @@ function hideItem() {
 
     //close the dialog
     $('.ui-dialog').dialog('close');
-}
+}//hideItem
 
 
 $(document).on('click', '#saveAddItem', function() {
@@ -142,7 +141,9 @@ $(document).on('pagebeforeshow', '#config-item-dialog', function() {
     if (gConfigureItemName !== undefined) {
         $("#itemName").val(gConfigureItemName);
     }
-});
+});//config-item-dialog on pagebeforeshow
+
+
 
 $(document).on('submit', '#config-item-dialog-form', function(eventObject) {
     console.log("Form submitted");

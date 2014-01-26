@@ -35,10 +35,7 @@
   * Add partial sync, so you can push changes for only one list?
 * Add ability to send list as email
 * Add manual ordering/reordering
-* Select multiple stores on long-press, but on short-press open a single-select quick dropdown to select a single store.
-* Change list name to selected store name (if 1) or e.g. "Store N... + 2 others"
 * Option to use location services to figure out what store you're at?
-* If size is wide enough, show date item was added/removed
 * Options where you can turn that feature on/off.
 * Add logout option
 * Option to remember me.

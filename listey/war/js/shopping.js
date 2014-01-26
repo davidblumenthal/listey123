@@ -92,6 +92,33 @@ function now(){
 }
 
 
+//Takes a millisecond number returned by now() and returns a
+//compact date string for display in the frontend.
+function compactDateString(millisec) {
+	var howLongAgo = now() - millisec;
+	if (howLongAgo < 60*1000) {
+		return "1 m ago";
+	}
+	else if (howLongAgo < 60*60*1000) {
+		return (Math.round(howLongAgo/(60*1000)) + " m ago");
+	}
+	else if (howLongAgo < 24*60*60*1000) {
+		return (Math.round(howLongAgo/(60*60*1000)) + " h ago");
+	}
+	else if (howLongAgo < 7*24*60*60*1000){
+		return (Math.round(howLongAgo/(24*60*60*1000)) + " d ago");
+	}
+	else if (howLongAgo < 365*24*60*60*1000) {
+		var date = new Date(millisec);
+		return ((date.getMonth()+1) + '/' + date.getDate());
+	}
+	else {
+		var date = new Date(millisec);
+		return ((date.getMonth()+1) + '/' + date.getDate() + '/' + date.getYear());
+	}
+}
+
+
 //Returns a list of the proper keys of the passed object (using hasOwnProperty)
 function keys(obj)
 {
