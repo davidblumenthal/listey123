@@ -46,6 +46,7 @@
 * Need a way to log remember login or not, at least on the web version.
   * If remembering, add a logout button.
   * If not remembering, don't store data in localStorage.
+* List settings option to turn off timestamps.
 
 * Adjust to add features for larger screens (option to display categories inline?)
 
