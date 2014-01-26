@@ -120,6 +120,7 @@ function displayItems (user, listId, listName) {
 				console.log("   Adding crossed off " + item[NAME]);
 				liElem = $("<li>");
 				ulElem.append(liElem);
+				lastUpdateSpan="<p class='lastUpdateClass ui-li-aside'>(" + compactDateString(item[LAST_UPDATE]) + ")</p>";
 				if (COUNT in item
 						&& item[COUNT] != 1) {
 					itemCountSpan = "<span class='ui-li-count'>" + item[COUNT] + "</span>";
@@ -128,7 +129,7 @@ function displayItems (user, listId, listName) {
 					itemCountSpan = "";
 				}
 				//XXX use a style, instead of strike
-				aElem = $("<a href='#'><strike>" + escapeHTML(item[NAME]) + itemCountSpan + "<strike></a>");
+				aElem = $("<a href='#'><strike>" + escapeHTML(item[NAME]) + lastUpdateSpan + itemCountSpan + "<strike></a>");
 				liElem.append(aElem);
 				aElem.click(function () {
 					console.log("Clicked crossed off " + item[NAME]);
