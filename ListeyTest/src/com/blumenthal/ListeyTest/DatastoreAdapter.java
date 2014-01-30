@@ -129,7 +129,7 @@ public class DatastoreAdapter {
 		
 		//Create Foo listToDelete
 		fooListToDeleteId = uniqCreator.getUniqueId();
-		ListInfo fooListToDelete = new ListInfo(ACTIVE, fooListToDeleteId, "Foo List 2", uniqueTime++);
+		ListInfo fooListToDelete = new ListInfo(ACTIVE, fooListToDeleteId, "Foo List To Delete", uniqueTime++);
 		fooUser.lists.put(fooListToDelete.getUniqueId(), fooListToDelete);
 		
 		OtherUserPrivOnList barPrivOnFoo2 = new OtherUserPrivOnList();
@@ -140,7 +140,7 @@ public class DatastoreAdapter {
 		
 		CategoryInfo fooListToDeleteCat1 = new CategoryInfo();
 		fooListToDeleteCat1.setLastUpdate(uniqueTime++);
-		fooListToDeleteCat1.setName("Foo List 2 Category 1");
+		fooListToDeleteCat1.setName("Foo List To Delete Category 1");
 		fooListToDeleteCat1.setStatus(ACTIVE);
 		fooListToDeleteCat1.setUniqueId(uniqCreator.getUniqueId());
 		fooListToDelete.getCategories().add(fooListToDeleteCat1);
@@ -150,7 +150,7 @@ public class DatastoreAdapter {
 		fooListToDeleteItem1.setUniqueId(fooListToDeleteItem1Id);
 		fooListToDelete.getItems().put(fooListToDeleteItem1.getUniqueId(), fooListToDeleteItem1);
 		fooListToDeleteItem1.setLastUpdate(uniqueTime++);
-		fooListToDeleteItem1.setName("Foo List 2 Item 1");
+		fooListToDeleteItem1.setName("Foo List To Delete Item 1");
 		fooListToDeleteItem1.setStatus(ACTIVE);
 		fooListToDeleteItem1.setCount(2L);
 		ItemCategoryInfo fooListToDeleteItem1Cat1 = new ItemCategoryInfo();
