@@ -1,62 +1,78 @@
 ##################################################################
 ####PhoneGap Client Side####
+
+* Figure out why beforepageload won't trigger on index.html when it's not loaded first.
+
+* update intro page with info, link to github, IN PROGRESS, etc
+* Refactor add option to allow multi-add
+  * Show a list of everything they've hidden for the list, let them permanently delete hidden items here
+  * Filter box as they type
+  * Checkbox to allow selecting multiple without closing
+  * Add default list of items for auto-suggest, can be deleted
+
+* Add logout option
+* Option to import/export from csv file.  
+* Need a way to log remember login or not, at least on the web version.
+  * If remembering, add a logout button.
+  * If not remembering, don't store data in localStorage.
+  * Server option to log out all remembered logins.
+
+* Add rename of categories
+* Add category items page where you can select a category then check off all items that belong in that store
+
+* Add option to require long-press to check off items.
+* Add option to sort crossed off items alphabetically or in the order they were crossed off
+* Add quick option to delete all crossed-off items
+
 * Tweak colors on icon
 * Periodically check the server to pull down updates.  Note that changes need to be pushed for any user that can view the list.
   * https://developers.google.com/appengine/docs/java/channel/?hl=en&csw=1
 
-* Figure out why beforepageload won't trigger on index.html when it's not loaded first.
 * Need to add copyright and license info to every file?
-* update intro page with info, link to github, IN PROGRESS, etc
+* Need a privacy policy
+* Need a software disclaimer page
 * Option to share particular lists with other users,
   * Add support for read-only mode.
   * Maybe don't display shared lists until user accepts them?  Allow user to hide/unaccept other shared list so it doesn't clutter their screen
   * When list is shared, notify of change from server
-  
-  
+
 * Add option to store a note with items
 * refactor all my javascript to be in L123 namespace.
   
 * Add delete options
-* Add default list of items for auto-suggest
-* Add auto-suggest from hidden options.
 * Add rename/delete dialog.
 * Add uncheck-all option (ask if should uncheck for just the selected stores or all stores)
 * Implement item configuration update
   * Count, custom amount text.  "+" "-" "Custom" instead of More/Less.  +/- greyed out if non-numeric "Custom" entered
 * Finish category maintenance
-* Add auto-suggest of items from standard list + deleted items
-* Add rename of categories
-* Add category items page where you can select a category then check off all items that belong in that store
+* Add ability to send list as email
+
+
 * Add location (subcategory) options inside stores
 * In location config, add page where you can check off all items from that store that belong in that location
 * Support multiple locations, or just single?
 * Replace error alerts with dialogs
 * Add SyncML layer, or rework to be more granular and more parsimonious of bandwidth.
   * Add partial sync, so you can push changes for only one list?
-* Add ability to send list as email
 * Add manual ordering/reordering
 * Option to use location services to figure out what store you're at?
 * Options where you can turn that feature on/off.
-* Add logout option
-* Option to remember me.
-** Server option to log out all remembered logins.
-* Option to import/export from csv file.
 * Ads
 * Better colors/some graphics
-* Need a way to log remember login or not, at least on the web version.
-  * If remembering, add a logout button.
-  * If not remembering, don't store data in localStorage.
+
 * List settings option to turn off timestamps.
 
-* Adjust to add features for larger screens (option to display categories inline?)
+* Adjust to add features for larger screens (option to display categories inline?) Redo as desktop vs jquery mobile version?
 
 
 ################################################################
 #### Implement server side ####
-  * Handle added something whose name matches something that already exists.
-    * e.g. add foo list on client A, but don't sync, add foo list on client B and sync.  When A syncs, it should just merge the 2 Foo lists...  
+  * Handle transaction on merge to prevent conflicts?
+  * If an id is on the client side and not on the server side then replace it with a new unique id, even
+    if it looks like a permanent ID.  Otherwise, one user could mess with someone else's lists.
+  * Implement OpenID  
+  
   * Add abstraction layer around Google-specific code, in case I want to move it
-  * Implement OpenID
   * Convert all direct field access to getter/setter
   * Add ability to upload list
   * Add ability to export list
@@ -64,8 +80,7 @@
     * As view-only
   * Add ability to share an link to a list that doesn't require login
     * As view-only
-  * If an id is on the client side and not on the server side then replace it with a new unique id, even
-    if it looks like a permanant ID.  Otherwise, one user could mess with someone else's lists.
+
   * Google ads
 
 ################################################################
@@ -80,53 +95,3 @@
   
   
   
-  
-###Notes
-Server need to store
-  * users lists
-      * other users allowed to see each list
-  
-    * user is entity (kind=user)
-      * name: user email address
-      * each list is a separate entity with ancestor of the owner:(kind=list)
-        * name: from sharded unique ID generator
-        * displayName: property of the user-defined list name
-        * current selectedCategories (categories to display) is only stored on client?
-        * lastUpdate: last update time property
-        
-        * each other user allowed to view the list is added with an ancestor of the list: (kind=other_user_list)
-          * name: other user email address
-          * lastUpdate: last update time property
-          * privLevel: property with possible values VIEW or FULL
-          
-        * each category is separate entity with ancestor of the list (kind=category)
-          * name: unique name from sharded unique ID generator
-          * displayName: property of the user-defined category name
-          * lastUpdate: last update time property
-          
-        * each item is a separate entity (kind=item)
-          * displayName: property of the user-defined item name
-          * count: property of the number of items desired
-          * status: property with possible values ACTIVE | COMPLETED | DELETED
-          * lastUpdate: last update time property
-          
-          * each category the item is configured with is set up as a separate entity (kind=itemCategory)
-            * name: category sharded name
-            * lastUpdate: last update time property
-            * status: property with possible values ACTIVE | DELETED (so we can compare timestamp if category is removed then readded in conflict)
-            
-        
-      
-      * shard counters to create a unique identifier for all items we add.
-      https://developers.google.com/appengine/articles/sharding_counters
-          e.g. entity1:1
-
-* Given a user:
-  * find their lists by looking up lists by the owner property.
-  * find other user's lists they should be able to edit by looking up lists by other_user property (does this work with multiple values??)
-  * Find who/what they granted privs to by looking up their lists and looking at the other_user property values
-   
-   
- 
-
- 
