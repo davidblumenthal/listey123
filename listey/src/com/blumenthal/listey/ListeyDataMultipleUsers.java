@@ -8,7 +8,8 @@
  */
 package com.blumenthal.listey;
 
-import static com.blumenthal.listey.JsonFieldNameConstants.*;
+import static com.blumenthal.listey.JsonFieldNameConstants.USER_ID;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -116,7 +117,7 @@ public class ListeyDataMultipleUsers {
 			ListeyDataOneUser clientSubObj = clientUserMap.get(userEmail);
 			ListeyDataOneUser serverSubObj = serverUserMap.get(userEmail);
 
-			ListeyDataOneUser updatedObj = (ListeyDataOneUser) ListeyDataOneUser.compareAndUpdate(uniqueIdCreator, null, serverSubObj, clientSubObj, updateEntities, deleteKeys);
+			ListeyDataOneUser updatedObj = (ListeyDataOneUser) ListeyDataOneUser.compareAndUpdate(uniqueIdCreator, null, serverSubObj, clientSubObj, serverUserMap.values(), updateEntities, deleteKeys);
 			rv.userData.put(updatedObj.getUniqueId(), updatedObj);
 		}//for each subObj
 		return rv;

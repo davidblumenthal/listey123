@@ -220,7 +220,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 	
 
 	public static TimeStampedNode compareAndUpdate(DataStoreUniqueId uniqueIdCreator, Key parent, TimeStampedNode serverObj, TimeStampedNode clientObj,
-			List<Entity> updateEntities, List<Key> deleteKeys) {
+			Iterable<? extends TimeStampedNode> serverPeers, List<Entity> updateEntities, List<Key> deleteKeys) {
 		TimeStampedNode rv = null;
 		
 		//New from the client
@@ -228,11 +228,22 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 			if (!clientObj.getStatus().equals(Status.DELETED)) {
 				//Before we add it, let's look and see if there's something with the same
 				//name already on the server.  If so, let's update that instead.
-				//XXX
+				String clientName = clientObj.getName();
+				if (clientName != null) {
+					for (TimeStampedNode serverPeer : serverPeers) {
+						if (!serverPeer.getStatus().equals(Status.DELETED) && clientName.equals(serverPeer.getName())) {
+							//If an item with this name already exists in active state on the server
+							//in another node, then assume it's a double-send from the client and just
+							//ignore this one rather than resending.
+							getLog().warning("New " + clientObj.getKind() + " from client matched existing server item with same name (" + serverPeer.getName() + "), skipping");
+							return null;
+						}
+					}//foreach serverPeer
+				}//if clientName
 				
 				rv = clientObj.makeCopy();
 				//If it's new from the client, then we're creating a new unique id for it, so flag it as new from the server
-				//Note, all sub-objects under this are also new, but it's hard to flag them and not as new and not
+				//Note, all sub-objects under this are also new, but it's hard to flag them as new and not
 				//worth the effort.
 				rv.setChangedOnServer(true);
 				updateEntities.addAll(rv.toEntities(uniqueIdCreator, parent));
@@ -306,8 +317,8 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 					for (TimeStampedNode fullSetList : fullSet) {
 						TimeStampedNode clientSubObj = clientSubMap.get(fullSetList.getUniqueId());
 						TimeStampedNode serverSubObj = serverSubMap.get(fullSetList.getUniqueId());
-
-						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverSubObj, clientSubObj, updateEntities, deleteKeys);
+						
+						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverSubObj, clientSubObj, serverSubMap.values(), updateEntities, deleteKeys);
 						if (updatedObj != null) {
 							if (updatedObj.getChangedOnServer()) rv.setChangedOnServer(true);
 							subMapEntriesToAdd.add(updatedObj);
@@ -359,7 +370,7 @@ public abstract class TimeStampedNode implements Comparable<TimeStampedNode>{
 						}
 						
 						//Same object, so compare and update if needed
-						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverToCompare, clientToCompare, updateEntities, deleteKeys);
+						TimeStampedNode updatedObj = TimeStampedNode.compareAndUpdate(uniqueIdCreator, thisEntityKey, serverToCompare, clientToCompare, serverSubIters.get(i), updateEntities, deleteKeys);
 						if (updatedObj != null) {
 							if (updatedObj.getChangedOnServer()) rv.setChangedOnServer(true);
 							subIterEntriesToAdd.add(updatedObj);
