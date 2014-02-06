@@ -1,8 +1,6 @@
 ##################################################################
 ####PhoneGap Client Side####
 
-* Figure out why beforepageload won't trigger on index.html when it's not loaded first.
-
 * update intro page with info, link to github, IN PROGRESS, etc
 * Refactor add option to allow multi-add
   * Show a list of everything they've hidden for the list, let them permanently delete hidden items here

@@ -60,7 +60,7 @@ function displayLists() {
 
 
 
-$('#choose-list-page,#items-page').on('pageinit', function(event) {
+$(document).on('pageinit', '#choose-list-page,#items-page', function(event) {
 	var userEmail = loggedInAs();
 	if (!userEmail) {
 		handleNotLoggedIn();
@@ -71,7 +71,7 @@ $('#choose-list-page,#items-page').on('pageinit', function(event) {
 });
 
 
-$('#choose-list-page').on('pagebeforeshow', function() {
+$(document).on('pagebeforeshow', '#choose-list-page', function() {
 	console.log("Showing list page");
 	displayLists();
 });
