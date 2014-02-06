@@ -1,7 +1,6 @@
 ##################################################################
 ####PhoneGap Client Side####
 
-* update intro page with info, link to github, IN PROGRESS, etc
 * Refactor add option to allow multi-add
   * Show a list of everything they've hidden for the list, let them permanently delete hidden items here
   * Filter box as they type

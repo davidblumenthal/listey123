@@ -36,9 +36,10 @@
   <div data-role="content">
     <p><img src="img/logo.png" alt="Listey123 logo" style="display: block; margin-left: auto; margin-right: auto"></p>
     <p>
-    This site allows you to keep lists and access them on many different
+    This free site allows you to keep lists and access them on many different
     devices.  You can log in using your GMail account.
     </p>
+    <p>This site is still in ALPHA, many more features are coming.  The source can be found on <a href="https://github.com/davidblumenthal/listey123">GitHub</a>.
     <p>
     Please sign in and get started!
     </p>
